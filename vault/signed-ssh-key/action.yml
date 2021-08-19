@@ -1,0 +1,42 @@
+name: "Generate an ssh keypair signed by Vault"
+description: "Generate an ssh keypair signed by Vault"
+inputs:
+  vault_url:
+    description: "Full URL including port to vault"
+    required: true
+  vault_token:
+    description: "Token for accessing vault"
+    required: true
+  backend_name:
+    default: "ssh-client-signer"
+    required: false
+    description: "The name of the ssh signer for the path"
+  role_name:
+    description: "The role name in vault that will sign the generated keypair"
+    required: true
+  keypair_path:
+    description: "Full path to the keypair to generate"
+    default: "~/.ssh/id_rsa"
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: Ensure dependencies are present
+      run: |
+        ( command -v apk && apk add openssh-keygen jq curl ) || true
+        ( command -v apt-get && apt-get update && apt-get install -y ssh-client jq curl ) || true
+      shell: sh
+    - name: Generate keypair
+      run: ssh-keygen -b 2048 -t rsa -f ${{ inputs.keypair_path }} -q -N ""
+      shell: sh
+    - name: Sign key
+      run: |
+        PUBLIC_KEY=$(cat ${{ inputs.keypair_path }}.pub)
+        data=$(curl -s \
+          --header "X-Vault-Token: ${{ inputs.vault_token }}" \
+          --request POST \
+          --data "{\"public_key\":\"$PUBLIC_KEY\"}" \
+          ${{ inputs.vault_url }}/v1/${{ inputs.backend_name }}/sign/${{ inputs.role_name }})
+
+        echo $data | tr -d '\n' | jq -r '.data.signed_key' > ${{ inputs.keypair_path }}-cert.pub
+      shell: sh

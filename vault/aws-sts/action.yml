@@ -13,6 +13,11 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Ensure dependencies are present
+      run: |
+        ( command -v apk && apk add jq curl ) || true
+        ( command -v apt-get && apt-get update && apt-get install -y jq curl ) || true
+      shell: sh
     - name: Get credentials from vault
       run: |
         creds=$(curl -s --header "X-Vault-Token: ${{ inputs.vault_token }}" --request PUT ${{ inputs.vault_url }}/v1/aws/sts/${{ inputs.role_name }})
