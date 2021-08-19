@@ -1,0 +1,37 @@
+name: "Terraform Destroy"
+description: "Runs a terraform destroy in the given workspace with the given vars file"
+inputs:
+  workspace:
+    description: "The terraform workspace to run in. Usually a region/network combination, like testnet7-us-west-2"
+    requied: true
+  varfile:
+    description: "The vars file to pass to terraform"
+    required: true
+  terraform_dir:
+    description: "Path to terraform directory"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Init
+      working-directory: ${{ inputs.terraform_dir }}
+      run: terraform init
+      shell: sh
+      # We don't create the workspace - if it doesn't exist, just error and let this fail, since there is nothing to delete
+    - name: Select Workspace
+      working-directory: ${{ inputs.terraform_dir }}
+      run: terraform workspace select ${{ inputs.workspace }}
+      shell: sh
+    - name: Destroy
+      working-directory: ${{ inputs.terraform_dir }}
+      run: terraform destroy -auto-approve -var-file=${{ inputs.varfile }}
+      shell: sh
+    # Select the default workspace so that the current ephemeral one can be deleted
+    - name: Select Default Workspace
+      working-directory: ${{ inputs.terraform_dir }}
+      run: terraform workspace select default
+      shell: sh
+    - name: Delete Workspace
+      working-directory: ${{ inputs.terraform_dir }}
+      run: terraform workspace delete ${{ inputs.workspace }}
+      shell: sh

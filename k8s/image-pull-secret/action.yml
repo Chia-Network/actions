@@ -1,0 +1,30 @@
+name: "Image Pull Secret"
+description: "Creates an image pull secret in k8s. This action assums kubectl is available and the cluster is already authenticated"
+inputs:
+  secret_name:
+    description: "Name of the image pull secret to create"
+    required: true
+  namespace:
+    description: "Namespace to create the secret in"
+    required: true
+  username:
+    description: "Username for image pull secret"
+    required: true
+  password:
+    description: "Password for image pull secret"
+    required: true
+  docker_server:
+    description: "Docker server to authenticate too"
+    default: "https://index.docker.io/v1/"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Ensure namespace exists
+      shell: sh
+      run: |
+        kubectl create namespace ${{ inputs.namespace }} || true
+    - name: Create secret
+      run: |
+        kubectl create secret docker-registry "${{ inputs.secret_name }}" -n "${{ inputs.namespace }}" --docker-username="${{ inputs.username }}" --docker-password="${{ inputs.password }}" --docker-server="${{ inputs.docker_server }}" --dry-run=client --save-config -o yaml | kubectl apply -f -
+      shell: sh

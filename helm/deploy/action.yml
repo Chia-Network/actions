@@ -1,0 +1,29 @@
+name: "Helm Deploy"
+description: "Deploys the specified helm chart. Assumes helm and j2-cli are available and cluster is authenticated. Can use these images for these requirements https://gitlab.com/cmmarslender/kubectl-helm"
+inputs:
+  namespace:
+    description: "Namespace to deploy to"
+    required: true
+  app_name:
+    description: "Name of the helm app when deployed to the cluster"
+    required: true
+  helm_chart:
+    description: "Name or directory of the helm chart to deploy"
+    required: true
+  helm_values:
+    description: "Values file to pass when running helm"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Template values
+      shell: sh
+      run: |
+        if [ -f "${{ inputs.helm_values }}.j2" ]; then
+           echo "Values file is .j2 - Processing with j2..."
+           j2 "${{ inputs.helm_values }}.j2" -o "${{ inputs.helm_values }}"
+        fi
+    - name: Helm Upgrade / Install
+      shell: sh
+      run: |
+        helm upgrade --install --create-namespace --namespace ${{ inputs.namespace }} --values ${{ inputs.helm_values }} ${{ inputs.app_name }} ${{ inputs.helm_chart }}

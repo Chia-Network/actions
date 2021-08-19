@@ -1,0 +1,61 @@
+name: "Ansible Playbook"
+description: "Runs an ansible playbook"
+inputs:
+  ansible_dir:
+    description: "Path to ansible directory"
+    required: true
+  playbook_file:
+    description: "Playbook file name"
+    required: true
+  inventory_file:
+    description: "Inventory file name"
+    required: true
+  remote_user:
+    description: "remote user for ssh connection"
+    default: "ubuntu"
+    required: true
+  private_key_file:
+    description: "Private key to use for remote ssh sessino"
+    required: true
+  extra_vars_file:
+    description: "Provides a file to pass to ansible with extra variables defined. Typically use group vars instead of this"
+    default: "extravars.json"
+    required: false
+  ansible_galaxy_roles:
+    description: "Ansible galaxy roles to install. Space separated list of roles."
+    default: ""
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: Install dependencies
+      run: apk add ansible rsync openssh
+      shell: sh
+    # @TODO parameterize this and make it optional
+    - name: Install ansible galaxy deps
+      run: ansible-galaxy collection install ansible.posix
+      shell: sh
+    - name: Install ansible galaxy roles
+      run: |
+        if [ ! -z "${{ inputs.ansible_galaxy_roles }}" ]
+        then
+          ansible-galaxy role install ${{ inputs.ansible_galaxy_roles }}
+        fi
+      shell: sh
+    - name: Run playbook
+      working-directory: ${{ inputs.ansible_dir }}
+      run: |
+        echo "Using extra vars file: ${{ inputs.extra_vars_file }}"
+
+        # Ensure the extra var file exists, in case we're not using it upstream
+        if [ ! -f "${{ inputs.extra_vars_file }}" ]
+        then
+            echo "{}" > ${{ inputs.extra_vars_file }}
+        fi
+
+        echo "Contents of extra vars file:"
+        cat ${{ inputs.extra_vars_file }}
+
+        ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -u ${{ inputs.remote_user }} -i ${{ inputs.inventory_file }} --private-key ${{ inputs.private_key_file }} ${{ inputs.playbook_file }}  --extra-vars "@${{ inputs.extra_vars_file }}"
+      shell: sh
+

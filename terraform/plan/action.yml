@@ -1,0 +1,32 @@
+name: "Terraform Plan"
+description: "Runs a terraform plan in the given workspace with the given vars file"
+inputs:
+  workspace:
+    description: "The terraform workspace to run in. Usually a region, like us-west-2"
+    required: true
+  varfile:
+    description: "The vars file to pass to terraform"
+    required: true
+  terraform_dir:
+    description: "Path to terraform directory"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Init
+      working-directory: ${{ inputs.terraform_dir }}
+      run: terraform init
+      shell: sh
+    - name: Ensure workspace exists
+      working-directory: ${{ inputs.terraform_dir }}
+      run: |
+        terraform workspace new ${{ inputs.workspace }} || true
+      shell: sh
+    - name: Select Workspace
+      working-directory: ${{ inputs.terraform_dir }}
+      run: terraform workspace select ${{ inputs.workspace }}
+      shell: sh
+    - name: Show Plan
+      working-directory: ${{ inputs.terraform_dir }}
+      run: terraform plan -var-file=${{ inputs.varfile }}
+      shell: sh

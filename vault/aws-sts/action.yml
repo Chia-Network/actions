@@ -1,0 +1,31 @@
+name: "Get STS Credentials from Vault"
+description: "Gets STS credentials for assuming a role from vault"
+inputs:
+  vault_url:
+    description: "Full URL including port to vault"
+    required: true
+  vault_token:
+    description: "Token for accessing vault"
+    required: true
+  role_name:
+    description: "The role name to assume, as named in vault"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Get credentials from vault
+      run: |
+        creds=$(curl -s --header "X-Vault-Token: ${{ inputs.vault_token }}" --request PUT ${{ inputs.vault_url }}/v1/aws/sts/${{ inputs.role_name }})
+
+        AWS_ACCESS_KEY_ID=$(echo $creds | jq -r '.data.access_key')
+        echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
+        echo "::add-mask::$AWS_ACCESS_KEY_ID"
+
+        AWS_SECRET_ACCESS_KEY=$(echo $creds | jq -r '.data.secret_key')
+        echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
+        echo "::add-mask::$AWS_SECRET_ACCESS_KEY"
+
+        AWS_SESSION_TOKEN=$(echo $creds | jq -r '.data.security_token')
+        echo "AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN" >> $GITHUB_ENV
+        echo "::add-mask::$AWS_SESSION_TOKEN"
+      shell: sh
