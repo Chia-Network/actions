@@ -23,7 +23,7 @@ runs:
   steps:
     - name: Ensure dependencies are present
       run: |
-        ( command -v apk && apk add openssh-keygen jq curl ) || true
+        ( command -v apk && apk add openssh-keygen openssh-client jq curl ) || true
         ( command -v apt-get && apt-get update && apt-get install -y ssh-client jq curl ) || true
       shell: sh
     - name: Ensure directory for keypair exists
