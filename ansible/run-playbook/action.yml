@@ -16,7 +16,7 @@ inputs:
     required: true
   private_key_file:
     description: "Private key to use for remote ssh sessino"
-    required: true
+    required: false
     default: "~/.ssh/id_rsa"
   extra_vars_file:
     description: "Provides a file to pass to ansible with extra variables defined. Typically use group vars instead of this"
