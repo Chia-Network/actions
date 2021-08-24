@@ -10,6 +10,10 @@ inputs:
   role_name:
     description: "The role name to assume, as named in vault"
     required: true
+  ttl:
+    description: "Duration of the token (subject to AWS / Vault configured limits)"
+    default: "3600s"
+    required: false
 runs:
   using: "composite"
   steps:
@@ -20,7 +24,7 @@ runs:
       shell: sh
     - name: Get credentials from vault
       run: |
-        creds=$(curl -s --header "X-Vault-Token: ${{ inputs.vault_token }}" --request PUT ${{ inputs.vault_url }}/v1/aws/sts/${{ inputs.role_name }})
+        creds=$(curl -s --header "X-Vault-Token: ${{ inputs.vault_token }}" --request PUT -d "{\"ttl\":\"${{ inputs.ttl }}\"}" ${{ inputs.vault_url }}/v1/aws/sts/${{ inputs.role_name }})
 
         AWS_ACCESS_KEY_ID=$(echo $creds | jq -r '.data.access_key')
         echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
