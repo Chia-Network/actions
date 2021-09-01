@@ -16,7 +16,7 @@ inputs:
   docker_server:
     description: "Docker server to authenticate too"
     default: "https://index.docker.io/v1/"
-    required: true
+    required: false
 runs:
   using: "composite"
   steps:
