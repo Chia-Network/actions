@@ -28,7 +28,7 @@ inputs:
     required: false
   ansible_galaxy_collections:
     description: "Ansible galaxy collections to install. Space separate list of collections"
-    default: "ansible.posix"
+    default: ""
     required: false
 runs:
   using: "composite"
