@@ -26,15 +26,22 @@ inputs:
     description: "Ansible galaxy roles to install. Space separated list of roles."
     default: ""
     required: false
+  ansible_galaxy_collections:
+    description: "Ansible galaxy collections to install. Space separate list of collections"
+    default: ""
+    required: false
 runs:
   using: "composite"
   steps:
     - name: Install dependencies
       run: apk add ansible rsync openssh
       shell: sh
-    # @TODO parameterize this and make it optional
     - name: Install ansible galaxy deps
-      run: ansible-galaxy collection install ansible.posix
+      run: |
+        if [ ! -z "${{ inputs.ansible_galaxy_collections }}" ]
+        then
+          ansible-galaxy collection install ${{ inputs.ansible_galaxy_collections }}
+        fi
       shell: sh
     - name: Install ansible galaxy roles
       run: |
