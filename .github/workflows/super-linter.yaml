@@ -25,3 +25,5 @@ jobs:
           VALIDATE_ALL_CODEBASE: true
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Some things are incorrectly detected as ansible playbooks. Disable this linter, since this is just actions
+          VALIDATE_ANSIBLE: false
