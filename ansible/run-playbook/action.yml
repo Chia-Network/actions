@@ -29,6 +29,10 @@ inputs:
     description: "Ansible galaxy collections to install. Space separate list of collections"
     default: ""
     required: false
+  limit_hosts:
+    description: "Optional set of hosts to limit the ansible run to. See --limit in ansible docs"
+    default: "*"
+    required: false
 runs:
   using: "composite"
   steps:
@@ -68,6 +72,8 @@ runs:
           USER_FLAG="-u ${{ inputs.remote_user }}"
         fi
 
-        ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook $USER_FLAG -i ${{ inputs.inventory_file }} --private-key ${{ inputs.private_key_file }} ${{ inputs.playbook_file }}  --extra-vars "@${{ inputs.extra_vars_file }}"
+        ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3 ANSIBLE_HOST_KEY_CHECKING=False \
+          ansible-playbook $USER_FLAG -i ${{ inputs.inventory_file }} --private-key ${{ inputs.private_key_file }} \
+          ${{ inputs.playbook_file }}  --extra-vars "@${{ inputs.extra_vars_file }}" --limit "${{ inputs.limit_hosts }}"
       shell: sh
 
