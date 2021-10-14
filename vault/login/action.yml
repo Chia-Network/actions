@@ -23,7 +23,7 @@ runs:
       shell: sh
     - name: Get credentials from vault
       run: |
-        creds=$(curl -s --request POST -d -d "{\"jwt\":\"$JWT_TOKEN\",\"role\":\"${{ inputs.role_name }}\"}" ${{ inputs.vault_url }}/v1/auth/github-jwt/login)
+        creds=$(curl -s --request POST -d "{\"jwt\":\"$JWT_TOKEN\",\"role\":\"${{ inputs.role_name }}\"}" ${{ inputs.vault_url }}/v1/auth/github-jwt/login)
 
         VAULT_TOKEN=$(echo $creds | jq -r '.auth.client_token')
         echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
