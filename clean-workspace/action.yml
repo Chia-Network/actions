@@ -5,6 +5,6 @@ runs:
   steps:
     - name: Install dependencies
       run: |
-        rm -rf *
-        rm -rf .*
+        sudo rm -rf * || rm -rf * || true
+        sudo rm -rf .* || rm -rf .* || true
       shell: sh
