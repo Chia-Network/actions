@@ -1,0 +1,10 @@
+name: "Clean Workspace"
+description: "Cleans the current workspace before checking out code, to ensure a clean slate"
+runs:
+  using: "composite"
+  steps:
+    - name: Install dependencies
+      run: |
+        rm -rf *
+        rm -rf .*
+      shell: sh
