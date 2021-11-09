@@ -1,0 +1,22 @@
+name: "Keep workflow enabled"
+description: "Disables and re-enables the running workflow"
+inputs:
+  workflow_id:
+    description: 'A single Workflow ID'
+    required: true
+  access_token:
+    description: 'Your GitHub Access Token, defaults to: {{ github.token }}'
+    default: '${{ github.token }}'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Install dependencies
+      run: apt update && apt install jq -y
+      shell: sh
+    - name: Flip workflow
+      run: |
+        curl -X PUT -H "Authorization: token ${{ github.token }}" -H "Accept: application/vnd.github.v3+json" ${WORKFLOW_API_ENDPOINT}/${GITHUB_ACTION}/disable
+        curl -X PUT -H "Authorization: token ${{ github.token }}" -H "Accept: application/vnd.github.v3+json" ${WORKFLOW_API_ENDPOINT}/${GITHUB_ACTION}/enable
+      shell: sh
+
