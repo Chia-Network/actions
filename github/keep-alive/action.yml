@@ -1,6 +1,9 @@
 name: "Keep workflow enabled"
-description: "Disables and re-enables the running workflow"
+description: "Disables and re-enables the running workflow to avoid 60 day CI disables from GitHub for repo inactivity"
 inputs:
+  repository:
+    description: 'The repository the workflow is in'
+    required: true
   workflow_id:
     description: 'A single Workflow ID'
     required: true
@@ -16,7 +19,7 @@ runs:
       shell: sh
     - name: Flip workflow
       run: |
-        curl -X PUT -H "Authorization: token ${{ github.token }}" -H "Accept: application/vnd.github.v3+json" ${WORKFLOW_API_ENDPOINT}/${GITHUB_ACTION}/disable
-        curl -X PUT -H "Authorization: token ${{ github.token }}" -H "Accept: application/vnd.github.v3+json" ${WORKFLOW_API_ENDPOINT}/${GITHUB_ACTION}/enable
+        curl -X PUT -H "Authorization: token ${{ github.token }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ inputs.repository }}/actions/workflows/${{ inputs.workflow_id }}/disable
+        curl -X PUT -H "Authorization: token ${{ github.token }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ inputs.repository }}/actions/workflows/${{ inputs.workflow_id }}/enable
       shell: sh
 
