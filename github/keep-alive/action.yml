@@ -3,9 +3,11 @@ description: "Disables and re-enables the running workflow to avoid 60 day CI di
 inputs:
   repository:
     description: 'The repository the workflow is in'
+    default: ${{ github.repository }}
     required: true
   workflow_id:
     description: 'A single Workflow ID'
+    default: ${{ github.action }}
     required: true
   access_token:
     description: 'Your GitHub Access Token, defaults to: {{ github.token }}'
