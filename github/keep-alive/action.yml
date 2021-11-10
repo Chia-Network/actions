@@ -28,10 +28,10 @@ runs:
         else
           echo "[INFO] Using workflow name to find workflow ID: ${{ inputs.workflow }}"
           WORKFLOWS=$(curl -s -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT")
-          for wf in $(echo "${WORKFLOWS}"); do
-            WF_NAME=$(echo "$wf" | jq -r .workflows[].name)
+          for wf in $(echo "${WORKFLOWS}" | jq -c -r '.workflows[] | @base64'); do
+            WF_NAME=$(echo "$wf" | base64 --decode | jq -r .name)
             if [[ "$WF_NAME" == "${{ inputs.workflow }}" ]]; then
-              WORKFLOW_ID=$(echo "$wf" | jq -r .workflows[].id)
+              WORKFLOW_ID=$(echo "$wf" | base64 --decode | jq -r .id)
             fi
           done
         fi
