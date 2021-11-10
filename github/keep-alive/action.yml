@@ -5,8 +5,9 @@ inputs:
     description: 'The repository the workflow is in'
     default: ${{ github.repository }}
     required: true
-  workflow_id:
-    description: 'A single Workflow ID'
+  workflow:
+    description: 'A path to a workflow file in a repository, or the name string of a workflow'
+    default: ${{ github.workflow }}
     required: true
   access_token:
     description: 'Your GitHub Access Token, defaults to: {{ github.token }}'
@@ -17,8 +18,8 @@ runs:
   steps:
     - name: Flip workflow
       run: |
-        echo "[INFO] Flipping workflow for ${{ inputs.repository }} workflow ID ${{ inputs.workflow_id }}"
-        WORKFLOW_API_ENDPOINT="https://api.github.com/repos/${{ inputs.repository }}/actions/workflows/${{ inputs.workflow_id }}"
+        echo "[INFO] Flipping workflow for ${{ inputs.repository }} workflow ID ${{ inputs.workflow }}"
+        WORKFLOW_API_ENDPOINT="https://api.github.com/repos/${{ inputs.repository }}/actions/workflows/${{ inputs.workflow }}"
         curl -sX PUT -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/disable"
         curl -sX PUT -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/enable"
       shell: sh
