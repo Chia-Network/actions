@@ -19,7 +19,7 @@ runs:
     - name: Flip workflow
       run: |
         WORKFLOW_ID=""
-        WORKFLOW_API_ENDPOINT="https://api.github.com/repos/${{ inputs.repository }}/actions/workflows
+        WORKFLOW_API_ENDPOINT="https://api.github.com/repos/${{ inputs.repository }}/actions/workflows"
         if [[ ${{ inputs.workflow }} == .github/* ]]; then
           echo "[INFO] Using filepath to find workflow ID: ${{ inputs.workflow }}"
           WORKFLOW_FILE=$(awk -F'/' '{print $NF}' <<< "${{ inputs.workflow }}")
