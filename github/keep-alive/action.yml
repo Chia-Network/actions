@@ -24,10 +24,10 @@ runs:
         if [[ "${{ inputs.workflow }}" == .github/* ]]; then
           echo "[INFO] Using filepath to find workflow ID: ${{ inputs.workflow }}"
           WORKFLOW_FILE=$(echo "${{ inputs.workflow }}" | awk -F '/' '{print $NF}')
-          WORKFLOW_ID=$(curl -s -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/$WORKFLOW_FILE" | jq -r .id)
+          WORKFLOW_ID=$(curl -sf -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/$WORKFLOW_FILE" | jq -r .id)
         else
           echo "[INFO] Using workflow name to find workflow ID: ${{ inputs.workflow }}"
-          WORKFLOWS=$(curl -s -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT")
+          WORKFLOWS=$(curl -sf -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT")
           for wf in $(echo "${WORKFLOWS}" | jq -c -r '.workflows[] | @base64'); do
             WF_NAME=$(echo "$wf" | base64 --decode | jq -r .name)
             if [[ "$WF_NAME" == "${{ inputs.workflow }}" ]]; then
@@ -37,6 +37,6 @@ runs:
         fi
 
         echo "[INFO] Flipping workflow for ${{ inputs.repository }} workflow ID $WORKFLOW_ID"
-        curl -sX PUT -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/$WORKFLOW_ID/disable"
-        curl -sX PUT -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/$WORKFLOW_ID/enable"
+        curl -fX PUT -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/$WORKFLOW_ID/disable"
+        curl -fX PUT -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/$WORKFLOW_ID/enable"
       shell: bash
