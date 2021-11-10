@@ -31,4 +31,4 @@ runs:
         echo "[INFO] Flipping workflow for ${{ inputs.repository }} workflow ID $WORKFLOW_ID"
         curl -sX PUT -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/$WORKFLOW_ID/disable"
         curl -sX PUT -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/$WORKFLOW_ID/enable"
-      shell: sh
+      shell: bash
