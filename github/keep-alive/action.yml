@@ -18,7 +18,7 @@ runs:
   steps:
     - name: Flip workflow
       run: |
-        export WORKFLOW_ID
+        export WORKFLOW_ID=""
         WORKFLOW_API_ENDPOINT="https://api.github.com/repos/${{ inputs.repository }}/actions/workflows
 
         if [[ ${{ inputs.workflow }} == .github/* ]]; then
