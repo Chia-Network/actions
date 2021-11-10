@@ -20,10 +20,10 @@ runs:
       run: |
         WORKFLOW_ID=""
         WORKFLOW_API_ENDPOINT="https://api.github.com/repos/${{ inputs.repository }}/actions/workflows"
-        if [[ ${{ inputs.workflow }} == .github/* ]]; then
+        if [[ "${{ inputs.workflow }}" == .github/* ]]; then
           echo "[INFO] Using filepath to find workflow ID: ${{ inputs.workflow }}"
           WORKFLOW_FILE=$(echo "${{ inputs.workflow }}" | awk -F '/' '{print $NF}')
-          curl -s -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/$WORKFLOW_FILE"
+          WORKFLOW_ID=$(curl -s -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/$WORKFLOW_FILE" | jq -r .id)
         else
           echo "[INFO] Using workflow name to find workflow ID: ${{ inputs.workflow }}"
           curl -s -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT"
