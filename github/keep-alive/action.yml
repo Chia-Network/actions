@@ -18,8 +18,19 @@ runs:
   steps:
     - name: Flip workflow
       run: |
-        echo "[INFO] Flipping workflow for ${{ inputs.repository }} workflow ID ${{ inputs.workflow }}"
-        WORKFLOW_API_ENDPOINT="https://api.github.com/repos/${{ inputs.repository }}/actions/workflows/${{ inputs.workflow }}"
-        curl -sX PUT -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/disable"
-        curl -sX PUT -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/enable"
+        export WORKFLOW_ID
+        WORKFLOW_API_ENDPOINT="https://api.github.com/repos/${{ inputs.repository }}/actions/workflows
+
+        if [[ ${{ inputs.workflow }} == .github/* ]]; then
+          echo "[INFO] Using filepath to find workflow ID: ${{ inputs.workflow }}"
+          WORKFLOW_FILE=$(awk -F'/' '{print $NF}' <<< "${{ inputs.workflow }}")
+          curl -s -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/$WORKFLOW_FILE"
+        else
+          echo "[INFO] Using workflow name to find workflow ID: ${{ inputs.workflow }}"
+          curl -s -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT"
+        fi
+
+        echo "[INFO] Flipping workflow for ${{ inputs.repository }} workflow ID $WORKFLOW_ID"
+        curl -sX PUT -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/$WORKFLOW_ID/disable"
+        curl -sX PUT -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/$WORKFLOW_ID/enable"
       shell: sh
