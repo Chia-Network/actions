@@ -17,9 +17,8 @@ runs:
   steps:
     - name: Flip workflow
       run: |
-        echo "[INFO] Flipping workflow for ${{ github.repository }} workflow ID ${GITHUB_ACTION}"
         echo "[INFO] Flipping workflow for ${{ inputs.repository }} workflow ID ${{ inputs.workflow_id }}"
-        WORKFLOW_API_ENDPOINT="https://api.github.com/repos/${{ github.repository }}/actions/workflows/${GITHUB_ACTION}"
-        curl -sX PUT -H "Authorization: token ${{ github.token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/disable"
-        curl -sX PUT -H "Authorization: token ${{ github.token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/enable"
+        WORKFLOW_API_ENDPOINT="https://api.github.com/repos/${{ inputs.repository }}/actions/workflows/${{ inputs.workflow_id }}"
+        curl -sX PUT -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/disable"
+        curl -sX PUT -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/enable"
       shell: sh
