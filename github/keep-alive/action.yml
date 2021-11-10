@@ -1,0 +1,42 @@
+name: "Keep workflow enabled"
+description: "Disables and re-enables the running workflow to avoid 60 day CI disables from GitHub for repo inactivity"
+inputs:
+  repository:
+    description: 'The repository the workflow is in'
+    default: ${{ github.repository }}
+    required: true
+  workflow:
+    description: 'A path to a workflow file in a repository, or the name string of a workflow'
+    default: ${{ github.workflow }}
+    required: true
+  access_token:
+    description: 'Your GitHub Access Token, defaults to: {{ github.token }}'
+    default: '${{ github.token }}'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Flip workflow
+      run: |
+        WORKFLOW_ID=""
+        WORKFLOW_API_ENDPOINT="https://api.github.com/repos/${{ inputs.repository }}/actions/workflows"
+
+        if [[ "${{ inputs.workflow }}" == .github/* ]]; then
+          echo "[INFO] Using filepath to find workflow ID: ${{ inputs.workflow }}"
+          WORKFLOW_FILE=$(echo "${{ inputs.workflow }}" | awk -F '/' '{print $NF}')
+          WORKFLOW_ID=$(curl -sf -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/$WORKFLOW_FILE" | jq -r .id)
+        else
+          echo "[INFO] Using workflow name to find workflow ID: ${{ inputs.workflow }}"
+          WORKFLOWS=$(curl -sf -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT")
+          for wf in $(echo "${WORKFLOWS}" | jq -c -r '.workflows[] | @base64'); do
+            WF_NAME=$(echo "$wf" | base64 --decode | jq -r .name)
+            if [[ "$WF_NAME" == "${{ inputs.workflow }}" ]]; then
+              WORKFLOW_ID=$(echo "$wf" | base64 --decode | jq -r .id)
+            fi
+          done
+        fi
+
+        echo "[INFO] Flipping workflow for ${{ inputs.repository }} workflow ID $WORKFLOW_ID"
+        curl -fX PUT -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/$WORKFLOW_ID/disable"
+        curl -fX PUT -H "Authorization: token ${{ inputs.access_token }}" -H "Accept: application/vnd.github.v3+json" "$WORKFLOW_API_ENDPOINT/$WORKFLOW_ID/enable"
+      shell: bash
