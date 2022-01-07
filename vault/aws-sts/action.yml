@@ -7,6 +7,10 @@ inputs:
   vault_token:
     description: "Token for accessing vault"
     required: true
+  backend_name:
+    required: false
+    description: "The path name of the AWS backend"
+    default: "aws"
   role_name:
     description: "The role name to assume, as named in vault"
     required: true
@@ -24,7 +28,7 @@ runs:
       shell: sh
     - name: Get credentials from vault
       run: |
-        creds=$(curl -s --header "X-Vault-Token: ${{ inputs.vault_token }}" --request PUT -d "{\"ttl\":\"${{ inputs.ttl }}\"}" ${{ inputs.vault_url }}/v1/aws/sts/${{ inputs.role_name }})
+        creds=$(curl -s --header "X-Vault-Token: ${{ inputs.vault_token }}" --request PUT -d "{\"ttl\":\"${{ inputs.ttl }}\"}" ${{ inputs.vault_url }}/v1/${{ inputs.backend_name }}/sts/${{ inputs.role_name }})
 
         AWS_ACCESS_KEY_ID=$(echo $creds | jq -r '.data.access_key')
         echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
