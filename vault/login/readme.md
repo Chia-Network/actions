@@ -1,4 +1,4 @@
-# Vault K8S Login
+# Vault Login
 
 Logs into vault and sets env.VAULT_TOKEN using the github JWT token. Assumes vault is already configured with a [jwt auth method](https://www.vaultproject.io/docs/auth/jwt) that will accept jwt tokens signed by github actions.
 
