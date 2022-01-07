@@ -32,25 +32,15 @@ runs:
           --data "{\"common_name\":\"${{ github.actor }}@github\"}" \
           ${{ inputs.vault_url }}/v1/${{ inputs.backend_name }}/issue/${{ inputs.role_name }})
 
-        # Pull out the relevant information we need for the kubeconfig file
-        ISSUING_CA_DATA=$(printf '%s' "$DATA" | jq -r '.data.issuing_ca' | base64)
-        CERTIFICATE=$(printf '%s' "$DATA" | jq -r '.data.certificate')
-        PRIVATE_KEY=$(printf '%s' "$DATA" | jq -r '.data.private_key')
-
-        # Mask the certificate data
-        echo "::add-mask::$ISSUING_CA_DATA"
-        echo "::add-mask::$CERTIFICATE"
-        echo "::add-mask::$PRIVATE_KEY"
-
         # Write the key data to a temp file
         CERT_FILE=$(mktemp)
         KEY_FILE=$(mktemp)
-        echo "$CERTIFICATE" > $CERT_FILE
-        echo "$PRIVATE_KEY" > $KEY_FILE
+        printf '%s' "$DATA" | jq -r '.data.certificate' > $CERT_FILE
+        printf '%s' "$DATA" | jq -r '.data.private_key' > $KEY_FILE
 
         # Generate a kubeconfig with the provided data
         kubectl config set-cluster 'cluster' --server=${{ inputs.cluster_url }}
-        kubectl config set clusters.cluster.certificate-authority-data "$ISSUING_CA_DATA"
+        kubectl config set clusters.cluster.certificate-authority-data "$(printf '%s' "$DATA" | jq -r '.data.issuing_ca' | base64)"
         kubectl config set-credentials 'cluster-user' --embed-certs=true --client-certificate="$CERT_FILE" --client-key="$KEY_FILE"
         kubectl config set-context 'cluster' --cluster=cluster --user=cluster-user
         kubectl config use-context 'cluster'
