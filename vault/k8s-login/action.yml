@@ -1,0 +1,60 @@
+name: "Vault K8S Login"
+description: "Gets a certificate pair to log in to k8s from vault"
+inputs:
+  vault_url:
+    description: "Full URL including port to vault"
+    required: true
+  vault_token:
+    description: "Token for accessing vault"
+    required: true
+  backend_name:
+    required: false
+    description: "The name of the PKI endpoint that issues certificates for the cluster"
+  role_name:
+    description: "The role name in vault that will sign the generated keypair"
+    required: true
+  cluster_url:
+    description: "URL or IP with port of the kubernetes api server"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Ensure dependencies are present
+      run: |
+        ( command -v apk && apk add jq curl ) || true
+        ( command -v apt-get && apt-get update && apt-get install -y jq curl ) || true
+      shell: sh
+    - name: Get certificate
+      run: |
+        DATA=$(curl -s \
+          --header "X-Vault-Token: ${{ inputs.vault_token }}" \
+          --request POST \
+          --data "{\"common_name\":\"${{ github.actor }}@github\"}" \
+          ${{ inputs.vault_url }}/v1/${{ inputs.backend_name }}/issue/${{ inputs.role_name }})
+
+        # Pull out the relevant information we need for the kubeconfig file
+        ISSUING_CA_DATA=$(printf '%s' "$DATA" | jq -r '.data.issuing_ca' | base64)
+        CERTIFICATE=$(printf '%s' "$DATA" | jq -r '.data.certificate')
+        PRIVATE_KEY=$(printf '%s' "$DATA" | jq -r '.data.private_key')
+
+        # Mask the certificate data
+        echo "::add-mask::$ISSUING_CA_DATA"
+        echo "::add-mask::$CERTIFICATE"
+        echo "::add-mask::$PRIVATE_KEY"
+
+        # Write the key data to a temp file
+        CERT_FILE=$(mktemp)
+        KEY_FILE=$(mktemp)
+        echo "$CERTIFICATE" > $CERT_FILE
+        echo "$PRIVATE_KEY" > $KEY_FILE
+
+        # Generate a kubeconfig with the provided data
+        kubectl config set-cluster 'cluster' --server=${{ inputs.cluster_url }}
+        kubectl config set clusters.cluster.certificate-authority-data "$ISSUING_CA_DATA"
+        kubectl config set-credentials 'cluster-user' --embed-certs=true --client-certificate="$CERT_FILE" --client-key="$KEY_FILE"
+        kubectl config set-context 'cluster' --cluster=cluster --user=cluster-user
+        kubectl config use-context 'cluster'
+
+        rm -f $CERT_FILE || true
+        rm -f $KEY_FILE || true
+      shell: sh
