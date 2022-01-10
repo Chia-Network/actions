@@ -7,4 +7,5 @@ runs:
       run: |
         sudo rm -rf * || rm -rf * || true
         sudo rm -rf .* || rm -rf .* || true
+        sudo rm -rf $HOME/.npm || true
       shell: sh
