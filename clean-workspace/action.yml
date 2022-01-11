@@ -5,7 +5,8 @@ runs:
   steps:
     - name: Install dependencies
       run: |
+        # Remove all files whose name does NOT start with '.'
         sudo rm -rf * || rm -rf * || true
-        sudo rm -rf .* || rm -rf .* || true
-        sudo rm -rf $HOME/.npm || true
+        # Remove all files whose name starts with '.'
+        sudo find . -name . -o -prune -exec rm -rf -- {} + || true
       shell: sh
