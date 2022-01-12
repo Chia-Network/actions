@@ -5,6 +5,6 @@ runs:
   steps:
     - name: Install dependencies
       run: |
-        sudo rm -rf * || rm -rf * || true
-        sudo rm -rf .* || rm -rf .* || true
+        sudo find . -name . -o -prune -exec rm -rf -- {} + || true
+        sudo rm -rf $HOME/.npm || true
       shell: sh
