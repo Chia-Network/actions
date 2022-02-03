@@ -1,0 +1,35 @@
+name: "Windows Code Sign"
+description: "Signs the specified file with signtool. Assumes that signtool is in the location for `windows-latest` runner"
+inputs:
+  certificate_path:
+    description: "Path to the certificate to use for signing"
+    required: true
+  certificate_password:
+    description: "Password for the certificate"
+    required: true
+  file:
+    description: "Path to the file to sign"
+    required: true
+  digest_algorithm:
+    description: "Specifies the file digest algorithm to use for creating file signatures"
+    required: false
+    default: "sha256"
+  timestamp_server:
+    description: "Specifies the URL of the time stamp server"
+    required: false
+    default: "http://timestamp.comodoca.com/"
+runs:
+  using: "composite"
+  steps:
+    - name: Sign file
+      shell: pwsh
+      run: |
+        $env:path="C:\Program` Files` (x86)\Microsoft` Visual` Studio\2019\Enterprise\SDK\ScopeCppSDK\vc15\VC\bin\;$env:path"
+        $env:path="C:\Program` Files` (x86)\Windows` Kits\10\App` Certification` Kit;$env:path"
+        signtool sign /fd ${{ inputs.digest_algorithm }} /f ${{ inputs.certificate_path }} /p ${{ inputs.certificate_password }} /t ${{ inputs.timestamp_server }} /a ${{ inputs.file }}
+    - name: Validate signature
+      shell: pwsh
+      run: |
+        $env:path="C:\Program` Files` (x86)\Microsoft` Visual` Studio\2019\Enterprise\SDK\ScopeCppSDK\vc15\VC\bin\;$env:path"
+        $env:path="C:\Program` Files` (x86)\Windows` Kits\10\App` Certification` Kit;$env:path"
+        signtool verify /v /pa ${{ inputs.file }}
