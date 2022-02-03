@@ -1,5 +1,5 @@
 name: "Windows Code Sign"
-description: "Signs the specified file with signtool. Assumes that signtool is installed and in PATH already"
+description: "Signs the specified file with signtool. Assumes that signtool is in the location for `windows-latest` runner"
 inputs:
   certificate_path:
     description: "Path to the certificate to use for signing"
