@@ -3,33 +3,33 @@ This repository stores internal actions that will be reused in GitHub Actions ac
 
 **If you would like to contribute to this repo, please ensure that you follow the established naming convention.** If the action uses a separate tool, such as Ansible or Terraform, use the existing directory for that tool if it exists or create one if it doesn't. Otherwise, if the action doesn't rely on any third-party tools, create your directory at the root level.
 
-### ansible/run-playbook
+## ansible/run-playbook
 
 
-### clean-workspace
+## clean-workspace
 
 
-### enforce-semver
+## enforce-semver
 Ensures that the checked-out code has a GitHub tag that complies with semantic versioning in format `Major.minor.patch`. Supports up to three numeric digits per release type.
 
-### git-ssh-to-https
+## git-ssh-to-https
 
 
-### github/keep-alive
+## github/keep-alive
 
 
-### helm/deploy
+## helm/deploy
 
 
-### k8s/image-pull-secret
+## k8s/image-pull-secret
 
 
-### sign/windows
+## sign/windows
 
 
-### terraform
+## terraform
 
 
-### vault
+## vault
 
 
