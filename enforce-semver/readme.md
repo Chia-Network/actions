@@ -5,6 +5,6 @@ Ensures the current version/tag is compliant with `Major.minor.patch` formatting
 ```yaml
 - uses: Chia-Network/actions/enforce-semver@main
 
-- name: Check Versioning Compliance
+- name: Enforce Semantic Versioning
   uses: actions/checkout@v2
 ```
