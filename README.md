@@ -7,13 +7,13 @@ This repository stores internal actions that will be reused in GitHub Actions ac
 
 
 ## clean-workspace
-
+Cleans the current workspace prior to running the checkout action, to ensure the job starts with a clean slate.
 
 ## enforce-semver
 Ensures that the checked-out code has a GitHub tag that complies with semantic versioning in format `Major.minor.patch`. Supports up to three numeric digits per release type.
 
 ## git-ssh-to-https
-
+Sets up the global git config to replace any ssh clone URLs with HTTPS URLs. This must be used after the checkout code action.
 
 ## github/keep-alive
 
