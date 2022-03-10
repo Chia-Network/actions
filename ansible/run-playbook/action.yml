@@ -36,8 +36,9 @@ inputs:
 runs:
   using: "composite"
   steps:
+    # jmespath is used for json filtering in playbooks/roles, similar to jq
     - name: Install dependencies
-      run: apk add ansible rsync openssh
+      run: apk add ansible rsync openssh py3-jmespath
       shell: sh
     - name: Install ansible galaxy deps
       run: |
