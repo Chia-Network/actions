@@ -4,7 +4,7 @@ This repository stores internal actions that will be reused in GitHub Actions ac
 **If you would like to contribute to this repository, please ensure that you follow the established naming convention.** If the action uses a separate tool, such as Ansible or Terraform, use the existing directory for that tool if it exists or create one if it doesn't. Otherwise, if the action doesn't rely on any third-party tools, create your directory at the root level.
 
 ## ansible/run-playbook
-
+Runs an ansible playbook against an inventory of hosts
 
 ## clean-workspace
 Cleans the current workspace prior to running the checkout action, to ensure the job starts with a clean slate.
