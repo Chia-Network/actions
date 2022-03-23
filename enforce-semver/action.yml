@@ -8,7 +8,9 @@ runs:
           set -e
           echo "Version $GITHUB_REF_NAME"
           IFS='.'
-          verArray="($GITHUB_REF_NAME)"
+          tempHold=$GITHUB_REF_NAME
+          verArray=($tempHold)
+          echo "${verArray[0]}, ${verArray[1]}, ${verArray[2]}"
           if [[ ${#verArray[@]} -le 2 ]]
           then
             echo "The version number tagged in this release is two or fewer numbers. Please use a three-digit version number in the form of Major.minor.patch."
