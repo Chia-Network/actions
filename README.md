@@ -23,7 +23,7 @@ Sets up the global git config to replace any ssh clone URLs with HTTPS URLs. Thi
 
 
 ## helm/deploy
-
+Deploys a helm chart to a k8s cluster.
 
 ## k8s/image-pull-secret
 
