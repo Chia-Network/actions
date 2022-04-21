@@ -23,17 +23,31 @@ Sets up the global git config to replace any ssh clone URLs with HTTPS URLs. Thi
 
 
 ## helm/deploy
-
+Deploys a helm chart to a k8s cluster.
 
 ## k8s/image-pull-secret
-
+Creates/updates a kubernetes image pull secret in a namespace.
 
 ## sign/windows
+Windows Codesigning. Signs a file with a cert for windows.
 
+## terraform/plan
+Runs terraform plan and shows the output.
 
-## terraform
+## terraform/apply
+Runs terraform apply.
 
+## terraform/destroy
+Runs terraform destroy.
 
-## vault
+## vault/login
+Log in to the vault server using the jwt token and set env vars, to be able to use other vault actions.
 
+## vault/aws-sts
+Get ephemeral AWS credentials from Vault
 
+## vault/k8s-login
+Log in to a k8s cluster, using a certificate issued by vault signed by the same CA k8s uses.
+
+## vault/signed-ssh-key
+Generate a new ssh key and have vault sign it with the SSH CA

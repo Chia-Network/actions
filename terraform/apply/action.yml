@@ -1,5 +1,5 @@
-name: "Terraform Plan"
-description: "Runs a terraform plan in the given workspace with the given vars file"
+name: "Terraform Apply"
+description: "Runs a terraform apply in the given workspace with the given vars file"
 inputs:
   workspace:
     description: "The terraform workspace to run in. Usually a region, like us-west-2"
