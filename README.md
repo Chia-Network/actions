@@ -40,6 +40,14 @@ Runs terraform apply.
 ## terraform/destroy
 Runs terraform destroy.
 
-## vault
+## vault/login
+Log in to the vault server using the jwt token and set env vars, to be able to use other vault actions.
 
+## vault/aws-sts
+Get ephemeral AWS credentials from Vault
 
+## vault/k8s-login
+Log in to a k8s cluster, using a certificate issued by vault signed by the same CA k8s uses.
+
+## vault/signed-ssh-key
+Generate a new ssh key and have vault sign it with the SSH CA
