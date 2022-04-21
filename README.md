@@ -29,7 +29,7 @@ Deploys a helm chart to a k8s cluster.
 Creates/updates a kubernetes image pull secret in a namespace.
 
 ## sign/windows
-
+Windows Codesigning. Signs a file with a cert for windows.
 
 ## terraform
 
