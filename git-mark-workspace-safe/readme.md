@@ -1,6 +1,6 @@
 # Git Mark Workspace Safe
 
-Marks the GITHUB_WORKSPACE as a safe git directory. See https://github.com/actions/checkout/issues/760
+Marks the GITHUB_WORKSPACE as a safe git directory. See [bug report](https://github.com/actions/checkout/issues/760)
 The underlying checkout issue is resolved, but if you need to commit back to a repo, especially in a container, this action is still needed.
 
 ```yaml
