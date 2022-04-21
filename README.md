@@ -12,6 +12,10 @@ Cleans the current workspace prior to running the checkout action, to ensure the
 ## enforce-semver
 Ensures that the checked-out code has a GitHub tag that complies with semantic versioning in format `Major.minor.patch`. Supports up to three numeric digits per release type.
 
+## git-mark-workspace-safe
+Marks the github workspace as safe. See https://github.com/actions/checkout/issues/760
+The underlying checkout issue is resolved, but if you need to commit back to a repo, especially in a container, this action is still needed.
+
 ## git-ssh-to-https
 Sets up the global git config to replace any ssh clone URLs with HTTPS URLs. This must be used after the checkout code action.
 
