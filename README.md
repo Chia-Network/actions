@@ -31,8 +31,14 @@ Creates/updates a kubernetes image pull secret in a namespace.
 ## sign/windows
 Windows Codesigning. Signs a file with a cert for windows.
 
-## terraform
+## terraform/plan
+Runs terraform plan and shows the output.
 
+## terraform/apply
+Runs terraform apply.
+
+## terraform/destroy
+Runs terraform destroy.
 
 ## vault
 
