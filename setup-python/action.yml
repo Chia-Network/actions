@@ -46,5 +46,5 @@ runs:
       shell: sh
       run: |
         arch -arm64 brew install python@${{ inputs.python-version }}
-        PY_PREFIX=$(arch -arm64 brew prefix python@${{ inputs.python-version }})
+        PY_PREFIX=$(arch -arm64 brew --prefix python@${{ inputs.python-version }})
         echo "PATH=$PY_PREFIX/bin:$PATH" >> $GITHUB_ENV
