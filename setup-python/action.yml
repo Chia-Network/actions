@@ -52,8 +52,12 @@ runs:
       run: |
         unset PYENV_ROOT
         curl https://pyenv.run | bash
+        
         export PATH="$HOME/.pyenv/bin:$PATH"
-        echo "PATH="$HOME/.pyenv/bin:$PATH" >> $GITHUB_ENV
+        echo "PATH=$HOME/.pyenv/bin:$PATH" >> $GITHUB_ENV
+        
+        export PYENV_ROOT="$HOME/.pyenv"
+        echo "PYENV_ROOT=$HOME/.pyenv" >> $GITHUB_ENV
         
         # Ensure pyenv is up to date if it was already installed
         pyenv update
