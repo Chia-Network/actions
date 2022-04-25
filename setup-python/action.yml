@@ -32,7 +32,7 @@ runs:
       uses: actions/setup-python@v3
       # Runner arch doesn't work until we have native m1 runner software, since it runs with an arch flag on the host
       # if: runner.arch == 'X64'
-      if: !startsWith('m1-', runner.name)
+      if: ${{ !startsWith('m1-', runner.name) }}
       with:
         python-version: ${{ inputs.python-version }}
         architecture: ${{ inputs.architecture }}
@@ -42,7 +42,7 @@ runs:
     - name: Setup Python on ARM64 MacOS
       # Runner arch doesn't work until we have native m1 runner software, since it runs with an arch flag on the host
       # if: runner.arch == 'ARM64' && runner.os == 'macOS'
-      if: startsWith('m1-', runner.name)
+      if: ${{ startsWith('m1-', runner.name) }}
       shell: sh
       run: |
         arch -arm64 brew install python@${{ inputs.python-version }}
