@@ -30,9 +30,8 @@ runs:
   steps:
     - name: Call upstream setup-python action
       uses: actions/setup-python@v3
-      # Runner arch doesn't work until we have native m1 runner software, since it runs with an arch flag on the host
-      # if: runner.arch == 'X64'
-      if: ${{ !startsWith(runner.name, 'm1-') }}
+      # Requires native m1 runner software, not x64 running via arch flags
+      if: runner.arch == 'X64'
       with:
         python-version: ${{ inputs.python-version }}
         architecture: ${{ inputs.architecture }}
@@ -40,11 +39,10 @@ runs:
         token: ${{ inputs.token }}
         cache-dependency-path: ${{ inputs.cache-dependency-path }}
     - name: Setup Python on ARM64 MacOS
-      # Runner arch doesn't work until we have native m1 runner software, since it runs with an arch flag on the host
-      # if: runner.arch == 'ARM64' && runner.os == 'macOS'
-      if: ${{ startsWith(runner.name, 'm1-') }}
+      # Requires native m1 runner software, not x64 running via arch flags
+      if: runner.arch == 'ARM64' && runner.os == 'macOS'
       shell: sh
       run: |
-        arch -arm64 brew install python@${{ inputs.python-version }}
-        PY_PREFIX=$(arch -arm64 brew --prefix python@${{ inputs.python-version }})
+        brew install python@${{ inputs.python-version }}
+        PY_PREFIX=$(brew --prefix python@${{ inputs.python-version }})
         echo "PATH=$PY_PREFIX/bin:$PY_PREFIX/libexec/bin:$PATH" >> $GITHUB_ENV
