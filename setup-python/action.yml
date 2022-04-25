@@ -65,7 +65,8 @@ runs:
         # Ensure pyenv is up to date
         pyenv update
         
-        env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install pyenv install --list | grep "^  ${{ inputs.python-version }}" | grep -v 'dev' | tail -n 1 
+        FULL_PY_VERSION=$(pyenv install --list | grep "^  ${{ inputs.python-version }}" | grep -v 'dev' | tail -n 1)
+        env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install $FULL_PY_VERSION
         
-        PY_PREFIX=$(pyenv prefix ${{ inputs.python-version }})
+        PY_PREFIX=$(pyenv prefix $FULL_PY_VERSION)
         echo "PATH=$PY_PREFIX/bin:$PATH" >> $GITHUB_ENV
