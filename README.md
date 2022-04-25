@@ -28,6 +28,9 @@ Deploys a helm chart to a k8s cluster.
 ## k8s/image-pull-secret
 Creates/updates a kubernetes image pull secret in a namespace.
 
+## setup-python
+Wrapper around actions/setup-python that also supports ARM64 Mac.
+
 ## sign/windows
 Windows Codesigning. Signs a file with a cert for windows.
 
