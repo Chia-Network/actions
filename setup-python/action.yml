@@ -31,7 +31,7 @@ runs:
     - name: Call upstream setup-python action
       uses: actions/setup-python@v3
       # Requires native m1 runner software, not x64 running via arch flags
-      if: runner.arch == 'X64'
+      if: runner.arch != 'ARM64'
       with:
         python-version: ${{ inputs.python-version }}
         architecture: ${{ inputs.architecture }}
@@ -46,3 +46,27 @@ runs:
         brew install python@${{ inputs.python-version }}
         PY_PREFIX=$(brew --prefix python@${{ inputs.python-version }})
         echo "PATH=$PY_PREFIX/bin:$PY_PREFIX/libexec/bin:$PATH" >> $GITHUB_ENV
+    - name: Setup Python on ARM64 Linux
+      if: runner.arch == 'ARM64' && runner.os == 'Linux'
+      shell: sh
+      run: |
+        unset PYENV_ROOT
+
+        if [ ! -d "$HOME/.pyenv" ]; then
+          curl https://pyenv.run | bash
+        fi
+        
+        export PATH="$HOME/.pyenv/bin:$PATH"
+        echo "PATH=$HOME/.pyenv/bin:$PATH" >> $GITHUB_ENV
+        
+        export PYENV_ROOT="$HOME/.pyenv"
+        echo "PYENV_ROOT=$HOME/.pyenv" >> $GITHUB_ENV
+        
+        # Ensure pyenv is up to date
+        pyenv update
+        
+        FULL_PY_VERSION=$(pyenv install --list | grep "^  ${{ inputs.python-version }}" | grep -v 'dev' | tail -n 1)
+        env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install $FULL_PY_VERSION
+        
+        PY_PREFIX=$(pyenv prefix $FULL_PY_VERSION)
+        echo "PATH=$PY_PREFIX/bin:$PATH" >> $GITHUB_ENV
