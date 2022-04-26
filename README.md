@@ -29,7 +29,7 @@ Deploys a helm chart to a k8s cluster.
 Creates/updates a kubernetes image pull secret in a namespace.
 
 ## setup-python
-Wrapper around actions/setup-python that also supports ARM64 Mac.
+Wrapper around actions/setup-python that also supports ARM64 Mac and ARM64 Linux.
 
 ## sign/windows
 Windows Codesigning. Signs a file with a cert for windows.
