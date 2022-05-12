@@ -33,7 +33,7 @@ runs:
       # Requires native m1 runner software, not x64 running via arch flags
       if: runner.arch != 'ARM64'
       with:
-        python-version: ${{ inputs.python-version }}
+        python-version: ${{ format('{0}.0-alpha - {0}.X', inputs.python-version) }}
         architecture: ${{ inputs.architecture }}
         cache: ${{ inputs.cache }}
         token: ${{ inputs.token }}
