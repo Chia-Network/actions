@@ -1,6 +1,6 @@
 # Docker Build
 
-Reusable workflow for building a docker image. Assumes that the Dockerfile is in the root of the repo when building.
+Reusable workflow for building a docker image. Assumes that the Dockerfile is in the root of the repository when building.
 
 ```yaml
 name: Build
