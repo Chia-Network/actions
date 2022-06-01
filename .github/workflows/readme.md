@@ -1,4 +1,6 @@
-# Docker Build
+# Reusable Workflows
+
+## Docker Build
 
 Reusable workflow for building a docker image. Assumes that the Dockerfile is in the root of the repository when building.
 
@@ -13,5 +15,5 @@ on:
 
 jobs:
   package:
-    uses: Chia-Network/actions/workflows/docker/build.yaml@main
+    uses: Chia-Network/actions/.github/workflows/docker-build.yaml@main
 ```
