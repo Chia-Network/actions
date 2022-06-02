@@ -36,7 +36,7 @@ runs:
         exit 1
     - name: Activate virtual environment (Windows)
       if: runner.os == 'windows'
-      shell: sh
+      shell: pwsh
       run: |
         foreach ($venv in (echo '${{ inputs.directories }}' | jq -c  -r '.[]'))
         {
