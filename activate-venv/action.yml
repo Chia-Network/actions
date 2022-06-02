@@ -4,7 +4,7 @@ inputs:
   directories:
     description: "A list of directories to attempt to activate, terminates on the first present directory.  Uses JSON format."
     required: true
-    default: ${{ toJSON(['venv/', '.venv/']) }}
+    default: '["venv/", ".venv/"]'
 #outputs:
 #  virtual-env:
 #    description: "The VIRTUAL_ENV environment value."
