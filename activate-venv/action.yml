@@ -1,0 +1,67 @@
+name: "Activate virtual environment"
+description: 'Activate the a virtual environment for future steps.'
+inputs:
+  directories:
+    description: "A list of directories to attempt to activate, terminates on the first present directory.  Uses JSON format."
+    required: true
+    default: ${{ toJSON(['venv/', '.venv/']) }}
+#outputs:
+#  virtual-env:
+#    description: "The VIRTUAL_ENV environment value."
+#    value:
+#  virtual-env-bin:
+#    description: "The path to the virtual environment directory containing the executables."
+#    value:
+runs:
+  using: "composite"
+  steps:
+    - name: Activate virtual environment (macOS, Ubuntu)
+      if: runner.os == 'macos' || runner.os == 'linux'
+      shell: sh
+      run: |
+        FOUND=0
+
+        echo "${{ inputs.directories }} | jq -c '.[]' | while read venv
+        do
+          if [ -d "${venv}" ]
+          then
+            source ${venv}/bin/activate
+            FOUND=1
+            break
+          else
+            echo "No environment found at: ${venv}"
+          fi
+        done
+
+        if [ "${FOUND}" -eq 0 ]
+        then
+          echo "No environment found" 1>&2
+          exit 1
+        fi
+
+        echo "$(cd venv/bin/; pwd)" >> $GITHUB_PATH
+        echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
+    - name: Activate virtual environment (Windows)
+      if: runner.os == 'windows'
+      shell: sh
+      run: |
+        $found = 0
+
+        foreach ($venv in (echo "${{ inputs.directories }}" | jq -c '.[]'))
+        {
+          if (Test-Path -Path-Type Container "$venv") {
+            $venv/Scripts/activate
+            $found = 1
+            break
+          } else {
+            Write-Output "No environment found at: $venv"
+          }
+        }
+
+        if ($found -eq 0) {
+          Write-Error "No environment found"
+          exit 1
+        }
+        
+        (Resolve-Path venv/Scripts/).Path >> $Env:GITHUB_PATH
+        Write-Output "VIRTUAL_ENV=$Env:VIRTUAL_ENV" >> $Env:GITHUB_ENV
