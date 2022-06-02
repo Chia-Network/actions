@@ -21,7 +21,7 @@ runs:
       run: |
         FOUND=0
 
-        echo "${{ inputs.directories }} | jq -c '.[]' | while read venv
+        for venv in $(echo "${{ inputs.directories }}" | jq -c '.[]')
         do
           if [ -d "${venv}" ]
           then
