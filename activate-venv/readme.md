@@ -1,9 +1,14 @@
-# Setup Python
+# Activate virtual environment
 
-Wrapper around actions/setup-python that also will support python on ARM64 macOS (viw homebrew) and ARM64 Linux (via pyenv). Note that the mac runners must be running with native GitHub actions runner code, NOT the `arch` flag workaround.
+Provides cross-platform activation of a Python virtual environment.
+By default it searches in `venv/` then `.venv/`.
+This is configurable via a JSON list passed to the `directories` parameter.
 
 ```yaml
-- uses: Chia-Network/actions/setup-python@main
-  with:
-    python-version: "3.10"
+- uses: Chia-Network/actions/activate-venv@main
+```
+
+```yaml
+- uses: Chia-Network/actions/activate-venv@main
+  directories: '["another_virtualenv/"]'
 ```
