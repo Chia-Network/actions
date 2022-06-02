@@ -19,8 +19,6 @@ runs:
       if: runner.os == 'macos' || runner.os == 'linux'
       shell: sh
       run: |
-        set -vx
-
         for venv in $(echo '${{ inputs.directories }}' | jq -c -r '.[]')
         do
           if [ -d "${venv}" ]
