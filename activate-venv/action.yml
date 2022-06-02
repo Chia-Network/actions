@@ -33,13 +33,13 @@ runs:
           fi
         done
 
-        if [ "${FOUND}" -eq 0 ]
+        if [ "${FOUND}" -eq "0" ]
         then
           echo "No environment found" 1>&2
           exit 1
         fi
 
-        echo "$(cd venv/bin/; pwd)" >> $GITHUB_PATH
+        echo "$(cd "${{ inputs.directories }}/bin/"; pwd)" >> $GITHUB_PATH
         echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
     - name: Activate virtual environment (Windows)
       if: runner.os == 'windows'
@@ -58,10 +58,10 @@ runs:
           }
         }
 
-        if ($found -eq 0) {
+        if ($found -eq "0") {
           Write-Error "No environment found"
           exit 1
         }
         
-        (Resolve-Path venv/Scripts/).Path >> $Env:GITHUB_PATH
+        (Resolve-Path "${{ inputs.directories }}/Scripts/").Path >> $Env:GITHUB_PATH
         Write-Output "VIRTUAL_ENV=$Env:VIRTUAL_ENV" >> $Env:GITHUB_ENV
