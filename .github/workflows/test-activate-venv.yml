@@ -1,0 +1,55 @@
+name: test-activate-venv
+
+on:
+  push:
+    branches:
+    - main
+    tags:
+    - '**'
+  pull_request:
+    branches:
+    - '**'
+
+jobs:
+  test:
+    name: ${{ matrix.os.name }}
+    runs-on: ${{ matrix.os.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - name: macOS
+            matrix: macos
+            runs-on: macos-latest
+          - name: Ubuntu
+            matrix: ubuntu
+            runs-on: ubuntu-latest
+          - name: Windows
+            matrix: windows
+            runs-on: windows-latest
+        python:
+          - name: '3.9'
+            action: '3.9'
+
+    env:
+      ENV_PATH: venv/${{ matrix.os.name == 'windows' && 'Scripts' || 'bin' }}/
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up ${{ matrix.python.name }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python.action }}
+
+    - name: Setup virtual environment
+      run: |
+        python -m venv venv
+        ${{ env.ENV_PATH }}/python -m pip install decorator
+
+    - name: Run the action
+      uses: ./activate-venv/
+
+    - name: Check environment is activated
+      run: |
+        python -c 'import decorator'
