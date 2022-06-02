@@ -33,7 +33,7 @@ jobs:
             action: '3.9'
 
     env:
-      ENV_PATH: venv/${{ 'Scripts' && matrix.os.name == 'windows' || 'bin' }}/
+      ENV_PATH: venv/${{ matrix.os.name == 'windows' && 'Scripts' || 'bin' }}/
 
     steps:
     - uses: actions/checkout@v3
