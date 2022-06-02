@@ -22,7 +22,7 @@ runs:
         set -vx
         FOUND=0
 
-        for venv in $(echo "${{ inputs.directories }}" | jq -c '.[]')
+        for venv in $(echo '${{ inputs.directories }}' | jq -c '.[]')
         do
           if [ -d "${venv}" ]
           then
@@ -48,7 +48,7 @@ runs:
       run: |
         $found = 0
 
-        foreach ($venv in (echo "${{ inputs.directories }}" | jq -c '.[]'))
+        foreach ($venv in (echo '${{ inputs.directories }}' | jq -c '.[]'))
         {
           if (Test-Path -Path-Type Container "$venv") {
             $venv/Scripts/activate
