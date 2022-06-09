@@ -46,7 +46,7 @@ jobs:
             check: '3.8'
           - name: '3.9'
             action: '3.9'
-            check: '3.9'
+            check: '3.8'
           - name: '3.10'
             action: '3.10'
             check: '3.10'
