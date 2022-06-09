@@ -67,4 +67,4 @@ jobs:
     - name: Check the Python version
       shell: python
       run: |
-        python -c 'return 0 if ".".join(str(segment) for segment in sys.version_info[:2]) == "${{ matrix.python.check }}" else 1'
+        python -c 'import sys; sys.exit(0 if ".".join(str(segment) for segment in sys.version_info[:2]) == "${{ matrix.python.check }}" else 1)'
