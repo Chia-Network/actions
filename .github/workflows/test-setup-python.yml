@@ -65,5 +65,14 @@ jobs:
         python-version: ${{ matrix.python.action }}
 
     - name: Check the Python version
+      shell: python
+      env:
+        PYTHON_CHECK: ${{ matrix.python.check }}
       run: |
-        python -c 'import sys; sys.exit(0 if ".".join(str(segment) for segment in sys.version_info[:2]) == "${{ matrix.python.check }}" else 1)'
+        import os
+        import sys
+
+        version = ".".join(str(segment) for segment in sys.version_info[:2])
+
+        if version != os.environ["PYTHON_CHECK"]:
+            sys.exit(1)
