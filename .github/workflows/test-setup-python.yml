@@ -1,0 +1,70 @@
+name: test-activate-venv
+
+on:
+  push:
+    branches:
+    - main
+    tags:
+    - '**'
+  pull_request:
+    branches:
+    - '**'
+
+jobs:
+  test:
+    name: ${{ matrix.os.name }} ${{ matrix.arch.name }}
+    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - name: macOS
+            matrix: macos
+            runs-on:
+              arm: [m1]
+              intel: [macos-latest]
+          - name: Ubuntu
+            matrix: ubuntu
+            runs-on:
+              arm: [Linux, ARM64]
+              intel: [ubuntu-latest]
+          - name: Windows
+            matrix: windows
+            runs-on:
+              intel: [windows-latest]
+        python:
+          - name: '3.7'
+            action: '3.7'
+            check: '3.7'
+          - name: '3.8'
+            action: '3.8'
+            check: '3.8'
+          - name: '3.9'
+            action: '3.9'
+            check: '3.9'
+          - name: '3.10'
+            action: '3.10'
+            check: '3.10'
+        arch:
+          - name: ARM
+            matrix: arm
+          - name: Intel
+            matrix: intel
+        exclude:
+          - os:
+              matrix: windows
+            arch:
+              matrix: arm
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Run the action
+      uses: ./setup-python/
+      with:
+        python-version: ${{ matrix.python.action }}
+
+    - name: Check the Python version
+      shell: python
+      run: |
+        python -c 'return 0 if ".".join(str(segment) for segment in sys.version_info[:2]) == "${{ matrix.python.check }}" else 1'
