@@ -77,21 +77,8 @@ jobs:
       with:
         python-version: ${{ matrix.python.action }}
 
-    - name: Report Python version
-      env:
-        PYTHON_CHECK: ${{ matrix.python.check }}
-      run: |
-        python --version
-
     - name: Check Python version
-      shell: python
       env:
         PYTHON_CHECK: ${{ matrix.python.check }}
       run: |
-        import os
-        import sys
-
-        version = ".".join(str(segment) for segment in sys.version_info[:2])
-
-        if version != os.environ["PYTHON_CHECK"]:
-            sys.exit(1)
+        python ./setup-python/test_check_version.py
