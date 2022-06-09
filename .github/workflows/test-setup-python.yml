@@ -1,4 +1,4 @@
-name: test-activate-venv
+name: test-setup-python
 
 on:
   push:
