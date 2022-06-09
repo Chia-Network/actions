@@ -68,6 +68,19 @@ jobs:
             arch:
               name: ARM
               matrix: arm
+          - os:
+              name: macOS
+              matrix: macos
+              runs-on:
+                arm: [m1]
+                intel: [macos-latest]
+            python:
+              name: '3.7'
+              action: '3.7'
+              check: '3.7'
+            arch:
+              name: ARM
+              matrix: arm
 
     steps:
     - uses: actions/checkout@v3
