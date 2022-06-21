@@ -50,6 +50,9 @@ jobs:
           - name: '3.10'
             action: '3.10'
             check: '3.10'
+          - name: '3.11'
+            action: '3.11'
+            check: '3.11'
         arch:
           - name: ARM
             matrix: arm
