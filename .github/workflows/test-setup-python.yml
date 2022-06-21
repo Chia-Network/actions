@@ -26,7 +26,7 @@ jobs:
           - name: macOS
             matrix: macos
             runs-on:
-              arm: [m1]
+              arm: [macOS, ARM64]
               intel: [macos-latest]
           - name: Ubuntu
             matrix: ubuntu
@@ -75,7 +75,7 @@ jobs:
               name: macOS
               matrix: macos
               runs-on:
-                arm: [m1]
+                arm: [macOS, ARM64]
                 intel: [macos-latest]
             python:
               name: '3.7'
