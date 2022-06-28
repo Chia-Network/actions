@@ -61,4 +61,4 @@ jobs:
 
     - name: Check environment is activated
       run: |
-        python -c 'import sys; sys.exit(0 if sys.executable.endswith("${{ env.PYTHON_EXECUTABLE }}") else 0)'
+        python -c "import os; import sys; sys.exit(0 if sys.executable.endswith(os.environ['PYTHON_EXECUTABLE']) else 1)"
