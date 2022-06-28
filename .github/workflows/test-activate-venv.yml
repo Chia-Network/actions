@@ -42,7 +42,7 @@ jobs:
             action: '3.9'
 
     env:
-      ENV_PATH: venv/${{ matrix.os.name == 'windows' && 'Scripts' || 'bin' }}/
+      PYTHON_EXECUTABLE: /venv/${{ matrix.os.name == 'windows' && 'Scripts' || 'bin' }}/${{ matrix.os.name == 'windows' && 'python.exe' || 'python' }}
 
     steps:
     - uses: actions/checkout@v3
@@ -55,11 +55,10 @@ jobs:
     - name: Setup virtual environment
       run: |
         python -m venv venv
-        ${{ env.ENV_PATH }}/python -m pip install decorator
 
     - name: Run the action
       uses: ./activate-venv/
 
     - name: Check environment is activated
       run: |
-        python -c 'import decorator'
+        python -c 'import sys; sys.exit(0 if sys.executable.endswith("${{ env.PYTHON_EXECUTABLE }}") else 0)'
