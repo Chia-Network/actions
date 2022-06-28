@@ -41,9 +41,6 @@ jobs:
           - name: '3.9'
             action: '3.9'
 
-    env:
-      PYTHON_EXECUTABLE: /venv/${{ matrix.os.name == 'windows' && 'Scripts' || 'bin' }}/${{ matrix.os.name == 'windows' && 'python.exe' || 'python' }}
-
     steps:
     - uses: actions/checkout@v3
 
@@ -60,5 +57,7 @@ jobs:
       uses: ./activate-venv/
 
     - name: Check environment is activated
+      env:
+        EXPECTED_EXECUTABLE: /venv/${{ matrix.os.name == 'windows' && 'Scripts' || 'bin' }}/${{ matrix.os.name == 'windows' && 'python.exe' || 'python' }}
       run: |
-        python -c "import os; import sys; sys.exit(0 if sys.executable.endswith(os.environ['PYTHON_EXECUTABLE']) else 1)"
+        python activate-venv/test_check_activated.py
