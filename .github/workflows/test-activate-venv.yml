@@ -19,6 +19,7 @@ jobs:
   test:
     name: ${{ matrix.os.name }}
     runs-on: ${{ matrix.os.runs-on }}
+    container: ${{ matrix.os.container }}
     strategy:
       fail-fast: false
       matrix:
@@ -29,6 +30,10 @@ jobs:
           - name: Ubuntu
             matrix: ubuntu
             runs-on: ubuntu-latest
+          - name: Ubuntu Docker
+            matrix: docker
+            runs-on: ubuntu-latest
+            container: ubuntu
           - name: Windows
             matrix: windows
             runs-on: windows-latest
