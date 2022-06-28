@@ -19,7 +19,7 @@ runs:
       if: runner.os == 'macos' || runner.os == 'linux'
       shell: sh
       run: |
-        for venv in $(echo '${{ inputs.directories }}' | jq -c -r '.[]')
+        for venv in ${{ join(fromJSON(inputs.directories), ' ') }}
         do
           if [ -d "${venv}" ]
           then
@@ -38,7 +38,7 @@ runs:
       if: runner.os == 'windows'
       shell: pwsh
       run: |
-        foreach ($venv in (echo '${{ inputs.directories }}' | jq -c  -r '.[]'))
+        foreach ($venv in ${{ join(fromJSON(inputs.directories), ' ') }})
         {
           if (Test-Path -PathType Container "$venv") {
             "$venv/Scripts/activate"
