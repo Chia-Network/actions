@@ -58,6 +58,6 @@ jobs:
 
     - name: Check environment is activated
       env:
-        EXPECTED_EXECUTABLE: /venv/${{ matrix.os.name == 'windows' && 'Scripts' || 'bin' }}/${{ matrix.os.name == 'windows' && 'python.exe' || 'python' }}
+        EXPECTED_EXECUTABLE: ./venv/${{ matrix.os.name == 'windows' && 'Scripts' || 'bin' }}/${{ matrix.os.name == 'windows' && 'python.exe' || 'python' }}
       run: |
         python activate-venv/test_check_activated.py
