@@ -20,6 +20,10 @@ inputs:
   cache-dependency-path:
     required: false
     description: 'Used to specify the path to dependency files. Supports wildcards or a list of file names for caching multiple dependencies.'
+  force-pyenv:
+    required: false
+    default: 'false'
+    description: "Will force using pyenv instead of the upstream action if set to 'true'"
 outputs:
   python-version:
     description: "The installed python version. Useful when given a version range as input."
@@ -31,15 +35,15 @@ runs:
     - name: Call upstream setup-python action
       uses: actions/setup-python@v3
       # Requires native m1 runner software, not x64 running via arch flags
-      if: runner.arch != 'ARM64'
+      if: runner.arch != 'ARM64' && inputs.force-pyenv == 'false'
       with:
         python-version: ${{ format('{0}.0-alpha - {0}.X', inputs.python-version) }}
         architecture: ${{ inputs.architecture }}
         cache: ${{ inputs.cache }}
         token: ${{ inputs.token }}
         cache-dependency-path: ${{ inputs.cache-dependency-path }}
-    - name: Setup Python on ARM64 (macOS, Ubuntu)
-      if: runner.arch == 'ARM64'
+    - name: Setup Python on ARM64 (pyenv)
+      if: runner.arch == 'ARM64' || inputs.force-pyenv != 'false'
       shell: sh
       run: |
         unset PYENV_ROOT
