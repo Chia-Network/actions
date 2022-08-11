@@ -13,6 +13,18 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Ensure dependencies are present
+      run: |
+        ( command -v apk && apk add jq ) || true
+        ( command -v apt-get && apt-get update && apt-get install -y jq ) || true
+      shell: sh
+    - name: Template values
+      shell: sh
+      run: |
+        if [ -f "${{ inputs.varfile }}.j2" ]; then
+           echo "Var file is .j2 - Processing with j2..."
+           j2 "${{ inputs.varfile }}.j2" -o "${{ inputs.varfile }}"
+        fi
     - name: Init
       working-directory: ${{ inputs.terraform_dir }}
       run: terraform init
