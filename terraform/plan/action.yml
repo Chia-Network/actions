@@ -19,6 +19,7 @@ runs:
         ( command -v apt-get && apt-get update && apt-get install -y jq ) || true
       shell: sh
     - name: Template values
+      working-directory: ${{ inputs.terraform_dir }}
       shell: sh
       run: |
         if [ -f "${{ inputs.varfile }}.j2" ]; then

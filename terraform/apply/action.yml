@@ -20,6 +20,7 @@ runs:
       shell: sh
     - name: Template values
       shell: sh
+      working-directory: ${{ inputs.terraform_dir }}
       run: |
         if [ -f "${{ inputs.varfile }}.j2" ]; then
            echo "Var file is .j2 - Processing with j2..."
