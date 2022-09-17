@@ -2,7 +2,7 @@
 
 This action tries to resolve issues found in [eps1lon/actions-label-merge-conflict](https://github.com/eps1lon/actions-label-merge-conflict)  
 - It tries to check conflict status of PRs which share the same base(target) branch as the PR triggering the action.  
-  For example, if we have 20 PRs which target to `main` branch, and we push commits to one of the 20 PRs,
+  For example, if you have 20 PRs which target to `main` branch, and you push commits to one of the 20 PRs,
   it tries to check conflict for all the 20 PRs between `main` and adds/removes conflict labels for those 19 irrelevant PRs.
 - When conflict status turns out to be "UNKNOWN", it retries GraphQL request after retry interval.  
   The problem is, that if conflict statuses of 3 PRs are "UNKNOWN",
@@ -24,7 +24,7 @@ This action adds/removes a label when Pull Request conflict status is changed.
 ## Example usage
 
 ```yaml
-name: "Maintenance"
+name: "Check conflict"
 on:
   # If you specify `push`, then this action checks conflict between this branch and
   # child branches which target this branch on push event.
@@ -36,7 +36,7 @@ on:
   # on pull request event
   # Note that `pull_request_target` is run on base branch's context for security reason.
   pull_request_target:
-    # `opened` type is triggered when a user open a pull request
+    # `opened` type is triggered when a user opens a pull request
     # `synchronize` type is usually triggered when a user pushes commits on pull request
     types: [opened, synchronize]
 
