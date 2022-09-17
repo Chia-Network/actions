@@ -34,3 +34,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Some things are incorrectly detected as ansible playbooks. Disable this linter, since this is just actions
           VALIDATE_ANSIBLE: false
+          # Linting is done in test-label-conflict.yml for label-conflict action
+          FILTER_REGEX_EXCLUDE: label-conflict/.*
