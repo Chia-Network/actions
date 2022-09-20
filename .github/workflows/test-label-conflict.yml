@@ -1,0 +1,69 @@
+name: Test label conflict
+on:
+  push:
+  pull_request:
+    types: [synchronize]
+
+concurrency:
+  # SHA is added to the end if on `main` to let all main workflows run
+  group: ${{ github.ref }}-${{ github.workflow }}-${{ github.event_name }}-${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/') || startsWith(github.ref, 'refs/heads/long_lived/')) && github.sha || '' }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test label conflict
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Get yarn version
+        run: |
+          cd label-conflict
+          echo "yarn_version=$(yarn -v)" >> "$GITHUB_ENV"
+
+      - name: Get yarn(v1) cache directory path
+        if: startsWith(env.yarn_version, '1')
+        run: |
+          cd label-conflict
+          echo "cache_dir=$(yarn cache dir)" >> "$GITHUB_ENV"
+
+      - name: Get yarn(v2) cache directory path
+        if: startsWith(env.yarn_version, '2')
+        run: |
+          cd label-conflict
+          echo "cache_dir=$(yarn config get cacheFolder)"
+
+      - name: Cache Node.js modules
+        id: yarn-cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.cache_dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        run: |
+          cd label-conflict
+          yarn --frozen-lockfile
+
+      - name: Check build file consistency
+        run: |
+          cd label-conflict
+          mv dist/index.js dist/index.js.orig
+          yarn build
+          COMMITTED_DIST="$(sha256sum dist/index.js.orig | cut -d' ' -f1)"
+          COMPILED_DIST="$(sha256sum dist/index.js | cut -d' ' -f1)"
+          echo "Hash of committed dist/index.js: ${COMMITTED_DIST}"
+          echo "Hash of compiled dist/index.js: ${COMPILED_DIST}"
+          test "$COMPILED_DIST" = "$COMMITTED_DIST"
+
+      - name: Lint
+        run: |
+          cd label-conflict
+          yarn lint

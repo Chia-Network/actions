@@ -1,0 +1,25 @@
+{
+  "name": "actions-label-conflict",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "ncc build src/main.ts --license LICENSE.txt",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@actions/core": "^1.9.1",
+    "@actions/github": "^5.0.3",
+    "@types/node": "^18.7.18",
+    "@typescript-eslint/eslint-plugin": "^5.37.0",
+    "@typescript-eslint/parser": "^5.37.0",
+    "@vercel/ncc": "^0.34.0",
+    "eslint": "8.22.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jsdoc": "^39.3.6",
+    "typescript": "^4.8.3"
+  },
+  "dependencies": {
+  }
+}

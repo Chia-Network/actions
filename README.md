@@ -30,6 +30,9 @@ Deploys a helm chart to a k8s cluster.
 ### k8s/image-pull-secret
 Creates/updates a kubernetes image pull secret in a namespace.
 
+### label-conflict
+Add/Remove labels when PR's conflict status changes.
+
 ### setup-python
 Wrapper around actions/setup-python that also supports ARM64 Mac and ARM64 Linux.
 

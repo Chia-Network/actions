@@ -1,0 +1,33 @@
+name: "Label conflict status"
+description: ""
+inputs:
+  secretToken:
+    description: "Token for the repository. Can be passed in using {{ secrets.GITHUB_TOKEN }}"
+    required: true
+  labelToAddOnConflict:
+    description: "Name of the label which indicates that the branch has conflicts"
+    required: true
+  labelToRemoveOnConflict:
+    description: "Name of the label removed when conflict is detected"
+  retryIntervalSec:
+    description: "Number of interval seconds to retry conflict check for branches whose mergeable state is unknown"
+    default: "120"
+  retryMax:
+    description: "Number of retries to check conflict. If it is set to 0, checking conflict will be done only once"
+    default: "5"
+  ignorePermissionError:
+    description: "Boolean. Whether to continue or fail when the provided token is missing permissions. By default pull requests from a fork do not have access to secrets and get a read only github token, resulting in a failure to update tags."
+  commentToAddOnConflict:
+    description: "Comment to add when conflict is detected. Supports Markdown"
+  commentToAddOnClean:
+    description: "Comment to add when conflict is resolved. Supports Markdown"
+outputs:
+  conflictStatus:
+    description: "Key-Value pairs. Key: pull request number. Value: boolean(if true, then the corresponding PR has conflict)"
+runs:
+  using: "node16"
+  main: "dist/index.js"
+author: "Izumi Hoshino"
+branding:
+  icon: "activity"
+  color: "green"
