@@ -33,7 +33,7 @@ runs:
   using: "composite"
   steps:
     - name: Call upstream setup-python action
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       # Requires native m1 runner software, not x64 running via arch flags
       if: runner.arch != 'ARM64' && inputs.force-pyenv == 'false'
       with:
