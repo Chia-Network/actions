@@ -64,12 +64,12 @@ jobs:
       id: failure_check
       uses: ./check-commit-signing/
       with:
-        source: ${{ outputs.unsigned_commit.unsigned_hash }}
+        source: ${{ steps.unsigned_commit.outputs.unsigned_hash }}
 
     - name: Make sure unsigned check failed
       if: always()
       run: |
-        if [ "${{ outputs.failure_check.outputs.status }}" == "unsigned" ]
+        if [ "${{ steps.failure_check.outputs.status }}" == "unsigned" ]
         then
           true
         else
