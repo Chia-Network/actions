@@ -38,9 +38,9 @@ runs:
         echo Commits in log considered unsigned:
         if grep 'N$' "${{ env.log }}"
         then
-          echo "status=unsigned" >> $GITHUB_OUTPUT  
+          echo "status=unsigned" >> "${GITHUB_OUTPUT}"
           false
         else
-          echo "status=signed" >> $GITHUB_OUTPUT
+          echo "status=signed" >> "${GITHUB_OUTPUT}"
           true
         fi
