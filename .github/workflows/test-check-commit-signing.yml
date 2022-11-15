@@ -45,7 +45,7 @@ jobs:
       id: unsigned_commit
       shell: bash
       run: |
-        git checkout ${{ github.pull_request.head.ref }}
+        git checkout '${{ github.event.pull_request.head.ref }}'
         git config --local user.email "test@example.com"
         git config --local user.name "Test Committer"
         git commit --no-gpg-sign --allow-empty -m 'unsigned commit for testing'
