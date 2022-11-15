@@ -24,9 +24,9 @@ runs:
       env:
         log: ${RUNNER_TEMP}/unsigned_commit_check_log.${{ github.run_id }}
       run: |
-        echo Target:
+        echo Target: ${{ inputs.target }}
         git show --no-patch ${{ inputs.target }}
-        echo Source:
+        echo Source: ${{ inputs.source }}
         git show --no-patch ${{ inputs.source }}
         git log --left-right --oneline --pretty='format:%H|%aN|%aI|%s|%G?' ${{ inputs.target }}...${{ inputs.source }} > "${{ env.log }}"
         echo
