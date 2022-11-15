@@ -1,0 +1,77 @@
+name: test-check-commit-signing
+
+on:
+  push:
+    branches:
+    - main
+    tags:
+    - '**'
+  pull_request:
+    branches:
+    - '**'
+
+concurrency:
+  # SHA is added to the end if on `main` to let all main workflows run
+  group: ${{ github.ref }}-${{ github.workflow }}-${{ github.event_name }}-${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/') || startsWith(github.ref, 'refs/heads/long_lived/')) && github.sha || '' }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: ${{ matrix.os.name }}
+    runs-on: ${{ matrix.os.runs-on }}
+    container: ${{ matrix.os.container }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - name: macOS
+            matrix: macos
+            runs-on: macos-latest
+          - name: Ubuntu
+            matrix: ubuntu
+            runs-on: ubuntu-latest
+          - name: Ubuntu Docker
+            matrix: docker
+            runs-on: ubuntu-latest
+            container: ubuntu
+          - name: Windows
+            matrix: windows
+            runs-on: windows-latest
+        python:
+          - name: '3.9'
+            action: '3.9'
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up ${{ matrix.python.name }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python.action }}
+
+    - name: Run the action
+      uses: ./check-commit-signing/
+
+    - name: Create unsigned commit
+      id: unsigned_commit
+      shell: bash
+      run: |
+        git checkout ${{ github.pull_request.head.ref }}
+        git commit --no-gpg-sign --allow-empty -m 'unsigned commit for testing'
+        echo "unsigned_hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+    - name: Run the action
+      id: failure_check
+      uses: ./check-commit-signing/
+      with:
+        source: ${{ outputs.unsigned_commit.unsigned_hash }}
+
+    - name: Make sure unsigned check failed
+      if: always()
+      run: |
+        if [ "${{ outputs.failure_check.outputs.status }}" == "unsigned" ]
+        then
+          true
+        else
+          false
+        fi

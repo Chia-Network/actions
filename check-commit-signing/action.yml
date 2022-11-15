@@ -1,0 +1,44 @@
+name: "Check unsigned commits"
+description: "Checks for unsigned commits being introduced and fails if present"
+
+inputs:
+  target:
+    description: ""
+    required: true
+    default: ${{ github.pull_request.base.sha }}
+  source:
+    description: ""
+    required: true
+    default: ${{ github.pull_request.head.sha }}
+  temporary_directory:
+    description: ""
+    required: true
+    default: ${{ env['RUNNER_TEMP'] }}
+
+outputs:
+  status:
+    description: "Set to either signed or unsigned accordingly."
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check for unsigned commits
+      if: github.event_name == 'pull_request'
+      shell: bash
+      run: |
+        git show ${{ inputs.target }}
+        git show ${{ inputs.source }}
+        git log --left-right --oneline --pretty='format:%H|%aN|%aI|%s|%G?' ${{ inputs.target }}...${{ inputs.source }} > "${{ inputs.temporary_directory }}/unsigned_commit_check_log"
+        echo
+        echo All commits in log:
+        cat "${{ inputs.temporary_directory }}/unsigned_commit_check_log"
+        echo
+        echo Commits in log considered unsigned:
+        if grep 'N$' "${{ inputs.temporary_directory }}/unsigned_commit_check_log"
+        then
+          echo "status=unsigned" >> $GITHUB_OUTPUT  
+          false
+        else
+          echo "status=signed" >> $GITHUB_OUTPUT
+          true
+        fi
