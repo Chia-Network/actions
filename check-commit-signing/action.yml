@@ -22,8 +22,10 @@ runs:
       if: github.event_name == 'pull_request'
       shell: bash
       run: |
-        git show ${{ inputs.target }}
-        git show ${{ inputs.source }}
+        echo Target:
+        git show --no-patch ${{ inputs.target }}
+        echo Source:
+        git show --no-patch ${{ inputs.source }}
         git log --left-right --oneline --pretty='format:%H|%aN|%aI|%s|%G?' ${{ inputs.target }}...${{ inputs.source }} > "${{ env['RUNNER_TEMP'] }}/unsigned_commit_check_log"
         echo
         echo All commits in log:
