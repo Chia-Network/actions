@@ -14,11 +14,13 @@ inputs:
 outputs:
   status:
     description: "Set to either signed or unsigned accordingly."
+    value: ${{ steps.check.outputs.status }}
 
 runs:
   using: "composite"
   steps:
     - name: Check for unsigned commits
+      id: check
       if: github.event_name == 'pull_request'
       shell: bash
       env:
