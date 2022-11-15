@@ -5,11 +5,11 @@ inputs:
   target:
     description: ""
     required: true
-    default: ${{ github.pull_request.base.sha }}
+    default: ${{ github.event.pull_request.base.sha }}
   source:
     description: ""
     required: true
-    default: ${{ github.pull_request.head.sha }}
+    default: ${{ github.event.pull_request.head.sha }}
 
 outputs:
   status:
@@ -24,9 +24,9 @@ runs:
       env:
         log: ${RUNNER_TEMP}/unsigned_commit_check_log.${{ github.run_id }}
       run: |
-        echo Target: ${{ inputs.target }}
+        echo Target: '${{ inputs.target }}'
         git show --no-patch ${{ inputs.target }}
-        echo Source: ${{ inputs.source }}
+        echo Source: '${{ inputs.source }}'
         git show --no-patch ${{ inputs.source }}
         git log --left-right --oneline --pretty='format:%H|%aN|%aI|%s|%G?' ${{ inputs.target }}...${{ inputs.source }} > "${{ env.log }}"
         echo
