@@ -19,7 +19,6 @@ jobs:
   test:
     name: ${{ matrix.os.name }}
     runs-on: ${{ matrix.os.runs-on }}
-    container: ${{ matrix.os.container }}
     strategy:
       fail-fast: false
       matrix:
