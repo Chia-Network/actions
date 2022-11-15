@@ -37,17 +37,9 @@ jobs:
           - name: Windows
             matrix: windows
             runs-on: windows-latest
-        python:
-          - name: '3.9'
-            action: '3.9'
 
     steps:
     - uses: actions/checkout@v3
-
-    - name: Set up ${{ matrix.python.name }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python.action }}
 
     - name: Run the action
       uses: ./check-commit-signing/
