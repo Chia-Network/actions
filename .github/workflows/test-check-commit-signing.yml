@@ -61,6 +61,7 @@ jobs:
 
     - name: Make sure unsigned check failed
       if: always()
+      shell: bash
       run: |
         if [ "${{ steps.failure_check.outputs.status }}" == "unsigned" ]
         then
