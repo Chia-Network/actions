@@ -49,7 +49,6 @@ jobs:
         git checkout ${{ github.pull_request.head.ref }}
         git config --local user.email "test@example.com"
         git config --local user.name "Test Committer"
-        git commit --no-gpg-sign --allow-empty -m 'unsigned commit for testing'
         echo "unsigned_hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
     - name: Run the action
