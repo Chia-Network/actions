@@ -75,6 +75,7 @@ runs:
       if: ${{ inputs.automatic-venv }}
       shell: python
       run: |
+        import os
         import pathlib
         import tempfile
         import venv
