@@ -2,13 +2,22 @@ import os
 import pathlib
 import sys
 
-expected = pathlib.Path.cwd().joinpath(os.environ["EXPECTED_EXECUTABLE"])
 actual = pathlib.Path(sys.executable)
-equal = expected == pathlib.Path(sys.executable)
 
-print(f"expected: {expected}")
-print(f"  actual: {actual}")
-print(f"   equal: {'yes' if equal else 'no'}")
+automatic_venv = os.environ["AUTOMATIC_VENV"]
+if automatic_venv == 'false':
+    reference = pathlib.Path.cwd().joinpath(os.environ["EXPECTED_EXECUTABLE"])
+    correct = reference == actual
+elif automatic_venv == 'true':
+    reference = pathlib.Path(os.environ["RUNNER_TEMP"])
+    correct = actual.is_relative_to(reference)
+else:
+    print(f"unknown AUTOMATIC_VENV value: {automatic_venv!r}")
 
-if not equal:
+
+print(f"reference: {reference}")
+print(f"   actual: {actual}")
+print(f"  correct: {'yes' if correct else 'no'}")
+
+if not correct:
     sys.exit(1)

@@ -24,6 +24,10 @@ inputs:
     required: false
     default: 'false'
     description: "Will force using pyenv instead of the upstream action if set to 'true'"
+  automatic-venv:
+    required: false
+    default: 'false'
+    description: "Create and activate an temporary virtual environment"
 outputs:
   python-version:
     description: "The installed python version. Useful when given a version range as input."
@@ -66,3 +70,15 @@ runs:
         
         PY_PREFIX=$(pyenv prefix $FULL_PY_VERSION)
         echo "PATH=$PY_PREFIX/bin:$PATH" >> $GITHUB_ENV
+    - name: Create venv
+      if: ${{ inputs.automatic-venv }}
+      run: |
+        TEMP_VENV_PATH=$(mktemp --directory --tmpdir="${RUNNER_TEMP}")
+        python -m venv "${TEMP_VENV_PATH}"
+    - uses: ./activate-venv
+      if: ${{ inputs.automatic-venv }}
+      directories: '["${TEMP_VENV_PATH}"]'
+    - name: Update pip
+      if: ${{ inputs.automatic-venv }}
+      run: |
+        python -m pip install --upgrade pip
