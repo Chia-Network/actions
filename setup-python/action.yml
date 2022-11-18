@@ -81,7 +81,7 @@ runs:
     - uses: ./activate-venv
       if: ${{ inputs.automatic-venv }}
       with:
-        directories: '["${{ steps.create-venv.outputs.temp-venv-path }}"]'
+        directories: ${{ toJSON([steps.create-venv.outputs.temp-venv-path]) }}
     - name: Update pip
       if: ${{ inputs.automatic-venv }}
       shell: sh
