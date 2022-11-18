@@ -75,7 +75,7 @@ runs:
       if: ${{ inputs.automatic-venv }}
       shell: sh
       run: |
-        TEMP_VENV_PATH=$(TMPDIR="${RUNNER_TEMP}" mktemp -d)
+        TEMP_VENV_PATH=$(export TMPDIR="${RUNNER_TEMP}"; mktemp -d)
         echo "temp-venv-path=${TEMP_VENV_PATH}" >> $GITHUB_OUTPUT
         python -m venv "${TEMP_VENV_PATH}"
     - uses: ./activate-venv
