@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   test:
-    name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.python.name }} ${{ matrix.automatic-venv.value }}
+    name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.python.name }} ${{ matrix.automatic-venv.name }}
     runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
     strategy:
       fail-fast: false
