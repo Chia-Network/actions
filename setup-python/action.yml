@@ -73,7 +73,7 @@ runs:
     - name: Create venv
       id: create-venv
       if: ${{ inputs.automatic-venv }}
-      shell: python
+      shell: python3
       run: |
         import os
         import pathlib
