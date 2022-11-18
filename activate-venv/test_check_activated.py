@@ -12,7 +12,12 @@ if automatic_venv == "false":
     correct = reference == actual
 elif automatic_venv == "true":
     reference = pathlib.Path(os.environ["RUNNER_TEMP"])
-    correct = actual.is_relative_to(reference)
+    try:
+        actual.relative_to(reference)
+    except ValueError:
+        correct = False
+    else:
+        correct = True
 else:
     print(f"unknown AUTOMATIC_VENV value: {automatic_venv!r}")
     sys.exit(1)
