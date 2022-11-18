@@ -4,15 +4,18 @@ import sys
 
 actual = pathlib.Path(sys.executable)
 
-automatic_venv = os.environ["AUTOMATIC_VENV"]
-if automatic_venv == 'false':
+automatic_venv = os.environ.get("AUTOMATIC_VENV", "false")
+reference: pathlib.Path
+correct: bool
+if automatic_venv == "false":
     reference = pathlib.Path.cwd().joinpath(os.environ["EXPECTED_EXECUTABLE"])
     correct = reference == actual
-elif automatic_venv == 'true':
+elif automatic_venv == "true":
     reference = pathlib.Path(os.environ["RUNNER_TEMP"])
     correct = actual.is_relative_to(reference)
 else:
     print(f"unknown AUTOMATIC_VENV value: {automatic_venv!r}")
+    sys.exit(1)
 
 
 print(f"reference: {reference}")

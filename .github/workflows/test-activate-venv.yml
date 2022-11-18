@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   test:
-    name: ${{ matrix.os.name }} ${{ matrix.python.name }} ${{ matrix.automatic-venv.name }}
+    name: ${{ matrix.os.name }}
     runs-on: ${{ matrix.os.runs-on }}
     container: ${{ matrix.os.container }}
     strategy:
@@ -40,11 +40,6 @@ jobs:
         python:
           - name: '3.9'
             action: '3.9'
-        automatic-venv:
-          - name: autoenv
-            value: true
-          - name: no-autoenv
-            value: false
 
     steps:
     - uses: actions/checkout@v3
@@ -53,7 +48,7 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python.action }}
-        automatic-venv: ${{ matrix.automatic-venv.value }}
+        automatic-venv: 'false'
 
     - name: Setup virtual environment
       run: |
@@ -65,6 +60,5 @@ jobs:
     - name: Check environment is activated
       env:
         EXPECTED_EXECUTABLE: ./venv/${{ matrix.os.name == 'windows' && 'Scripts' || 'bin' }}/${{ matrix.os.name == 'windows' && 'python.exe' || 'python' }}
-        AUTOMATIC_VENV: ${{ matrix.automatic-venv.value }}
       run: |
         python activate-venv/test_check_activated.py

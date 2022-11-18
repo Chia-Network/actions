@@ -58,6 +58,11 @@ jobs:
             matrix: arm
           - name: Intel
             matrix: intel
+        automatic-venv:
+          - name: autoenv
+            value: true
+          - name: no-autoenv
+            value: false
         exclude:
           # Only partial entries are required here by GitHub Actions so generally I
           # only specify the `matrix:` entry.  The super linter complains so for now
@@ -92,9 +97,17 @@ jobs:
       uses: ./setup-python/
       with:
         python-version: ${{ matrix.python.action }}
+        automatic-venv: ${{ matrix.automatic-venv.value }}
 
     - name: Check Python version
       env:
         PYTHON_CHECK: ${{ matrix.python.check }}
       run: |
         python ./setup-python/test_check_version.py
+
+    - name: Check Python is from env
+      if: matrix.automatic-venv.value
+      env:
+        AUTOMATIC_VENV: true
+      run: |
+        python activate-venv/test_check_activated.py
