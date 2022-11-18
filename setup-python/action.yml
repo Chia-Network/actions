@@ -78,8 +78,8 @@ runs:
         python -m venv "${TEMP_VENV_PATH}"
     - uses: ./activate-venv
       if: ${{ inputs.automatic-venv }}
-      shell: sh
-      directories: '["${TEMP_VENV_PATH}"]'
+      with:
+        directories: '["${TEMP_VENV_PATH}"]'
     - name: Update pip
       if: ${{ inputs.automatic-venv }}
       shell: sh
