@@ -85,7 +85,7 @@ runs:
         github_output = pathlib.Path(os.environ["GITHUB_OUTPUT"])
         with github_output.open("a") as file:
             print(f"temp-venv-path={temporary_directory}", file=file)
-        venv.create(env_dir=temporary_directory)
+        venv.create(env_dir=temporary_directory, with_pip=True)
     - uses: ./activate-venv
       if: ${{ inputs.automatic-venv }}
       with:
