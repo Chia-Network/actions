@@ -33,9 +33,6 @@ outputs:
     description: "The installed python version. Useful when given a version range as input."
   cache-hit:
     description: 'A boolean value to indicate a cache entry was found'
-defaults:
-  run:
-    shell: sh
 runs:
   using: "composite"
   steps:
@@ -51,6 +48,7 @@ runs:
         cache-dependency-path: ${{ inputs.cache-dependency-path }}
     - name: Setup Python on ARM64 (pyenv)
       if: runner.arch == 'ARM64' || inputs.force-pyenv != 'false'
+      shell: sh
       run: |
         unset PYENV_ROOT
 
@@ -74,13 +72,16 @@ runs:
         echo "PATH=$PY_PREFIX/bin:$PATH" >> $GITHUB_ENV
     - name: Create venv
       if: ${{ inputs.automatic-venv }}
+      shell: sh
       run: |
         TEMP_VENV_PATH=$(mktemp --directory --tmpdir="${RUNNER_TEMP}")
         python -m venv "${TEMP_VENV_PATH}"
     - uses: ./activate-venv
       if: ${{ inputs.automatic-venv }}
+      shell: sh
       directories: '["${TEMP_VENV_PATH}"]'
     - name: Update pip
       if: ${{ inputs.automatic-venv }}
+      shell: sh
       run: |
         python -m pip install --upgrade pip
