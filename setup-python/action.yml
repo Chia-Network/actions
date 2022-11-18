@@ -71,15 +71,17 @@ runs:
         PY_PREFIX=$(pyenv prefix $FULL_PY_VERSION)
         echo "PATH=$PY_PREFIX/bin:$PATH" >> $GITHUB_ENV
     - name: Create venv
+      id: create-venv
       if: ${{ inputs.automatic-venv }}
       shell: sh
       run: |
-        TEMP_VENV_PATH=$(mktemp --directory --tmpdir="${RUNNER_TEMP}")
+        TEMP_VENV_PATH=$(mktemp -d --tmpdir="${RUNNER_TEMP}")
+        echo "temp-venv-path=${TEMP_VENV_PATH}" >> $GITHUB_OUTPUT
         python -m venv "${TEMP_VENV_PATH}"
     - uses: ./activate-venv
       if: ${{ inputs.automatic-venv }}
       with:
-        directories: '["${TEMP_VENV_PATH}"]'
+        directories: '["${{ steps.create-venv.outputs.temp-venv-path }}"]'
     - name: Update pip
       if: ${{ inputs.automatic-venv }}
       shell: sh
