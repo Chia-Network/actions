@@ -73,11 +73,19 @@ runs:
     - name: Create venv
       id: create-venv
       if: ${{ inputs.automatic-venv }}
-      shell: sh
+      shell: python
       run: |
-        TEMP_VENV_PATH=$(export TMPDIR="${RUNNER_TEMP}"; mktemp -d)
-        echo "temp-venv-path=${TEMP_VENV_PATH}" >> $GITHUB_OUTPUT
-        python -m venv "${TEMP_VENV_PATH}"
+        import pathlib
+        import tempfile
+        import venv
+
+        runner_temp = os.environ["RUNNER_TEMP"]
+        temporary_directory = pathlib.Path(tempfile.mkdtemp(dir=runner_temp))
+        github_output = pathlib.Path(os.environ["GITHUB_OUTPUT"])
+        with github_output.open("a") as file:
+            print(f"temp-venv-path={temporary_directory}", file=file)
+        builder = venv.EnvBuilder()
+        builder.create(dir=temporary_directory)
     - uses: ./activate-venv
       if: ${{ inputs.automatic-venv }}
       with:
