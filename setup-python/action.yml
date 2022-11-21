@@ -27,7 +27,7 @@ inputs:
   automatic-venv:
     required: false
     default: 'false'
-    description: "Create and activate an temporary virtual environment"
+    description: "Create and activate a temporary virtual environment"
 outputs:
   python-version:
     description: "The installed python version. Useful when given a version range as input."
