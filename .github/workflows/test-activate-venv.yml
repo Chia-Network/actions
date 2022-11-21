@@ -48,7 +48,6 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python.action }}
-        automatic-venv: 'false'
 
     - name: Setup virtual environment
       run: |
