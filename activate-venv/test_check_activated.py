@@ -4,7 +4,7 @@ import sys
 
 reference = pathlib.Path(os.environ["REFERENCE_PATH"]).absolute()
 actual = pathlib.Path(sys.executable)
-expected_inside = {"true": True, "false": False}[os.environ["REFERENCE_PATH"]]
+expected_inside = {"true": True, "false": False}[os.environ["EXPECTED_INSIDE"]]
 
 is_inside: bool
 try:
