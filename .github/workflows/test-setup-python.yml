@@ -103,7 +103,7 @@ jobs:
       env:
         PYTHON_CHECK: ${{ matrix.python.check }}
       run: |
-        python ./setup-python/test_check_version.py
+        ${{ runner.os == 'Windows' && 'py -3' || 'python3' }} ./setup-python/test_check_version.py
 
     - name: Check Python is from env
       if: matrix.automatic-venv.value
