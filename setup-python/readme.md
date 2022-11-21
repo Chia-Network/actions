@@ -7,3 +7,8 @@ Wrapper around actions/setup-python that also will support python on ARM64 macOS
   with:
     python-version: "3.10"
 ```
+
+An additional option, `automatic-venv`, is provided to allow creation and activation of a temporary venv.
+This makes it easy to have a clean environment to work in.
+Presently, this option defaults to `false`.
+This may be enabled by default in the future.
