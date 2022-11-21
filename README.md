@@ -8,6 +8,9 @@ This repository stores internal actions and workflows that will be reused in Git
 ### ansible/run-playbook
 Runs an ansible playbook against an inventory of hosts
 
+### check-commit-signing
+Checks that all commits in a PR have been signed.
+
 ### clean-workspace
 Cleans the current workspace prior to running the checkout action, to ensure the job starts with a clean slate.
 
