@@ -75,7 +75,7 @@ runs:
       if: ${{ inputs.automatic-venv }}
       shell: sh
       run: |
-        python3 "${GITHUB_ACTION_PATH}/create-temporary-venv.py"
+        ${{ github.os == 'Windows' && 'py -3' || 'python3' }} "${GITHUB_ACTION_PATH}/create-temporary-venv.py"
     - uses: ./activate-venv
       if: ${{ inputs.automatic-venv }}
       with:
