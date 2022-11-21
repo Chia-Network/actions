@@ -54,7 +54,7 @@ jobs:
         python -m venv venv
 
     - name: Run the action
-      uses: ./activate-venv/
+      uses: ./activate-venv
 
     - name: Check environment is activated
       env:
