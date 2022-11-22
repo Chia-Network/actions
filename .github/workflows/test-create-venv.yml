@@ -44,6 +44,7 @@ jobs:
               '3.8': docker://python:3.8-buster
               '3.9': docker://python:3.9-buster
               '3.10': docker://python:3.10-buster
+              '3.11': docker://python:3.11-buster
           - name: Windows
             matrix: windows
             runs-on:
@@ -68,7 +69,7 @@ jobs:
           - name: '3.11'
             action: '3.11'
             check: '3.11'
-            matrix: '3.10'
+            matrix: '3.11'
         arch:
           - name: ARM
             matrix: arm
