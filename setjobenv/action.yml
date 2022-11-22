@@ -57,18 +57,21 @@ runs:
         LANGUAGE=$(curl -s -X GET https://"$GPR_TOKEN":@api.github.com/repos/"$GITHUB_REPOSITORY" | jq -r '.language')
         RFC_REPO=$(echo "$REPO" | sed 's/\./-/g; s/_/-/g')
         GIT_SHORT_HASH=$(echo "${GITHUB_SHA}" | cut -c1-8)
+        GH_EVENT_ACTION=${{ github.event.action }}
         # Pre-Release/Release logic
-        PRE_RELEASE=$(jq -r '.release.prerelease' "$GITHUB_EVENT_PATH")
-        RELEASE_TAG=$(jq -r '.release.tag_name' "$GITHUB_EVENT_PATH")
-        {
-          echo "RELEASE=true"
-          echo "PRE_RELEASE=$PRE_RELEASE"
-          echo "RELEASE_TAG=$RELEASE_TAG"
-        } >> "$GITHUB_ENV"
-        if [ "$PRE_RELEASE" = false ]; then
-          echo "FULL_RELEASE=true" >>"$GITHUB_ENV"
-        else
-          echo "FULL_RELEASE=false" >>"$GITHUB_ENV"
+        if [ "$GITHUB_EVENT_NAME" == 'release' ] && [ "$GH_EVENT_ACTION" == 'published' ]; then
+          PRE_RELEASE=$(jq -r '.release.prerelease' "$GITHUB_EVENT_PATH")
+          RELEASE_TAG=$(jq -r '.release.tag_name' "$GITHUB_EVENT_PATH")
+          {
+            echo "RELEASE=true"
+            echo "PRE_RELEASE=$PRE_RELEASE"
+            echo "RELEASE_TAG=$RELEASE_TAG"
+          } >> "$GITHUB_ENV"
+          if [ "$PRE_RELEASE" = false ]; then
+            echo "FULL_RELEASE=true" >>"$GITHUB_ENV"
+          else
+            echo "FULL_RELEASE=false" >>"$GITHUB_ENV"
+          fi
         fi
         # Begin custom
         echo "Setting env for steps:"
