@@ -6,7 +6,7 @@ inputs:
     required: false
     default: "python"
 outputs:
-  python_path:
+  venv_path:
     description: "The path to the virtual environment directory, not including the bin or scipts directory."
     value: ${{ steps.create-venv.outputs.temp-venv-path }}
 runs:
