@@ -7,6 +7,11 @@ query openPullRequests($owner: String!, $repo: String!, $after: String, $baseRef
     pullRequests(first: 100, after: $after, states: OPEN, baseRefName: $baseRefName, headRefName: $headRefName) {
       nodes {
         headRefName
+        headRepository {
+          owner {
+            login
+          }
+        }
         mergeable
         number
         title
@@ -28,6 +33,11 @@ query openPullRequests($owner: String!, $repo: String!, $after: String, $baseRef
 
 export interface PullRequestsNode {
   headRefName: string;
+  headRepository: null | {
+    owner: {
+      login: string;
+    };
+  };
   mergeable: string;
   number: number;
   title: string;
@@ -82,6 +92,17 @@ export async function postOpenPullRequestsQuery(
   if(!response){
     return [];
   }
+  
+  if(params.searchRefType === "currentBranch"){
+    // This eliminates external branches whose headRefName is the same as `param.refName`.
+    // We aren't interested in conflicts between external branch and branches whose target is the external branch.
+    // By the code below, pullRequests with branches whose owner does not match the pullRequest repository owner
+    // will be eliminated.
+    response.repository.pullRequests.nodes = response.repository.pullRequests.nodes.filter(n => {
+      return n.headRepository && n.headRepository.owner.login === requestParams.owner;
+    });
+  }
+  
   core.info(`Found ${response.repository.pullRequests.nodes.length} PRs`);
   
   let retVal = response.repository.pullRequests.nodes;
@@ -100,11 +121,17 @@ export async function postOpenPullRequestsQuery(
     if(!response){
       return [];
     }
+  
+    if(params.searchRefType === "currentBranch"){
+      response.repository.pullRequests.nodes = response.repository.pullRequests.nodes.filter(n => {
+        return n.headRepository && n.headRepository.owner.login === requestParams.owner;
+      });
+    }
     
     core.info(`Found ${response.repository.pullRequests.nodes.length} PRs`);
     retVal = retVal.concat(response.repository.pullRequests.nodes);
   }
   
-  core.info(`Finished GraphQL query. Found total ${response.repository.pullRequests.nodes.length} PRs`);
+  core.info(`Finished GraphQL query. Found total ${retVal.length} PRs`);
   return retVal;
 }
