@@ -19,6 +19,7 @@ jobs:
   test:
     name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.python.name }}
     runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
+    container: ${{ matrix.os.container[matrix.python.docker] }}
     strategy:
       fail-fast: false
       matrix:
@@ -33,6 +34,16 @@ jobs:
             runs-on:
               arm: [Linux, ARM64]
               intel: [ubuntu-latest]
+          - name: Docker Debian
+            matrix: docker-debian
+            runs-on:
+              arm: [Linux, ARM64]
+              intel: [ubuntu-latest]
+            container:
+              '3.7': docker://python:3.7-buster
+              '3.8': docker://python:3.8-buster
+              '3.9': docker://python:3.9-buster
+              '3.10': docker://python:3.10-buster
           - name: Windows
             matrix: windows
             runs-on:
@@ -41,18 +52,23 @@ jobs:
           - name: '3.7'
             action: '3.7'
             check: '3.7'
+            ubuntu-docker: '3.7'
           - name: '3.8'
             action: '3.8'
             check: '3.8'
+            ubuntu-docker: '3.8'
           - name: '3.9'
             action: '3.9'
             check: '3.9'
+            ubuntu-docker: '3.9'
           - name: '3.10'
             action: '3.10'
             check: '3.10'
+            ubuntu-docker: '3.10'
           - name: '3.11'
             action: '3.11'
             check: '3.11'
+            ubuntu-docker: '3.10'
         arch:
           - name: ARM
             matrix: arm
@@ -89,6 +105,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Set up ${{ matrix.python.name }}
+      if: matrix.os.container[matrix.python.docker] == ''
       uses: ./setup-python
       with:
         python-version: ${{ matrix.python.action }}
