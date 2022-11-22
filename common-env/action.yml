@@ -1,0 +1,19 @@
+name: "Sets up some common environment variables"
+description: "Sets up some common environment variables"
+runs:
+  using: "composite"
+  steps:
+    - name: Release Variables
+      if: github.event_name == 'release' && github.event.action == 'published'
+      shell: sh
+      run: |
+        PRE_RELEASE=$(jq -r '.release.prerelease' "$GITHUB_EVENT_PATH")
+        RELEASE_TAG=$(jq -r '.release.tag_name' "$GITHUB_EVENT_PATH")
+        echo "RELEASE=true" >>$GITHUB_ENV
+        echo "PRE_RELEASE=$PRE_RELEASE" >>$GITHUB_ENV
+        echo "RELEASE_TAG=$RELEASE_TAG" >>$GITHUB_ENV
+        if [ $PRE_RELEASE = false ]; then
+          echo "FULL_RELEASE=true" >>$GITHUB_ENV
+        else
+          echo "FULL_RELEASE=false" >>$GITHUB_ENV
+        fi
