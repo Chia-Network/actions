@@ -69,6 +69,7 @@ jobs:
           - name: '3.11'
             action: '3.11'
             check: '3.11'
+            # using py3.11 instead of 3.11 due to https://github.com/rhysd/actionlint/issues/250
             matrix: 'py3.11'
         arch:
           - name: ARM
@@ -79,7 +80,7 @@ jobs:
           # Only partial entries are required here by GitHub Actions so generally I
           # only specify the `matrix:` entry.  The super linter complains so for now
           # all entries are included to avoid that.  Reported at
-          # https://github.com/github/super-linter/issues/3016
+          # https://github.com/rhysd/actionlint/issues/249
           - os:
               name: Windows
               matrix: windows
