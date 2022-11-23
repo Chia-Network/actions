@@ -109,12 +109,12 @@ jobs:
         path: repo
 
     - name: Set up ${{ matrix.python.name }}
-      uses: ${{ env.GITHUB_REPOSITORY }}/setup-python@${{ env.GITHUB_SHA }}
+      uses: ./repo/setup-python
       with:
         python-version: ${{ matrix.python.action }}
 
     - name: Run the action
-      uses: ${{ env.GITHUB_REPOSITORY }}/create-venv@${{ env.GITHUB_SHA }}
+      uses: ./repo/create-venv
 
     - name: Check Python version
       env:
