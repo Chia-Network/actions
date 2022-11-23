@@ -1,0 +1,26 @@
+name: "Create venv"
+description: "Create a temporary venv"
+inputs:
+  python-command:
+    description: "The Python to use for creating the environment"
+    required: false
+    default: "python"
+outputs:
+  python_path:
+    description: "The path to the virtual environment directory, not including the bin or scipts directory."
+    value: ${{ steps.create-venv.outputs.temp-venv-path }}
+runs:
+  using: "composite"
+  steps:
+    - name: Create venv
+      id: create-venv
+      shell: sh
+      run: |
+        ${{ inputs.python-command }} "${{ github.action_path }}/create_temporary_venv.py"
+    - uses: ./activate-venv
+      with:
+        directories: '[${{ toJSON(steps.create-venv.outputs.temp-venv-path) }}]'
+    - name: Update pip
+      shell: sh
+      run: |
+        python -m pip install --upgrade pip

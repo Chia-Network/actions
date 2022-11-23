@@ -1,4 +1,4 @@
-name: test-activate-venv
+name: test-create-venv
 
 on:
   push:
@@ -111,16 +111,18 @@ jobs:
       with:
         python-version: ${{ matrix.python.action }}
 
-    - name: Setup virtual environment
-      run: |
-        python -m venv venv
-
     - name: Run the action
-      uses: ./activate-venv/
+      uses: ./create-venv
 
-    - name: Check environment is activated
+    - name: Check Python version
       env:
-        REFERENCE_PATH: ./venv/
+        PYTHON_CHECK: ${{ matrix.python.check }}
+      run: |
+        python ./setup-python/test_check_version.py
+
+    - name: Check if Python is from env
+      env:
+        REFERENCE_PATH: ${{ runner.temp }}
         EXPECTED_INSIDE: true
       run: |
         python activate-venv/test_check_activated.py
