@@ -19,6 +19,7 @@ jobs:
   test:
     name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.python.name }}
     runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
+    container: ${{ matrix.os.container[matrix.python.matrix] }}
     strategy:
       fail-fast: false
       matrix:
@@ -33,6 +34,17 @@ jobs:
             runs-on:
               arm: [Linux, ARM64]
               intel: [ubuntu-latest]
+          - name: Docker Debian
+            matrix: docker-debian
+            runs-on:
+              arm: [Linux, ARM64]
+              intel: [ubuntu-latest]
+            container:
+              'py3.7': docker://python:3.7-bullseye
+              'py3.8': docker://python:3.8-bullseye
+              'py3.9': docker://python:3.9-bullseye
+              'py3.10': docker://python:3.10-bullseye
+              'py3.11': docker://python:3.11-bullseye
           - name: Windows
             matrix: windows
             runs-on:
@@ -41,18 +53,23 @@ jobs:
           - name: '3.7'
             action: '3.7'
             check: '3.7'
+            matrix: 'py3.7'
           - name: '3.8'
             action: '3.8'
             check: '3.8'
+            matrix: 'py3.8'
           - name: '3.9'
             action: '3.9'
             check: '3.9'
+            matrix: 'py3.9'
           - name: '3.10'
             action: '3.10'
             check: '3.10'
+            matrix: 'py3.10'
           - name: '3.11'
             action: '3.11'
             check: '3.11'
+            matrix: 'py3.11'
         arch:
           - name: ARM
             matrix: arm
@@ -62,7 +79,7 @@ jobs:
           # Only partial entries are required here by GitHub Actions so generally I
           # only specify the `matrix:` entry.  The super linter complains so for now
           # all entries are included to avoid that.  Reported at
-          # https://github.com/github/super-linter/issues/3016
+          # https://github.com/rhysd/actionlint/issues/249
           - os:
               name: Windows
               matrix: windows
@@ -81,6 +98,7 @@ jobs:
               name: '3.7'
               action: '3.7'
               check: '3.7'
+              matrix: 'py3.7'
             arch:
               name: ARM
               matrix: arm
