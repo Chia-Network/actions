@@ -16,7 +16,7 @@ runs:
       id: create-venv
       shell: sh
       run: |
-        ${{ inputs.python-command }} "${{ github.action_path }}/create_temporary_venv.py"
+        ${{ inputs.python-command }} "${GITHUB_ACTION_PATH}/create_temporary_venv.py"
     - uses: ./activate-venv
       with:
         directories: '[${{ toJSON(steps.create-venv.outputs.temp-venv-path) }}]'
