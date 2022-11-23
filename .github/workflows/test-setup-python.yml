@@ -40,11 +40,11 @@ jobs:
               arm: [Linux, ARM64]
               intel: [ubuntu-latest]
             container:
-              'py3.7': docker://python:3.7-buster
-              'py3.8': docker://python:3.8-buster
-              'py3.9': docker://python:3.9-buster
-              'py3.10': docker://python:3.10-buster
-              'py3.11': docker://python:3.11-buster
+              'py3.7': docker://python:3.7-bullseye
+              'py3.8': docker://python:3.8-bullseye
+              'py3.9': docker://python:3.9-bullseye
+              'py3.10': docker://python:3.10-bullseye
+              'py3.11': docker://python:3.11-bullseye
           - name: Windows
             matrix: windows
             runs-on:
