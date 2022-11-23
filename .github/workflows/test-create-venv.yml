@@ -105,24 +105,26 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        path: repo
 
     - name: Set up ${{ matrix.python.name }}
-      uses: ./setup-python
+      uses: ${{ github.repository }}/setup-python@${{ github.sha }}
       with:
         python-version: ${{ matrix.python.action }}
 
     - name: Run the action
-      uses: ./create-venv
+      uses: ${{ github.repository }}/create-venv@${{ github.sha }}
 
     - name: Check Python version
       env:
         PYTHON_CHECK: ${{ matrix.python.check }}
       run: |
-        python ./setup-python/test_check_version.py
+        python repo/setup-python/test_check_version.py
 
     - name: Check if Python is from env
       env:
         REFERENCE_PATH: ${{ runner.temp }}
         EXPECTED_INSIDE: true
       run: |
-        python activate-venv/test_check_activated.py
+        python repo/activate-venv/test_check_activated.py
