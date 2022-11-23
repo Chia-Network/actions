@@ -24,6 +24,10 @@ inputs:
     required: false
     default: 'false'
     description: "Will force using pyenv instead of the upstream action if set to 'true'"
+  automatic-venv:
+    required: false
+    default: 'false'
+    description: "Create and activate a temporary virtual environment"
 outputs:
   python-version:
     description: "The installed python version. Useful when given a version range as input."
@@ -66,3 +70,10 @@ runs:
         
         PY_PREFIX=$(pyenv prefix $FULL_PY_VERSION)
         echo "PATH=$PY_PREFIX/bin:$PATH" >> $GITHUB_ENV
+    - uses: ./create-venv
+      if: ${{ inputs.automatic-venv == 'true' }}
+    - name: Dump python info
+      shell: sh
+      run: |
+        python --version --version
+        python -c 'import sys; print(sys.executable)'
