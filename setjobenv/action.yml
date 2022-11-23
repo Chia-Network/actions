@@ -1,17 +1,18 @@
-name: "Set Job Environment"
+name: "⚙️Set Job Environment"
 description: "Sets usable env for all job steps based on payload in GitHub Event. To be ran immediately after 'actions/checkout' step."
 runs:
   using: "composite"
   steps:
     - name: Check Dependencies
       run: |
-        if ! command -v jq &> /dev/null; then
-            echo "ERROR: Missing jq"
-            echo "Install it from your package manager, or get it at https://github.com/stedolan/jq"
-            exit 1
-        fi
+        ( command -v apk && apk add jq ) || true
+        ( command -v apt-get && apt-get update && apt-get install -y jq ) || true
+        ( command -v dnf && dnf install jq ) || true
+        ( command -v pacman && pacman -S jq ) || true
+        ( command -v brew && brew install jq ) || true
+        ( command -v chocolatey && chocolatey install jq ) || true
       shell: bash
-    - name: Check Dependencies
+    - name: Set & Print ENV
       run: |
         echo "GitHub native job envs:"
         echo "――――――――――――――――――――――"
