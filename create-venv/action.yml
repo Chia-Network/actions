@@ -20,7 +20,7 @@ runs:
       shell: sh
       run: |
         ${{ inputs.python-command }} "${GITHUB_ACTION_PATH}/create_temporary_venv.py"
-    - uses: ./activate-venv
+    - uses: ${{ env.GITHUB_ACTION_PATH }}/../activate-venv
       with:
         directories: '[${{ toJSON(steps.create-venv.outputs.temp-venv-path) }}]'
     - name: Update pip
