@@ -102,35 +102,6 @@ runs:
         export REVISION=${GITHUB_REF##*/}
         echo "REVISION=$REVISION" >>$GITHUB_ENV
         echo "Set REVISION=$REVISION"
-
-        # # For Dockerhub, uncomment the following block
-        export DH_REPO_OWNER=$(echo "$GITHUB_REPOSITORY_OWNER" | sed 's/[A-Z]/\L&/g;s/-//g')
-        echo "DH_REPO_OWNER=$DH_REPO_OWNER" >>$GITHUB_ENV
-        echo "Set DH_REPO_OWNER=$DH_REPO_OWNER"
-        export DH_REPO_NAME=$DH_REPOSITORY_OWNER/$REPO
-        echo "DH_REPO_NAME=$DH_REPO_NAME" >>$GITHUB_ENV
-        echo "Set DH_REPO_NAME=$DH_REPO_NAME"
-        #
-        if [ "$RELEASE" = true ]; then
-          export DH_IMAGE_TAG="$DH_REPO_NAME:$RELEASE_TAG"
-        else
-          export DH_IMAGE_TAG="$DH_REPO_NAME:$GITHUB_BASE_REF"
-        fi
-        echo "DH_IMAGE_TAG=$DH_IMAGE_TAG" >>$GITHUB_ENV
-        echo "Set DH_IMAGE_TAG=$DH_IMAGE_TAG"
-        # TODO: see if the below sections are wanted as input conditions
-        #
-        # export DOCKER_BUILDKIT=1
-        # echo "DOCKER_BUILDKIT=$DOCKER_BUILDKIT" >>$GITHUB_ENV
-        # echo "Set DOCKER_BUILDKIT=$DOCKER_BUILDKIT"
-        #
-        # # If using remote Docker host, uncomment the following block
-        # export DOCKER_HOST=tcp://my-remote.docker-host.tld:2376
-        # echo "DOCKER_HOST=$DOCKER_HOST" >> $GITHUB_ENV
-        #
-        # export DOCKER_TLS_VERIFY=1
-        # echo "DOCKER_TLS_VERIFY=$DOCKER_TLS_VERIFY" >> $GITHUB_ENV
-        #
         # ADD YOUR OWN ENVS BELOW
         #
         echo "――――――――――――――――――――――"
