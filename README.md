@@ -11,9 +11,6 @@ Runs an ansible playbook against an inventory of hosts
 ### clean-workspace
 Cleans the current workspace prior to running the checkout action, to ensure the job starts with a clean slate.
 
-### create-venv
-Creates and activates a venv in the runner temporary path that will be removed upon completion of the job.
-
 ### enforce-semver
 Ensures that the checked-out code has a GitHub tag that complies with semantic versioning in format `Major.minor.patch`. Supports up to three numeric digits per release type.
 

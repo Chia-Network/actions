@@ -2,25 +2,13 @@ import os
 import pathlib
 import sys
 
-reference = pathlib.Path(os.environ["REFERENCE_PATH"]).absolute()
+expected = pathlib.Path.cwd().joinpath(os.environ["EXPECTED_EXECUTABLE"])
 actual = pathlib.Path(sys.executable)
-expected_inside = {"true": True, "false": False}[os.environ["EXPECTED_INSIDE"]]
+equal = expected == pathlib.Path(sys.executable)
 
-is_inside: bool
-try:
-    actual.relative_to(reference)
-except ValueError:
-    is_inside = False
-else:
-    is_inside = True
+print(f"expected: {expected}")
+print(f"  actual: {actual}")
+print(f"   equal: {'yes' if equal else 'no'}")
 
-correct = expected_inside == is_inside
-
-print(f"      reference: {reference}")
-print(f"         actual: {actual}")
-print(f"expected_inside: {expected_inside}")
-print(f"      is_inside: {is_inside}")
-print(f"        correct: {'yes' if correct else 'no'}")
-
-if not correct:
+if not equal:
     sys.exit(1)
