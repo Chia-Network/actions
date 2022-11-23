@@ -6,9 +6,12 @@ inputs:
     required: false
     default: "python"
 outputs:
-  python_path:
+  venv_path:
     description: "The path to the virtual environment directory, not including the bin or scripts directory."
     value: ${{ steps.create-venv.outputs.temp-venv-path }}
+  python_executable:
+    description: "The path to the Python executable in the virtual environment directory."
+    value: ${{ steps.create-venv.outputs.temp-python-executable }}
 runs:
   using: "composite"
   steps:
@@ -23,4 +26,4 @@ runs:
     - name: Update pip
       shell: sh
       run: |
-        python -m pip install --upgrade pip
+        "${{ steps.create-venv.outputs.temp-python-executable }}" -m pip install --upgrade pip
