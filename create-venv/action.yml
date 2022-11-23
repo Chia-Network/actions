@@ -12,6 +12,9 @@ outputs:
   python_executable:
     description: "The path to the Python executable in the virtual environment directory."
     value: ${{ steps.create-venv.outputs.temp-python-executable }}
+  activate-venv-directories:
+    description: "The JSON serialized array including the path to the temporary env.  This is for use with the activate-venv action."
+    value: ${{ steps.create-venv.outputs.activate-venv-directories }}
 runs:
   using: "composite"
   steps:
@@ -20,9 +23,6 @@ runs:
       shell: sh
       run: |
         ${{ inputs.python-command }} "${GITHUB_ACTION_PATH}/create_temporary_venv.py"
-    - uses: ${{ env.GITHUB_ACTION_PATH }}/../activate-venv
-      with:
-        directories: '[${{ toJSON(steps.create-venv.outputs.temp-venv-path) }}]'
     - name: Update pip
       shell: sh
       run: |

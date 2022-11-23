@@ -115,12 +115,11 @@ jobs:
 
     - name: Run the action
       uses: ./repo/create-venv
+      id: create-venv
 
-    - name: Check Python version
-      env:
-        PYTHON_CHECK: ${{ matrix.python.check }}
-      run: |
-        python repo/setup-python/test_check_version.py
+    - uses: ./repo/activate-venv
+      with:
+        directories: ${{ steps.create-venv.outputs.activate-venv-directories }}
 
     - name: Check if Python is from env
       env:
@@ -128,3 +127,9 @@ jobs:
         EXPECTED_INSIDE: true
       run: |
         python repo/activate-venv/test_check_activated.py
+
+    - name: Check Python version
+      env:
+        PYTHON_CHECK: ${{ matrix.python.check }}
+      run: |
+        python repo/setup-python/test_check_version.py
