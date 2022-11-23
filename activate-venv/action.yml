@@ -20,4 +20,4 @@ runs:
       env:
         INPUT_DIRECTORIES: ${{ inputs.directories }}
       run: |
-        python "${GITHUB_ACTION_PATH}/activate-venv/activate_venv.py"
+        python "${GITHUB_ACTION_PATH}/activate_venv.py"
