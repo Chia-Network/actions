@@ -3,7 +3,6 @@ import os
 import pathlib
 import sys
 
-
 directories = [pathlib.Path(directory).absolute() for directory in json.loads(os.environ["INPUT_DIRECTORIES"])]
 github_env = pathlib.Path(os.environ["GITHUB_ENV"])
 github_path = pathlib.Path(os.environ["GITHUB_PATH"])
