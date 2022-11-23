@@ -26,10 +26,14 @@ jobs:
         os:
           - name: macOS
             matrix: macos
-            runs-on: macos-latest
+            runs-on:
+              arm: [macOS, ARM64]
+              intel: [macos-latest]
           - name: Ubuntu
             matrix: ubuntu
-            runs-on: ubuntu-latest
+            runs-on:
+              arm: [Linux, ARM64]
+              intel: [ubuntu-latest]
           - name: Docker Debian
             matrix: docker-debian
             runs-on:
@@ -43,7 +47,8 @@ jobs:
               'py3.11': docker://python:3.11-bullseye
           - name: Windows
             matrix: windows
-            runs-on: windows-latest
+            runs-on:
+              intel: [windows-latest]
         python:
           - name: '3.7'
             action: '3.7'
