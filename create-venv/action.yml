@@ -7,7 +7,7 @@ inputs:
     default: "python"
 outputs:
   python_path:
-    description: "The path to the virtual environment directory, not including the bin or scipts directory."
+    description: "The path to the virtual environment directory, not including the bin or scripts directory."
     value: ${{ steps.create-venv.outputs.temp-venv-path }}
 runs:
   using: "composite"
