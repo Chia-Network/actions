@@ -20,5 +20,13 @@ runs:
       env:
         INPUT_DIRECTORIES: ${{ inputs.directories }}
       run: |
-        PYTHON=$(command -v python3 || command -v python)
+        unset BEST_VERSION
+        for V in 311 3.11 310 3.10 39 3.9 38 3.8 37 3.7 3; do
+          if command -v python$V >/dev/null; then
+            if [ "$BEST_VERSION" = "" ]; then
+              BEST_VERSION=$V
+            fi
+          fi
+        done
+        [ -n "$BEST_VERSION" ] && PYTHON=python$BEST_VERSION || (echo "Unable to find python" && exit 1)
         $PYTHON "${GITHUB_ACTION_PATH}/activate_venv.py"
