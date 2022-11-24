@@ -126,10 +126,10 @@ jobs:
         REFERENCE_PATH: ${{ runner.temp }}
         EXPECTED_INSIDE: true
       run: |
-        python repo/activate-venv/test_check_activated.py
+        python3 repo/activate-venv/test_check_activated.py
 
     - name: Check Python version
       env:
         PYTHON_CHECK: ${{ matrix.python.check }}
       run: |
-        python repo/setup-python/test_check_version.py
+        python3 repo/setup-python/test_check_version.py

@@ -115,4 +115,4 @@ jobs:
       env:
         PYTHON_CHECK: ${{ matrix.python.check }}
       run: |
-        python ./setup-python/test_check_version.py
+        python3 ./setup-python/test_check_version.py

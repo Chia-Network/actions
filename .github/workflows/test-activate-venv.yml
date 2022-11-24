@@ -113,7 +113,7 @@ jobs:
 
     - name: Setup virtual environment
       run: |
-        python -m venv venv
+        python3 -m venv venv
 
     - name: Run the action
       uses: ./activate-venv/
@@ -123,4 +123,4 @@ jobs:
         REFERENCE_PATH: ./venv/
         EXPECTED_INSIDE: true
       run: |
-        python activate-venv/test_check_activated.py
+        python3 activate-venv/test_check_activated.py
