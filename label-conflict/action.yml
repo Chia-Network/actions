@@ -21,9 +21,6 @@ inputs:
     description: "Comment to add when conflict is detected. Supports Markdown"
   commentToAddOnClean:
     description: "Comment to add when conflict is resolved. Supports Markdown"
-outputs:
-  conflictStatus:
-    description: "Key-Value pairs. Key: pull request number. Value: boolean(if true, then the corresponding PR has conflict)"
 runs:
   using: "node16"
   main: "dist/index.js"

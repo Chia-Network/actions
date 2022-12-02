@@ -82,12 +82,14 @@ export async function postOpenPullRequestsQuery(
     throw err;
   };
   
-  core.info("Posting GraphQL request");
-  core.info(JSON.stringify(requestParams, null, 2));
+  const queryId = params.searchRefType === "currentBranch" ?
+    `headRef=${requestParams.headRefName}` : `baseRef=${requestParams.baseRefName}`;
+  core.info("Posting GraphQL request for " + queryId);
+  core.debug(JSON.stringify(requestParams, null, 2));
   start = Date.now();
   let response = await client.graphql<OpenPullRequestsResponse>(OpenPullRequestsQuery, requestParams)
     .catch(onRejection);
-  core.info(`Request took ${Date.now() - start} ms`);
+  core.info(`Request took ${Date.now() - start} ms for ${queryId}`);
   
   if(!response){
     return [];
@@ -103,7 +105,7 @@ export async function postOpenPullRequestsQuery(
     });
   }
   
-  core.info(`Found ${response.repository.pullRequests.nodes.length} PRs`);
+  core.info(`Found ${response.repository.pullRequests.nodes.length} PRs for ${queryId}`);
   
   let retVal = response.repository.pullRequests.nodes;
   
