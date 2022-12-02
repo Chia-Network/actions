@@ -23,7 +23,7 @@ export async function addLabel(
 ): Promise<boolean> {
   const hasLabel = pr.labels.nodes.some(label => label.name === labelName);
   if(hasLabel){
-    core.info(`  [Skip] PR#${pr.number} already has label '${labelName}'. No need to add.`);
+    core.info(`[Skip] PR#${pr.number} already has label '${labelName}'. No need to add.`);
     return false;
   }
   
@@ -36,7 +36,7 @@ export async function addLabel(
     })
     .then(
       () => {
-        core.info(`  [Success] Added label "${labelName}" to PR#${pr.number}`);
+        core.info(`[Success] Added label "${labelName}" to PR#${pr.number}`);
         return true;
       },
       (error: RestErrorResponse) => {
@@ -57,7 +57,7 @@ export async function removeLabel(
 ): Promise<boolean> {
   const hasLabel = pr.labels.nodes.some(label => label.name === labelName);
   if(!hasLabel){
-    core.info(`  [Skip] PR#${pr.number} does not have label '${labelName}'. No need to remove.`);
+    core.info(`[Skip] PR#${pr.number} does not have label '${labelName}'. No need to remove.`);
     return false;
   }
   
@@ -75,12 +75,12 @@ export async function removeLabel(
       },
       (error: RestErrorResponse) => {
         if(isMissingPermission(error) && ignorePermissionError){
-          core.warning(`  [Failure] Could not remove label "${labelName}" for PR#${pr.number}: ${commonErrorDetailedMessage}`);
+          core.warning(`[Failure] Could not remove label "${labelName}" for PR#${pr.number}: ${commonErrorDetailedMessage}`);
           return false;
         }
         else if(error.status === 404){
           core.info(
-            `  [Skip] On #${pr.number} label "${labelName}" doesn't need to be removed since it doesn't exist on that issue.`
+            `[Skip] On #${pr.number} label "${labelName}" doesn't need to be removed since it doesn't exist on that issue.`
           );
           return false;
         }
@@ -105,12 +105,12 @@ export async function addComment(
     body: comment,
   }).then(
     () => {
-      core.info(`  [Success] Created a comment for PR#${pr.number}`);
+      core.info(`[Success] Created a comment for PR#${pr.number}`);
       return;
     },
     (error: RestErrorResponse) => {
       if(isMissingPermission(error) && ignorePermissionError){
-        core.warning(`  [Failure] Couldn't add comment to PR#${pr.number}: ${commonErrorDetailedMessage}`);
+        core.warning(`[Failure] Couldn't add comment to PR#${pr.number}: ${commonErrorDetailedMessage}`);
         return;
       }
       
@@ -130,14 +130,19 @@ export async function updateLabel(
 ){
   core.debug(JSON.stringify(pr, null, 2));
   
-  const log = (message: string) => {
-    core.info(`${message} for PR#${pr.number}`);
+  const log = (message: string, debug?: boolean) => {
+    if(debug){
+      core.debug(`${message} for PR#${pr.number}`);
+    }
+    else{
+      core.info(`${message} for PR#${pr.number}`);
+    }
   };
   
   switch (pr.mergeable) {
     case "CONFLICTING": {
       const removeLabelInfo = labelToRemoveOnConflict ? `, removing label "${labelToRemoveOnConflict}"` : "";
-      log(`  Adding label "${labelToAddOnConflict}"` + removeLabelInfo);
+      log(`Adding label "${labelToAddOnConflict}"` + removeLabelInfo, true);
       
       // for labels PRs and issues are the same
       const tasks: Array<Promise<boolean>> = [addLabel(labelToAddOnConflict, pr, client)];
@@ -154,7 +159,7 @@ export async function updateLabel(
       break;
     }
     case "MERGEABLE": {
-      log(`  Removing label "${labelToAddOnConflict}"`);
+      log(`Removing label "${labelToAddOnConflict}"`, true);
       
       const removedDirtyLabel = await removeLabel(
         labelToAddOnConflict,
@@ -173,7 +178,7 @@ export async function updateLabel(
       break;
     }
     case "UNKNOWN":
-      log("  Encountered a pull request whose mergeable status is UNKNOWN. Skipping.");
+      log("Encountered a pull request whose mergeable status is UNKNOWN. Skipping.");
       break;
     default:
       throw new TypeError(`unhandled mergeable state '${pr.mergeable}'`);
