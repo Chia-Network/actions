@@ -6,7 +6,6 @@ import {
   github_baseRef,
   github_headRef,
   github_ref,
-  conflictStatusOutputKey,
 } from "./env";
 import {
   commentToAddOnClean,
@@ -27,7 +26,6 @@ async function main() {
     && eventName !== "workflow_dispatch"
   ){
     core.info(`Skipping conflict check as the event(${eventName}) is not a target`);
-    core.setOutput(conflictStatusOutputKey, {});
     return;
   }
   
@@ -48,14 +46,13 @@ async function main() {
   else{
     // When pushing a tag, do nothing.
     core.info("No action taken when pushing a tag");
-    core.setOutput(conflictStatusOutputKey, {});
     return;
   }
   core.info(`Checking conflicts on this branch and branches whose target branch is: ${currentRef}`)
   
   const client = github.getOctokit(secretToken);
   
-  const conflictStatus = await checkConflict({
+  await checkConflict({
     currentRef,
     client,
     commentToAddOnClean,
@@ -65,8 +62,6 @@ async function main() {
     retryIntervalSec,
     retryMax,
   });
-  
-  core.setOutput(conflictStatusOutputKey, conflictStatus);
 }
 
 main().catch((error) => {
