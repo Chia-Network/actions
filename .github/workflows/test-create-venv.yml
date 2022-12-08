@@ -75,6 +75,49 @@ jobs:
             matrix: arm
           - name: Intel
             matrix: intel
+        include:
+          - os:
+              name: Chia Network Ubuntu Intel Builder
+              matrix: docker-chia-network-ubuntu-intel-builder
+              runs-on:
+                intel: [ubuntu-latest]
+              container:
+                'native': chianetwork/ubuntu-18.04-builder:latest
+            python:
+              name: Native
+              check: '3.8'
+              matrix: native
+            arch:
+              name: Intel
+              matrix: intel
+          - os:
+              name: Chia Network Ubuntu ARM Builder
+              matrix: docker-chia-network-ubuntu-arm-builder
+              runs-on:
+                arm: [Linux, ARM64]
+              container:
+                'native': chianetwork/ubuntu-18.04-builder:latest
+            python:
+              name: Native
+              check: '3.8'
+              matrix: native
+            arch:
+              name: ARM
+              matrix: arm
+          - os:
+              name: Chia Network CentOS Intel Builder
+              matrix: docker-chia-network-centos-intel-builder
+              runs-on:
+                arm: [ubuntu-latest]
+              container:
+                'native': chianetwork/centos7-builder:latest
+            python:
+              name: Native
+              check: '3.9'
+              matrix: native
+            arch:
+              name: Intel
+              matrix: intel
         exclude:
           # Only partial entries are required here by GitHub Actions so generally I
           # only specify the `matrix:` entry.  The super linter complains so for now
@@ -109,6 +152,7 @@ jobs:
         path: repo
 
     - name: Set up ${{ matrix.python.name }}
+      if: matrix.python.matrix != 'native'
       uses: ./repo/setup-python
       with:
         python-version: ${{ matrix.python.action }}
