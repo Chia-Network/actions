@@ -26,16 +26,19 @@ jobs:
         os:
           - name: macOS
             matrix: macos
+            native-python: false
             runs-on:
               arm: [macOS, ARM64]
               intel: [macos-latest]
           - name: Ubuntu
             matrix: ubuntu
+            native-python: false
             runs-on:
               arm: [Linux, ARM64]
               intel: [ubuntu-latest]
           - name: Docker Debian
             matrix: docker-debian
+            native-python: true
             runs-on:
               arm: [Linux, ARM64]
               intel: [ubuntu-latest]
@@ -47,6 +50,7 @@ jobs:
               'py3.11': docker://python:3.11-bullseye
           - name: Windows
             matrix: windows
+            native-python: false
             runs-on:
               intel: [windows-latest]
         python:
@@ -83,6 +87,7 @@ jobs:
           - os:
               name: Windows
               matrix: windows
+              native-python: false
               runs-on:
                 intel: [windows-latest]
             arch:
@@ -91,6 +96,7 @@ jobs:
           - os:
               name: macOS
               matrix: macos
+              native-python: false
               runs-on:
                 arm: [macOS, ARM64]
                 intel: [macos-latest]
@@ -107,6 +113,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Set up ${{ matrix.python.name }}
+      if: ${{ ! matrix.os.native-python }}
       uses: ./setup-python
       with:
         python-version: ${{ matrix.python.action }}
