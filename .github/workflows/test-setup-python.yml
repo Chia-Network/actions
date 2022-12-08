@@ -107,7 +107,7 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
       run: |
         apt-get update
-        apt-get install --yes curl
+        apt-get install --yes curl git
 
     - name: Run the action
       uses: ./setup-python/
