@@ -103,9 +103,11 @@ jobs:
 
     - name: Setup for Docker Debian
       if: matrix.os.matrix == 'docker-debian'
+      env:
+        DEBIAN_FRONTEND: noninteractive
       run: |
-        apt update
-        apt install curl
+        apt-get update
+        apt-get install --yes curl
 
     - name: Run the action
       uses: ./setup-python/
