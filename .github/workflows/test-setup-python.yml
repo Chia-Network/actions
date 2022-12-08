@@ -101,6 +101,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Setup for Docker Debian
+      if: matrix.os.matrix == 'docker-debian'
+      run: |
+        apt update
+        apt install curl
+
     - name: Run the action
       uses: ./setup-python/
       with:
