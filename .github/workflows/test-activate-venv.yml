@@ -87,6 +87,7 @@ jobs:
           - os:
               name: Windows
               matrix: windows
+              native-python: false
               runs-on:
                 intel: [windows-latest]
             arch:
@@ -95,6 +96,7 @@ jobs:
           - os:
               name: macOS
               matrix: macos
+              native-python: false
               runs-on:
                 arm: [macOS, ARM64]
                 intel: [macos-latest]
