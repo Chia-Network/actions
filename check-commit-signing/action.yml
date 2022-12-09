@@ -38,7 +38,7 @@ runs:
         | while read hash
         do
           git verify-commit ${hash} &> "${{ env.verify_output }}" || true
-          git show --pretty='format:%H|%aN|%aI|%s' ${hash} > "${{ env.single_log }}"
+          git show --no-patch --pretty='format:%H|%aN|%aI|%s' ${hash} > "${{ env.single_log }}"
           cat "${{ env.single_log }}" >> "${{ env.all_log }}"
           if cat "${{ env.verify_output }}" | grep -E '(Signature made|gpg.ssh.allowedSignersFile needs to be configured)' > /dev/null
           then
