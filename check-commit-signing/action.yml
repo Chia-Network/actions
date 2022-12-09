@@ -34,13 +34,15 @@ runs:
         echo
         echo All commits in log:
         cat "${{ env.log }}"
-        echo
-        echo Commits in log considered unsigned:
-        if grep 'N$' "${{ env.log }}"
-        then
-          echo "status=unsigned" >> "${GITHUB_OUTPUT}"
-          false
-        else
-          echo "status=signed" >> "${GITHUB_OUTPUT}"
-          true
-        fi
+        # TODO: abominable bash
+        ((git log --left-right --oneline --pretty=format:%H ${{ inputs.target }}...${{ inputs.source }}; echo) | while read hash; do echo ____    ${hash}; git verify-commit ${hash} |& grep -E '(Signature made|gpg.ssh.allowedSignersFile needs to be configured)'; if [ "$?" == "0" ]; then echo yep; else exit 1; fi; done)
+#        echo
+#        echo Commits in log considered unsigned:
+#        if grep 'N$' "${{ env.log }}"
+#        then
+#          echo "status=unsigned" >> "${GITHUB_OUTPUT}"
+#          false
+#        else
+#          echo "status=signed" >> "${GITHUB_OUTPUT}"
+#          true
+#        fi
