@@ -62,6 +62,6 @@ runs:
         then
           echo "status=signed" >> "${GITHUB_OUTPUT}"
         else
-          echo "status=signed" >> "${GITHUB_OUTPUT}"
+          echo "status=unsigned" >> "${GITHUB_OUTPUT}"
           false
         fi
