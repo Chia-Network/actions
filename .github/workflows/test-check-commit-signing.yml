@@ -41,75 +41,17 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup git
-      shell: bash
-      run: |
-        # TODO: but this means the local uses: references below don't use the merge
-        git checkout '${{ github.event.pull_request.head.sha }}'
-        git config --local user.email "test@example.com"
-        git config --local user.name "Test Committer"
-
-    - name: Setup GPG signing
-      shell: bash
-      run: |
-        git config gpg.format openpgp
-        git config commit.gpgsign true
-        # key created by:
-        # gpg --generate-key --batch check-commit-signing/gpg_key_script
-        # gpg --list-secret-keys --keyid-format long | sed -n 's;^sec .*/\([^ ]\+\) .*;\1;p' > gpg_key
-        git config user.signingKey 03FAE97C9F159187
-        # TODO: but doesn't it need the full secret key and this is just an identifier for that?
-
-    - name: Create GPG signed commit
-      id: gpg_signed_commit
-      shell: bash
-      run: |
-         git commit --gpg-sign --allow-empty -m 'gpg signed commit for testing'
-
-    - name: Clear signing configuration
-      shell: bash
-      run: |
-        git config commit.gpgsign false
-        git config user.signingKey ''
-
     - name: Check GPG signed commit
       uses: ./check-commit-signing/
       with:
-        source: ${{ steps.gpg_signed_commit.outputs.commit_hash }}
-
-    - name: Setup SSH signing
-      shell: bash
-      run: |
-        git config gpg.format ssh
-        git config commit.gpgsign true
-        # key created by:
-        # ssh-keygen -t ed25519 -C 'test' -f ssh_keyfile -N justtesting
-        # cat ssh_keyfile.pub
-        git config user.signingKey ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHtMirnQ7ggCOHz8THdO03fLFzrJychk468PaoSK6Cn1 test
-        # TODO: but doesn't it need the full secret key and this is just an identifier for that?
-
-    - name: Create SSH signed commit
-      id: ssh_signed_commit
-      shell: bash
-      run: |
-         git commit --gpg-sign --allow-empty -m 'ssh signed commit for testing'
-
-    - name: Clear signing configuration
-      shell: bash
-      run: |
-        git config commit.gpgsign false
-        git config user.signingKey ''
+        source: 099b4d5e3114f8d065b81f89f5bd9d20b42cd7eb
+        target: 099b4d5e3114f8d065b81f89f5bd9d20b42cd7eb^
 
     - name: Check SSH signed commit
       uses: ./check-commit-signing/
       with:
-        source: ${{ steps.ssh_signed_commit.outputs.commit_hash }}
-
-    - name: Clear signing configuration
-      shell: bash
-      run: |
-        git config commit.gpgsign false
-        git config user.signingKey ''
+        source: 63dab4d7ed40084e208d8d50805af749740a386a
+        target: 63dab4d7ed40084e208d8d50805af749740a386a^
 
     - name: Create unsigned commit
       id: unsigned_commit
