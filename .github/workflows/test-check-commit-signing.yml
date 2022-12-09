@@ -49,7 +49,7 @@ jobs:
     - name: Setup GPG signing
       shell: bash
       run: |
-        git config gpg.format gpg
+        git config gpg.format openpgp
         git config commit.gpgsign true
         # key created by:
         # gpg --generate-key --batch check-commit-signing/gpg_key_script
