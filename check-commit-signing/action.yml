@@ -48,9 +48,9 @@ runs:
             true
           else
             cat "${{ env.single_log }}" >> "${{ env.unsigned_log }}"
-            echo about to FAIL=yes, fail was ->${FAIL}<-
+            echo "about to FAIL=yes, fail was ->${FAIL}<-"
             FAIL=yes
-            echo just FAIL=yes, fail is ->${FAIL}<-
+            echo "just FAIL=yes, fail is ->${FAIL}<-"
           fi
         done
 
