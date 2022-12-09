@@ -24,22 +24,20 @@ runs:
       if: github.event_name == 'pull_request'
       shell: bash
       env:
-        hashes: ${RUNNER_TEMP}/hashes.${{ github.run_id }}
         unsigned_log: ${RUNNER_TEMP}/unsigned_commits.${{ github.run_id }}
         all_log: ${RUNNER_TEMP}/all_commits.${{ github.run_id }}
         single_log: ${RUNNER_TEMP}/single_commit.${{ github.run_id }}
         verify_output: ${RUNNER_TEMP}/verify_output.${{ github.run_id }}
       run: |
         # TODO: make them more unique
-        rm -f "${{ env.hashes }}" "${{ env.unsigned_log }}" "${{ env.all_log }}" "${{ env.single_log }}" "${{ env.verify_output }}"
+        rm -f "${{ env.unsigned_log }}" "${{ env.all_log }}" "${{ env.single_log }}" "${{ env.verify_output }}"
         echo Target: '${{ inputs.target }}'
         git show --no-patch ${{ inputs.target }}
         echo Source: '${{ inputs.source }}'
         git show --no-patch ${{ inputs.source }}
         touch "${{ env.unsigned_log }}"
         export CHIA_CI_FAIL=nope
-        (git log --left-right --oneline --pretty=format:%H ${{ inputs.target }}...${{ inputs.source }}; echo) > "${{ env.hashes }}"
-        while read hash < "${{ env.hashes }}"
+        (git log --left-right --oneline --pretty=format:%H ${{ inputs.target }}...${{ inputs.source }}; echo) | while read hash
         do
           (git verify-commit ${hash}; echo) &> "${{ env.verify_output }}" || true
           (git show --no-patch --pretty='format:%H|%aN|%aI|%s' ${hash}; echo) > "${{ env.single_log }}"
