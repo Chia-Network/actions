@@ -39,7 +39,7 @@ runs:
         do
           (git verify-commit ${hash}; echo) &> "${{ env.verify_output }}" || true
           (git show --no-patch --pretty='format:%H|%aN|%aI|%s' ${hash}; echo) > "${{ env.single_log }}"
-          if cat "${{ env.verify_output }}" | grep -E '(Signature made|gpg.ssh.allowedSignersFile needs to be configured)' > /dev/null
+          if grep -E '(Signature made|gpg.ssh.allowedSignersFile needs to be configured)' "${{ env.verify_output }}" > /dev/null
           then
             echo -n '  signed: ' >> "${{ env.commit_log }}"
             cat "${{ env.single_log }}" >> "${{ env.commit_log }}"
