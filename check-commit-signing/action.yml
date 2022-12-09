@@ -36,9 +36,8 @@ runs:
         echo Source: '${{ inputs.source }}'
         git show --no-patch ${{ inputs.source }}
         touch "${{ env.unsigned_log }}"
-        FAIL=nope
-        (git log --left-right --oneline --pretty=format:%H ${{ inputs.target }}...${{ inputs.source }}; echo) \
-        | while read hash
+        export CHIA_CI_FAIL=nope
+        (git log --left-right --oneline --pretty=format:%H ${{ inputs.target }}...${{ inputs.source }}; echo) | while read hash
         do
           (git verify-commit ${hash}; echo) &> "${{ env.verify_output }}" || true
           (git show --no-patch --pretty='format:%H|%aN|%aI|%s' ${hash}; echo) > "${{ env.single_log }}"
@@ -48,9 +47,9 @@ runs:
             true
           else
             cat "${{ env.single_log }}" >> "${{ env.unsigned_log }}"
-            echo "about to FAIL=yes, fail was ->${FAIL}<-"
-            FAIL=yes
-            echo "just FAIL=yes, fail is ->${FAIL}<-"
+            echo "about to CHIA_CI_FAIL=yes, CHIA_CI_FAIL was ->${CHIA_CI_FAIL}<-"
+            export CHIA_CI_FAIL=yes
+            echo "just CHIA_CI_FAIL=yes, CHIA_CI_FAIL is ->${CHIA_CI_FAIL}<-"
           fi
         done
 
@@ -62,9 +61,9 @@ runs:
         cat "${{ env.unsigned_log }}"
         echo '    ----'
 
-        echo "FAIL: ->${FAIL}<-"
+        echo "CHIA_CI_FAIL: ->${CHIA_CI_FAIL}<-"
 
-        if [ "${FAIL}" == "nope" ]
+        if [ "${CHIA_CI_FAIL}" == "nope" ]
         then
           echo "status=signed" >> "${GITHUB_OUTPUT}"
         else
