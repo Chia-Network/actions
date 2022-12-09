@@ -33,6 +33,7 @@ runs:
         git show --no-patch ${{ inputs.target }}
         echo Source: '${{ inputs.source }}'
         git show --no-patch ${{ inputs.source }}
+        touch "${{ env.unsigned_log }}"
         FAIL=nope
         (git log --left-right --oneline --pretty=format:%H ${{ inputs.target }}...${{ inputs.source }}; echo) \
         | while read hash
