@@ -118,15 +118,18 @@ export async function checkConflict(context: CheckConflictContext): Promise<Reco
       core.warning(`Retry count reached a threshold(${retryMax})`);
       break;
     }
+    if(prsOfThisBranchUnknown.length > 1){
+      throw new Error(`Multiple base branches have been reported for a single branch(${currentRef})`);
+    }
   
+    core.info(`Sleeping ${retryIntervalSec} sec`);
+    await sleep(retryIntervalSec);
+    
     let checkConflictBetweenParentAndThisBranch: Promise<PullRequestsNode[]>|null = null;
     let checkConflictBetweenThisAndChildBranches: Promise<PullRequestsNode[]>|null = null;
   
     // prsOfThisBranchUnknown.length should be 0 or 1.
-    if(prsOfThisBranchUnknown.length > 1){
-      throw new Error(`Multiple base branches have been reported for a single branch(${currentRef})`);
-    }
-    else if(prsOfThisBranchUnknown.length === 1){
+    if(prsOfThisBranchUnknown.length === 1){
       const pr = prsOfThisBranchUnknown[0];
       core.info(`Searching conflict between base branch and this branch(${currentRef}) if base branch exists`);
   
@@ -197,8 +200,6 @@ export async function checkConflict(context: CheckConflictContext): Promise<Reco
       `Number of PRs whose mergeable status is UNKNOWN: ${prsOfThisBranchUnknown.length} + ${prsOfChildBranchUnknown.length}`
     );
     
-    core.info(`Sleeping ${retryIntervalSec} sec`);
-    await sleep(retryIntervalSec);
     currentTry++;
   }
   
