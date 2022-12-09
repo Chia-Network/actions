@@ -48,6 +48,7 @@ runs:
             true
           else
             cat "${{ env.single_log }}" >> "${{ env.unsigned_log }}"
+            echo about to FAIL=yes
             FAIL=yes
           fi
         done
