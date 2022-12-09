@@ -24,19 +24,19 @@ runs:
       if: github.event_name == 'pull_request'
       shell: bash
       env:
+        statuses: ${RUNNER_TEMP}/statuses.${{ github.run_id }}
         unsigned_log: ${RUNNER_TEMP}/unsigned_commits.${{ github.run_id }}
         all_log: ${RUNNER_TEMP}/all_commits.${{ github.run_id }}
         single_log: ${RUNNER_TEMP}/single_commit.${{ github.run_id }}
         verify_output: ${RUNNER_TEMP}/verify_output.${{ github.run_id }}
       run: |
         # TODO: make them more unique
-        rm -f "${{ env.unsigned_log }}" "${{ env.all_log }}" "${{ env.single_log }}" "${{ env.verify_output }}"
+        rm -f "${{ env.statuses }}" "${{ env.unsigned_log }}" "${{ env.all_log }}" "${{ env.single_log }}" "${{ env.verify_output }}"
         echo Target: '${{ inputs.target }}'
         git show --no-patch ${{ inputs.target }}
         echo Source: '${{ inputs.source }}'
         git show --no-patch ${{ inputs.source }}
         touch "${{ env.unsigned_log }}"
-        export CHIA_CI_FAIL=nope
         (git log --left-right --oneline --pretty=format:%H ${{ inputs.target }}...${{ inputs.source }}; echo) | while read hash
         do
           (git verify-commit ${hash}; echo) &> "${{ env.verify_output }}" || true
@@ -44,12 +44,10 @@ runs:
           cat "${{ env.single_log }}" >> "${{ env.all_log }}"
           if cat "${{ env.verify_output }}" | grep -E '(Signature made|gpg.ssh.allowedSignersFile needs to be configured)' > /dev/null
           then
-            true
+            echo signed >> "${{ env.statuses }}"
           else
             cat "${{ env.single_log }}" >> "${{ env.unsigned_log }}"
-            echo "about to CHIA_CI_FAIL=yes, CHIA_CI_FAIL was ->${CHIA_CI_FAIL}<-"
-            export CHIA_CI_FAIL=yes
-            echo "just CHIA_CI_FAIL=yes, CHIA_CI_FAIL is ->${CHIA_CI_FAIL}<-"
+            echo unsigned >> "${{ env.statuses }}"
           fi
         done
 
@@ -61,12 +59,10 @@ runs:
         cat "${{ env.unsigned_log }}"
         echo '    ----'
 
-        echo "CHIA_CI_FAIL: ->${CHIA_CI_FAIL}<-"
-
-        if [ "${CHIA_CI_FAIL}" == "nope" ]
+        if grep '^unsigned$' "${{ env.statuses }}"
         then
-          echo "status=signed" >> "${GITHUB_OUTPUT}"
-        else
           echo "status=unsigned" >> "${GITHUB_OUTPUT}"
           false
+        else
+          echo "status=signed" >> "${GITHUB_OUTPUT}"
         fi
