@@ -39,7 +39,6 @@ jobs:
         fetch-depth: 0
 
     - name: Setup git
-      id: unsigned_commit
       shell: bash
       run: |
         # TODO: but this means the local uses: references below don't use the merge
@@ -64,6 +63,12 @@ jobs:
       run: |
          git commit --gpg-sign --allow-empty -m 'gpg signed commit for testing'
 
+    - name: Clear signing configuration
+      shell: bash
+      run: |
+        git config commit.gpgsign false
+        git config user.signingKey ''
+
     - name: Check GPG signed commit
       uses: ./check-commit-signing/
       with:
@@ -85,6 +90,12 @@ jobs:
       shell: bash
       run: |
          git commit --gpg-sign --allow-empty -m 'ssh signed commit for testing'
+
+    - name: Clear signing configuration
+      shell: bash
+      run: |
+        git config commit.gpgsign false
+        git config user.signingKey ''
 
     - name: Check SSH signed commit
       uses: ./check-commit-signing/
