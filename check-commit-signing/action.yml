@@ -29,6 +29,8 @@ runs:
         single_log: ${RUNNER_TEMP}/single_commit.${{ github.run_id }}
         verify_output: ${RUNNER_TEMP}/verify_output.${{ github.run_id }}
       run: |
+        # TODO: make them more unique
+        rm -f "${{ env.unsigned_log }}" "${{ env.all_log }}" "${{ env.single_log }}" "${{ env.verify_output }}"
         echo Target: '${{ inputs.target }}'
         git show --no-patch ${{ inputs.target }}
         echo Source: '${{ inputs.source }}'
