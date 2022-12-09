@@ -9493,8 +9493,7 @@ function wrappy (fn, cb) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.github_headRef = exports.github_baseRef = exports.github_ref = exports.eventName = exports.commonErrorDetailedMessage = exports.conflictStatusOutputKey = void 0;
-exports.conflictStatusOutputKey = "conflictStatus";
+exports.github_headRef = exports.github_baseRef = exports.github_ref = exports.eventName = exports.commonErrorDetailedMessage = void 0;
 exports.commonErrorDetailedMessage = "Workflows can't access secrets and have read-only access to upstream when they are triggered by a pull request from a fork, [more information](https://docs.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token#permissions-for-the-github_token)";
 exports.eventName = process.env.GITHUB_EVENT_NAME;
 exports.github_ref = process.env.GITHUB_REF || "";
@@ -9599,7 +9598,7 @@ function addLabel(labelName, pr, client) {
     return __awaiter(this, void 0, void 0, function* () {
         const hasLabel = pr.labels.nodes.some(label => label.name === labelName);
         if (hasLabel) {
-            core.info(`  [Skip] PR#${pr.number} already has label '${labelName}'. No need to add.`);
+            core.info(`[Skip] PR#${pr.number} already has label '${labelName}'. No need to add.`);
             return false;
         }
         return client.rest.issues
@@ -9610,7 +9609,7 @@ function addLabel(labelName, pr, client) {
             labels: [labelName],
         })
             .then(() => {
-            core.info(`  [Success] Added label "${labelName}" to PR#${pr.number}`);
+            core.info(`[Success] Added label "${labelName}" to PR#${pr.number}`);
             return true;
         }, (error) => {
             if (isMissingPermission(error) && input_1.ignorePermissionError) {
@@ -9626,7 +9625,7 @@ function removeLabel(labelName, pr, client) {
     return __awaiter(this, void 0, void 0, function* () {
         const hasLabel = pr.labels.nodes.some(label => label.name === labelName);
         if (!hasLabel) {
-            core.info(`  [Skip] PR#${pr.number} does not have label '${labelName}'. No need to remove.`);
+            core.info(`[Skip] PR#${pr.number} does not have label '${labelName}'. No need to remove.`);
             return false;
         }
         return client.rest.issues
@@ -9641,11 +9640,11 @@ function removeLabel(labelName, pr, client) {
             return true;
         }, (error) => {
             if (isMissingPermission(error) && input_1.ignorePermissionError) {
-                core.warning(`  [Failure] Could not remove label "${labelName}" for PR#${pr.number}: ${env_1.commonErrorDetailedMessage}`);
+                core.warning(`[Failure] Could not remove label "${labelName}" for PR#${pr.number}: ${env_1.commonErrorDetailedMessage}`);
                 return false;
             }
             else if (error.status === 404) {
-                core.info(`  [Skip] On #${pr.number} label "${labelName}" doesn't need to be removed since it doesn't exist on that issue.`);
+                core.info(`[Skip] On #${pr.number} label "${labelName}" doesn't need to be removed since it doesn't exist on that issue.`);
                 return false;
             }
             throw new Error(`Error removing "${labelName}": ${error}`);
@@ -9664,11 +9663,11 @@ function addComment(comment, pr, client) {
             issue_number: pr.number,
             body: comment,
         }).then(() => {
-            core.info(`  [Success] Created a comment for PR#${pr.number}`);
+            core.info(`[Success] Created a comment for PR#${pr.number}`);
             return;
         }, (error) => {
             if (isMissingPermission(error) && input_1.ignorePermissionError) {
-                core.warning(`  [Failure] Couldn't add comment to PR#${pr.number}: ${env_1.commonErrorDetailedMessage}`);
+                core.warning(`[Failure] Couldn't add comment to PR#${pr.number}: ${env_1.commonErrorDetailedMessage}`);
                 return;
             }
             throw new Error(`Error adding "${comment}": ${error}`);
@@ -9679,13 +9678,18 @@ exports.addComment = addComment;
 function updateLabel(conflictStatuses, client, pr, labelToAddOnConflict, labelToRemoveOnConflict, commentToAddOnConflict, commentToAddOnClean) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug(JSON.stringify(pr, null, 2));
-        const log = (message) => {
-            core.info(`${message} for PR#${pr.number}`);
+        const log = (message, debug) => {
+            if (debug) {
+                core.debug(`${message} for PR#${pr.number}`);
+            }
+            else {
+                core.info(`${message} for PR#${pr.number}`);
+            }
         };
         switch (pr.mergeable) {
             case "CONFLICTING": {
                 const removeLabelInfo = labelToRemoveOnConflict ? `, removing label "${labelToRemoveOnConflict}"` : "";
-                log(`  Adding label "${labelToAddOnConflict}"` + removeLabelInfo);
+                log(`Adding label "${labelToAddOnConflict}"` + removeLabelInfo, true);
                 // for labels PRs and issues are the same
                 const tasks = [addLabel(labelToAddOnConflict, pr, client)];
                 if (labelToRemoveOnConflict) {
@@ -9699,7 +9703,7 @@ function updateLabel(conflictStatuses, client, pr, labelToAddOnConflict, labelTo
                 break;
             }
             case "MERGEABLE": {
-                log(`  Removing label "${labelToAddOnConflict}"`);
+                log(`Removing label "${labelToAddOnConflict}"`, true);
                 const removedDirtyLabel = yield removeLabel(labelToAddOnConflict, pr, client);
                 if (commentToAddOnClean && removedDirtyLabel) {
                     yield addComment(commentToAddOnClean, pr, client);
@@ -9712,7 +9716,7 @@ function updateLabel(conflictStatuses, client, pr, labelToAddOnConflict, labelTo
                 break;
             }
             case "UNKNOWN":
-                log("  Encountered a pull request whose mergeable status is UNKNOWN. Skipping.");
+                log("Encountered a pull request whose mergeable status is UNKNOWN. Skipping.");
                 break;
             default:
                 throw new TypeError(`unhandled mergeable state '${pr.mergeable}'`);
@@ -9790,50 +9794,49 @@ function sleep(sec) {
 function checkConflict(context) {
     return __awaiter(this, void 0, void 0, function* () {
         const { currentRef, client, commentToAddOnClean, commentToAddOnConflict, labelToAddOnConflict, labelToRemoveOnConflict, retryIntervalSec, retryMax, } = context;
-        let pullRequests = [];
-        core.info("Searching conflict between base branch and this branch if base branch exists");
-        let res = yield (0, query_1.postOpenPullRequestsQuery)(client, {
+        core.info(`Searching conflict between base branch and this branch(${currentRef}) if base branch exists`);
+        // If pushing to a non-PR branch (main, master, ...), this returns empty array.
+        let prsOfThisBranch = yield (0, query_1.postOpenPullRequestsQuery)(client, {
             refName: currentRef,
             searchRefType: "currentBranch",
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
         });
-        if (res.length > 0) {
-            pullRequests = pullRequests.concat(res);
-        }
-        else {
+        if (prsOfThisBranch.length <= 0) {
             core.info(`No base branch for ${currentRef} was found.`);
         }
-        core.info("Searching conflict between this branch and branches which target this branch");
-        res = yield (0, query_1.postOpenPullRequestsQuery)(client, {
+        core.info(`Searching conflict between this branch(${currentRef}) and branches which target this branch`);
+        let prsOfChildBranch = yield (0, query_1.postOpenPullRequestsQuery)(client, {
             refName: currentRef,
             searchRefType: "baseBranch",
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
         });
-        pullRequests = pullRequests.concat(res);
-        if (pullRequests.length === 0) {
-            core.warning("Found no pull requests");
+        if (prsOfThisBranch.length === 0 && prsOfChildBranch.length === 0) {
+            core.warning("Found no pull requests associated with this branch");
             return {};
         }
-        core.info(`There are ${pullRequests.length} PRs to check conflicts`);
-        let prsWithUnknownMergeableStatus = pullRequests.filter(pr => pr.mergeable === "UNKNOWN");
-        pullRequests = pullRequests.filter(pr => pr.mergeable !== "UNKNOWN");
-        core.info(`Number of PRs whose mergeable status is UNKNOWN: ${prsWithUnknownMergeableStatus.length}`);
+        core.info(`There are ${prsOfThisBranch.length} + ${prsOfChildBranch.length} PRs to check conflicts`);
+        let prsOfThisBranchUnknown = prsOfThisBranch.filter(pr => pr.mergeable === "UNKNOWN");
+        let prsOfChildBranchUnknown = prsOfChildBranch.filter(pr => pr.mergeable === "UNKNOWN");
+        prsOfThisBranch = prsOfThisBranch.filter(pr => pr.mergeable !== "UNKNOWN");
+        prsOfChildBranch = prsOfChildBranch.filter(pr => pr.mergeable !== "UNKNOWN");
+        core.info(`Number of PRs whose mergeable status is UNKNOWN: ${prsOfThisBranchUnknown.length} + ${prsOfChildBranchUnknown.length}`);
         const conflictStatus = {};
         const labelTasks = [];
-        const checkMergeableStatusTasks = [];
+        const finishedPRs = new Set();
         let currentTry = 0;
-        while ((pullRequests.length + prsWithUnknownMergeableStatus.length) > 0) {
+        while ((prsOfThisBranch.length + prsOfChildBranch.length + prsOfThisBranchUnknown.length + prsOfChildBranchUnknown.length) > 0) {
             core.info(`Retry loop #${currentTry}`);
-            core.info(`There are ${pullRequests.length} PRs to update labels`);
-            for (const pr of pullRequests) {
-                const prTitle = pr.title.length > 30 ? pr.title.substring(0, 30) + "..." : pr.title;
-                core.info(`Updating label for PR#${pr.number} [${prTitle}]`);
+            core.info(`There are ${prsOfThisBranch.length + prsOfChildBranch.length} PRs to update labels`);
+            const prsToUpdateLabel = [].concat(prsOfThisBranch, prsOfChildBranch);
+            for (let i = 0; i < prsToUpdateLabel.length; i++) {
+                const pr = prsToUpdateLabel[i];
                 const task = (0, label_1.updateLabel)(conflictStatus, client, pr, labelToAddOnConflict, labelToRemoveOnConflict, commentToAddOnConflict, commentToAddOnClean);
                 labelTasks.push(task);
+                finishedPRs.add(pr.headRefName);
             }
-            if (prsWithUnknownMergeableStatus.length === 0) {
+            if (prsOfThisBranchUnknown.length + prsOfChildBranchUnknown.length === 0) {
                 core.info("There are no PRs with unknown mergeable status.");
                 break;
             }
@@ -9841,45 +9844,81 @@ function checkConflict(context) {
                 core.warning(`Retry count reached a threshold(${retryMax})`);
                 break;
             }
-            for (let i = 0; i < prsWithUnknownMergeableStatus.length; i++) {
-                const pr = prsWithUnknownMergeableStatus[i];
-                core.info(`Checking mergeable status for PR#${pr.number} ${pr.headRefName}`);
-                const task = (0, query_1.postOpenPullRequestsQuery)(client, {
+            let checkConflictBetweenParentAndThisBranch = null;
+            let checkConflictBetweenThisAndChildBranches = null;
+            // prsOfThisBranchUnknown.length should be 0 or 1.
+            if (prsOfThisBranchUnknown.length > 1) {
+                throw new Error(`Multiple base branches have been reported for a single branch(${currentRef})`);
+            }
+            else if (prsOfThisBranchUnknown.length === 1) {
+                const pr = prsOfThisBranchUnknown[0];
+                core.info(`Searching conflict between base branch and this branch(${currentRef}) if base branch exists`);
+                checkConflictBetweenParentAndThisBranch = (0, query_1.postOpenPullRequestsQuery)(client, {
                     refName: pr.headRefName,
                     searchRefType: "currentBranch",
                     owner: github.context.repo.owner,
                     repo: github.context.repo.repo,
                 });
-                checkMergeableStatusTasks.push(task);
             }
-            pullRequests = [];
-            const prResponses = yield Promise.all(checkMergeableStatusTasks);
-            for (let i = 0; i < prResponses.length; i++) {
-                const res = prResponses[i];
-                if (res.length === 0) {
-                    // It's possible that some pull requests get closed while checking mergeable status.
-                    const pr = prsWithUnknownMergeableStatus[i];
-                    core.warning(`PR#${pr.number} might be closed during checking conflict`);
-                    continue;
+            if (prsOfChildBranchUnknown.length > 0) {
+                core.info(`Searching conflict between this branch(${currentRef}) and branches which target this branch`);
+                checkConflictBetweenThisAndChildBranches = (0, query_1.postOpenPullRequestsQuery)(client, {
+                    refName: currentRef,
+                    searchRefType: "baseBranch",
+                    owner: github.context.repo.owner,
+                    repo: github.context.repo.repo,
+                });
+            }
+            prsOfThisBranch = [];
+            prsOfThisBranchUnknown = [];
+            prsOfChildBranch = [];
+            prsOfChildBranchUnknown = [];
+            if (checkConflictBetweenParentAndThisBranch) {
+                const response = yield checkConflictBetweenParentAndThisBranch;
+                if (response.length === 0) {
+                    core.warning(`Branch${currentRef} might be removed during checking conflict`);
                 }
-                else if (res.length > 1) {
+                else if (response.length > 1) {
                     throw new Error("Searching PR by headRef is expected to return only 1 PR.");
                 }
-                const pr = res[0];
-                pullRequests.push(pr);
+                const pr = response[0];
+                if (finishedPRs.has(pr.headRefName)) {
+                    continue;
+                }
+                if (pr.mergeable === "UNKNOWN") {
+                    prsOfThisBranchUnknown.push(pr);
+                }
+                else {
+                    prsOfThisBranch.push(pr);
+                }
             }
-            prsWithUnknownMergeableStatus = pullRequests.filter(pr => pr.mergeable === "UNKNOWN");
-            pullRequests = pullRequests.filter(pr => pr.mergeable !== "UNKNOWN");
-            core.info(`Number of PRs whose mergeable status is UNKNOWN: ${prsWithUnknownMergeableStatus.length}`);
+            if (checkConflictBetweenThisAndChildBranches) {
+                const response = yield checkConflictBetweenThisAndChildBranches;
+                for (let i = 0; i < response.length; i++) {
+                    const pr = response[i];
+                    if (finishedPRs.has(pr.headRefName)) {
+                        continue;
+                    }
+                    if (pr.mergeable === "UNKNOWN") {
+                        prsOfChildBranchUnknown.push(pr);
+                    }
+                    else {
+                        prsOfChildBranch.push(pr);
+                    }
+                }
+            }
+            core.info(`Number of PRs whose mergeable status is UNKNOWN: ${prsOfThisBranchUnknown.length} + ${prsOfChildBranchUnknown.length}`);
             core.info(`Sleeping ${retryIntervalSec} sec`);
             yield sleep(retryIntervalSec);
             currentTry++;
         }
         yield Promise.all(labelTasks);
         core.info("Updating labels has been done");
-        if (prsWithUnknownMergeableStatus.length > 0) {
+        if (prsOfThisBranchUnknown.length + prsOfChildBranchUnknown.length > 0) {
             core.error("There are PRs whose mergeable status left UNKNOWN");
-            for (const pr of prsWithUnknownMergeableStatus) {
+            const prs = [].concat(prsOfThisBranchUnknown, prsOfChildBranchUnknown);
+            for (let i = 0; i < prs.length; i++) {
+                const pr = prs[i];
                 core.info(`  #${pr.number} (${pr.title})`);
             }
             throw new Error("Failed to check conflict");
@@ -9943,7 +9982,6 @@ function main() {
             && env_1.eventName !== "pull_request_target"
             && env_1.eventName !== "workflow_dispatch") {
             core.info(`Skipping conflict check as the event(${env_1.eventName}) is not a target`);
-            core.setOutput(env_1.conflictStatusOutputKey, {});
             return;
         }
         let currentRef = "";
@@ -9962,12 +10000,11 @@ function main() {
         else {
             // When pushing a tag, do nothing.
             core.info("No action taken when pushing a tag");
-            core.setOutput(env_1.conflictStatusOutputKey, {});
             return;
         }
         core.info(`Checking conflicts on this branch and branches whose target branch is: ${currentRef}`);
         const client = github.getOctokit(input_1.secretToken);
-        const conflictStatus = yield (0, lib_1.checkConflict)({
+        yield (0, lib_1.checkConflict)({
             currentRef,
             client,
             commentToAddOnClean: input_1.commentToAddOnClean,
@@ -9977,7 +10014,6 @@ function main() {
             retryIntervalSec: input_1.retryIntervalSec,
             retryMax: input_1.retryMax,
         });
-        core.setOutput(env_1.conflictStatusOutputKey, conflictStatus);
     });
 }
 main().catch((error) => {
@@ -10071,12 +10107,14 @@ function postOpenPullRequestsQuery(client, params) {
             core.error("Failed to get GraphQL response");
             throw err;
         };
-        core.info("Posting GraphQL request");
-        core.info(JSON.stringify(requestParams, null, 2));
+        const queryId = params.searchRefType === "currentBranch" ?
+            `headRef=${requestParams.headRefName}` : `baseRef=${requestParams.baseRefName}`;
+        core.info("Posting GraphQL request for " + queryId);
+        core.debug(JSON.stringify(requestParams, null, 2));
         start = Date.now();
         let response = yield client.graphql(exports.OpenPullRequestsQuery, requestParams)
             .catch(onRejection);
-        core.info(`Request took ${Date.now() - start} ms`);
+        core.info(`Request took ${Date.now() - start} ms for ${queryId}`);
         if (!response) {
             return [];
         }
@@ -10089,7 +10127,7 @@ function postOpenPullRequestsQuery(client, params) {
                 return n.headRepository && n.headRepository.owner.login === requestParams.owner;
             });
         }
-        core.info(`Found ${response.repository.pullRequests.nodes.length} PRs`);
+        core.info(`Found ${response.repository.pullRequests.nodes.length} PRs for ${queryId}`);
         let retVal = response.repository.pullRequests.nodes;
         while (response.repository.pullRequests.pageInfo.hasNextPage) {
             const after = response.repository.pullRequests.pageInfo.endCursor;

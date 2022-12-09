@@ -50,53 +50,52 @@ export async function checkConflict(context: CheckConflictContext): Promise<Reco
     retryMax,
   } = context;
   
-  let pullRequests: PullRequestsNode[] = [];
-  
-  core.info("Searching conflict between base branch and this branch if base branch exists");
-  let res = await postOpenPullRequestsQuery(client, {
+  core.info(`Searching conflict between base branch and this branch(${currentRef}) if base branch exists`);
+  // If pushing to a non-PR branch (main, master, ...), this returns empty array.
+  let prsOfThisBranch = await postOpenPullRequestsQuery(client, {
     refName: currentRef,
     searchRefType: "currentBranch",
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
   });
-  if(res.length > 0){
-    pullRequests = pullRequests.concat(res);
-  }
-  else{
+  if(prsOfThisBranch.length <= 0){
     core.info(`No base branch for ${currentRef} was found.`);
   }
   
-  core.info("Searching conflict between this branch and branches which target this branch");
-  res = await postOpenPullRequestsQuery(client, {
+  core.info(`Searching conflict between this branch(${currentRef}) and branches which target this branch`);
+  let prsOfChildBranch = await postOpenPullRequestsQuery(client, {
     refName: currentRef,
     searchRefType: "baseBranch",
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
   });
-  pullRequests = pullRequests.concat(res);
   
-  if (pullRequests.length === 0) {
-    core.warning("Found no pull requests");
+  if (prsOfThisBranch.length === 0 && prsOfChildBranch.length === 0) {
+    core.warning("Found no pull requests associated with this branch");
     return {};
   }
   
-  core.info(`There are ${pullRequests.length} PRs to check conflicts`);
-  let prsWithUnknownMergeableStatus = pullRequests.filter(pr => pr.mergeable === "UNKNOWN");
-  pullRequests = pullRequests.filter(pr => pr.mergeable !== "UNKNOWN");
-  core.info(`Number of PRs whose mergeable status is UNKNOWN: ${prsWithUnknownMergeableStatus.length}`);
+  core.info(`There are ${prsOfThisBranch.length} + ${prsOfChildBranch.length} PRs to check conflicts`);
+  let prsOfThisBranchUnknown = prsOfThisBranch.filter(pr => pr.mergeable === "UNKNOWN");
+  let prsOfChildBranchUnknown = prsOfChildBranch.filter(pr => pr.mergeable === "UNKNOWN");
+  prsOfThisBranch = prsOfThisBranch.filter(pr => pr.mergeable !== "UNKNOWN");
+  prsOfChildBranch = prsOfChildBranch.filter(pr => pr.mergeable !== "UNKNOWN");
+  core.info(`Number of PRs whose mergeable status is UNKNOWN: ${prsOfThisBranchUnknown.length} + ${prsOfChildBranchUnknown.length}`);
   
   const conflictStatus: Record<number, boolean> = {};
   
   const labelTasks: Array<Promise<unknown>> = [];
-  const checkMergeableStatusTasks: Array<Promise<PullRequestsNode[]>> = [];
+  const finishedPRs = new Set<string>();
   
   let currentTry = 0;
-  while((pullRequests.length + prsWithUnknownMergeableStatus.length) > 0){
+  while(
+    (prsOfThisBranch.length + prsOfChildBranch.length + prsOfThisBranchUnknown.length + prsOfChildBranchUnknown.length) > 0
+  ){
     core.info(`Retry loop #${currentTry}`);
-    core.info(`There are ${pullRequests.length} PRs to update labels`);
-    for(const pr of pullRequests){
-      const prTitle = pr.title.length > 30 ? pr.title.substring(0, 30) + "..." : pr.title;
-      core.info(`Updating label for PR#${pr.number} [${prTitle}]`);
+    core.info(`There are ${prsOfThisBranch.length + prsOfChildBranch.length} PRs to update labels`);
+    const prsToUpdateLabel = ([] as PullRequestsNode[]).concat(prsOfThisBranch, prsOfChildBranch);
+    for(let i=0; i<prsToUpdateLabel.length; i++){
+      const pr = prsToUpdateLabel[i];
       
       const task = updateLabel(
         conflictStatus,
@@ -108,9 +107,10 @@ export async function checkConflict(context: CheckConflictContext): Promise<Reco
         commentToAddOnClean,
       );
       labelTasks.push(task);
+      finishedPRs.add(pr.headRefName);
     }
     
-    if(prsWithUnknownMergeableStatus.length === 0){
+    if(prsOfThisBranchUnknown.length + prsOfChildBranchUnknown.length === 0){
       core.info("There are no PRs with unknown mergeable status.");
       break;
     }
@@ -119,39 +119,83 @@ export async function checkConflict(context: CheckConflictContext): Promise<Reco
       break;
     }
   
-    for(let i=0; i<prsWithUnknownMergeableStatus.length; i++){
-      const pr = prsWithUnknownMergeableStatus[i];
-      core.info(`Checking mergeable status for PR#${pr.number} ${pr.headRefName}`);
-      
-      const task = postOpenPullRequestsQuery(client, {
+    let checkConflictBetweenParentAndThisBranch: Promise<PullRequestsNode[]>|null = null;
+    let checkConflictBetweenThisAndChildBranches: Promise<PullRequestsNode[]>|null = null;
+  
+    // prsOfThisBranchUnknown.length should be 0 or 1.
+    if(prsOfThisBranchUnknown.length > 1){
+      throw new Error(`Multiple base branches have been reported for a single branch(${currentRef})`);
+    }
+    else if(prsOfThisBranchUnknown.length === 1){
+      const pr = prsOfThisBranchUnknown[0];
+      core.info(`Searching conflict between base branch and this branch(${currentRef}) if base branch exists`);
+  
+      checkConflictBetweenParentAndThisBranch = postOpenPullRequestsQuery(client, {
         refName: pr.headRefName,
         searchRefType: "currentBranch", // When "currentBranch" only one PR should be returned.
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
       });
-      checkMergeableStatusTasks.push(task);
     }
+  
+    if(prsOfChildBranchUnknown.length > 0){
+      core.info(`Searching conflict between this branch(${currentRef}) and branches which target this branch`);
+  
+      checkConflictBetweenThisAndChildBranches = postOpenPullRequestsQuery(client, {
+        refName: currentRef,
+        searchRefType: "baseBranch",
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+      });
+    }
+  
+    prsOfThisBranch = [];
+    prsOfThisBranchUnknown = [];
+    prsOfChildBranch = [];
+    prsOfChildBranchUnknown = [];
     
-    pullRequests = [];
-    const prResponses = await Promise.all(checkMergeableStatusTasks);
-    for(let i=0; i<prResponses.length; i++){
-      const res = prResponses[i];
-      if(res.length === 0){
-        // It's possible that some pull requests get closed while checking mergeable status.
-        const pr = prsWithUnknownMergeableStatus[i];
-        core.warning(`PR#${pr.number} might be closed during checking conflict`);
-        continue;
+    if(checkConflictBetweenParentAndThisBranch){
+      const response = await checkConflictBetweenParentAndThisBranch;
+      if(response.length === 0){
+        core.warning(`Branch${currentRef} might be removed during checking conflict`);
       }
-      else if(res.length > 1){
+      else if(response.length > 1){
         throw new Error("Searching PR by headRef is expected to return only 1 PR.");
       }
-      const pr = res[0];
-      pullRequests.push(pr);
+      
+      const pr = response[0];
+      if(finishedPRs.has(pr.headRefName)){
+        continue;
+      }
+  
+      if(pr.mergeable === "UNKNOWN"){
+        prsOfThisBranchUnknown.push(pr);
+      }
+      else{
+        prsOfThisBranch.push(pr);
+      }
     }
     
-    prsWithUnknownMergeableStatus = pullRequests.filter(pr => pr.mergeable === "UNKNOWN");
-    pullRequests = pullRequests.filter(pr => pr.mergeable !== "UNKNOWN");
-    core.info(`Number of PRs whose mergeable status is UNKNOWN: ${prsWithUnknownMergeableStatus.length}`);
+    if(checkConflictBetweenThisAndChildBranches){
+      const response = await checkConflictBetweenThisAndChildBranches;
+      for(let i=0;i<response.length;i++){
+        const pr = response[i];
+        if(finishedPRs.has(pr.headRefName)){
+          continue;
+        }
+        
+        if(pr.mergeable === "UNKNOWN"){
+          prsOfChildBranchUnknown.push(pr);
+        }
+        else{
+          prsOfChildBranch.push(pr);
+        }
+      }
+    }
+    
+    core.info(
+      `Number of PRs whose mergeable status is UNKNOWN: ${prsOfThisBranchUnknown.length} + ${prsOfChildBranchUnknown.length}`
+    );
     
     core.info(`Sleeping ${retryIntervalSec} sec`);
     await sleep(retryIntervalSec);
@@ -161,9 +205,11 @@ export async function checkConflict(context: CheckConflictContext): Promise<Reco
   await Promise.all(labelTasks);
   core.info("Updating labels has been done");
   
-  if(prsWithUnknownMergeableStatus.length > 0){
+  if(prsOfThisBranchUnknown.length + prsOfChildBranchUnknown.length > 0){
     core.error("There are PRs whose mergeable status left UNKNOWN");
-    for(const pr of prsWithUnknownMergeableStatus){
+    const prs = ([] as PullRequestsNode[]).concat(prsOfThisBranchUnknown, prsOfChildBranchUnknown);
+    for(let i=0;i<prs.length;i++){
+      const pr = prs[i];
       core.info(`  #${pr.number} (${pr.title})`);
     }
     throw new Error("Failed to check conflict");
