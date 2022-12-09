@@ -56,7 +56,7 @@ runs:
         echo '    ----'
 
         echo '    ---- Unsigned commits in log:'
-        grep '^UNSIGNED:' "${{ env.commit_log }}"
+        grep '^UNSIGNED:' "${{ env.commit_log }}" || true
         echo '    ----'
 
         if grep '^unsigned$' "${{ env.statuses }}"
