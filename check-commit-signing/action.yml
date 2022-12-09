@@ -43,8 +43,10 @@ runs:
           cat verify_output
           if cat verify_output | grep -E '(Signature made|gpg.ssh.allowedSignersFile needs to be configured)' > /dev/null; \
           then \
+            echo "status=signed" >> "${GITHUB_OUTPUT}"
             echo status: commit was signed in some way: ${hash}; \
           else \
+            echo "status=unsigned" >> "${GITHUB_OUTPUT}"
             echo status: commit was not signed: ${hash}; \
             exit 1; \
           fi; \
