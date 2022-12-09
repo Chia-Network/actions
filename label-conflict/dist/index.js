@@ -9844,13 +9844,15 @@ function checkConflict(context) {
                 core.warning(`Retry count reached a threshold(${retryMax})`);
                 break;
             }
-            let checkConflictBetweenParentAndThisBranch = null;
-            let checkConflictBetweenThisAndChildBranches = null;
-            // prsOfThisBranchUnknown.length should be 0 or 1.
             if (prsOfThisBranchUnknown.length > 1) {
                 throw new Error(`Multiple base branches have been reported for a single branch(${currentRef})`);
             }
-            else if (prsOfThisBranchUnknown.length === 1) {
+            core.info(`Sleeping ${retryIntervalSec} sec`);
+            yield sleep(retryIntervalSec);
+            let checkConflictBetweenParentAndThisBranch = null;
+            let checkConflictBetweenThisAndChildBranches = null;
+            // prsOfThisBranchUnknown.length should be 0 or 1.
+            if (prsOfThisBranchUnknown.length === 1) {
                 const pr = prsOfThisBranchUnknown[0];
                 core.info(`Searching conflict between base branch and this branch(${currentRef}) if base branch exists`);
                 checkConflictBetweenParentAndThisBranch = (0, query_1.postOpenPullRequestsQuery)(client, {
@@ -9908,8 +9910,6 @@ function checkConflict(context) {
                 }
             }
             core.info(`Number of PRs whose mergeable status is UNKNOWN: ${prsOfThisBranchUnknown.length} + ${prsOfChildBranchUnknown.length}`);
-            core.info(`Sleeping ${retryIntervalSec} sec`);
-            yield sleep(retryIntervalSec);
             currentTry++;
         }
         yield Promise.all(labelTasks);
