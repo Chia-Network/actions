@@ -83,42 +83,45 @@ jobs:
           - os:
               name: Chia Network Ubuntu Intel Builder
               matrix: docker-chia-network-ubuntu-intel-builder
+              native-python: true
               runs-on:
                 intel: [ubuntu-latest]
               container:
-                'native': chianetwork/ubuntu-18.04-builder:latest
+                '3.8': chianetwork/ubuntu-18.04-builder:latest
             python:
-              name: Native
+              name: '3.8'
               check: '3.8'
-              matrix: native
+              matrix: '3.8'
             arch:
               name: Intel
               matrix: intel
           - os:
               name: Chia Network Ubuntu ARM Builder
               matrix: docker-chia-network-ubuntu-arm-builder
+              native-python: true
               runs-on:
                 arm: [Linux, ARM64]
               container:
-                'native': chianetwork/ubuntu-18.04-builder:latest
+                '3.8': chianetwork/ubuntu-18.04-builder:latest
             python:
-              name: Native
+              name: '3.8'
               check: '3.8'
-              matrix: native
+              matrix: '3.8'
             arch:
               name: ARM
               matrix: arm
           - os:
               name: Chia Network CentOS Intel Builder
               matrix: docker-chia-network-centos-intel-builder
+              native-python: true
               runs-on:
-                intel: [ubuntu-latest]
+                arm: [ubuntu-latest]
               container:
-                'native': chianetwork/centos7-builder:latest
+                '3.9': chianetwork/centos7-builder:latest
             python:
-              name: Native
+              name: '3.9'
               check: '3.9'
-              matrix: native
+              matrix: '3.9'
             arch:
               name: Intel
               matrix: intel
@@ -158,7 +161,7 @@ jobs:
         path: repo
 
     - name: Set up ${{ matrix.python.name }}
-      if: '! matrix.os.native-python'
+      if: ${{ ! matrix.os.native-python }}
       uses: ./repo/setup-python
       with:
         python-version: ${{ matrix.python.action }}
