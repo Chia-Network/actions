@@ -60,6 +60,8 @@ runs:
         cat "${{ env.unsigned_log }}"
         echo '    ----'
 
+        echo "FAIL: ->${FAIL}<-"
+
         if [ "${FAIL}" == "nope" ]
         then
           echo "status=signed" >> "${GITHUB_OUTPUT}"
