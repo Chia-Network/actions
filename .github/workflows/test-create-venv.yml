@@ -158,7 +158,7 @@ jobs:
         path: repo
 
     - name: Set up ${{ matrix.python.name }}
-      if: ${{ ! matrix.os.native-python }}
+      if: '! matrix.os.native-python'
       uses: ./repo/setup-python
       with:
         python-version: ${{ matrix.python.action }}
