@@ -26,7 +26,7 @@ runs:
       env:
         unsigned_log: ${RUNNER_TEMP}/unsigned_commits.${{ github.run_id }}
         all_log: ${RUNNER_TEMP}/all_commits.${{ github.run_id }}
-        single_log: ${RUNNER_TEMP}/all_commits.${{ github.run_id }}
+        single_log: ${RUNNER_TEMP}/single_commit.${{ github.run_id }}
         verify_output: ${RUNNER_TEMP}/verify_output.${{ github.run_id }}
       run: |
         echo Target: '${{ inputs.target }}'
