@@ -53,6 +53,12 @@ jobs:
         source: 63dab4d7ed40084e208d8d50805af749740a386a
         target: 63dab4d7ed40084e208d8d50805af749740a386a^
 
+    - name: Setup git for unsigned committing
+      shell: bash
+      run: |
+        git config --local user.email "test@example.com"
+        git config --local user.name "Test Committer"
+
     - name: Create unsigned commit
       id: unsigned_commit
       shell: bash
@@ -66,6 +72,7 @@ jobs:
       uses: ./check-commit-signing/
       with:
         source: ${{ steps.unsigned_commit.outputs.commit_hash }}
+        target: ${{ steps.unsigned_commit.outputs.commit_hash }}^
 
     - name: Make sure unsigned check failed
       if: always()
