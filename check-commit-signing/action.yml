@@ -39,7 +39,7 @@ runs:
         (git log --left-right --oneline --pretty=format:%H ${{ inputs.target }}...${{ inputs.source }}; echo) \
         | while read hash; \
         do \
-          git verify-commit ${hash} 2>&1 | grep -E '(Signature made|gpg.ssh.allowedSignersFile needs to be configured)' > /dev/null; \
+          git verify-commit ${hash} |& grep -E '(Signature made|gpg.ssh.allowedSignersFile needs to be configured)' > /dev/null; \
           if [ "$?" == "0" ]; \
           then \
             echo status: commit was signed in some way: ${hash}; \
