@@ -1,0 +1,82 @@
+name: "Check unsigned commits"
+description: "Checks for unsigned commits being introduced and fails if present"
+
+inputs:
+  target:
+    description: ""
+    required: true
+    default: ${{ github.event.pull_request.base.sha }}
+  source:
+    description: ""
+    required: true
+    default: ${{ github.event.pull_request.head.sha }}
+
+outputs:
+  status:
+    description: "Set to either signed or unsigned accordingly."
+    value: ${{ steps.check.outputs.status }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check for unsigned commits
+      id: check
+      if: github.event_name == 'pull_request'
+      shell: bash
+      env:
+        statuses: ${RUNNER_TEMP}/statuses.${{ github.run_id }}
+        commit_log: ${RUNNER_TEMP}/commit_log.${{ github.run_id }}
+        single_log: ${RUNNER_TEMP}/single_commit.${{ github.run_id }}
+        verify_output: ${RUNNER_TEMP}/verify_output.${{ github.run_id }}
+      run: |
+        # TODO: make them more unique
+        # Make sure not to reuse temporary files if this action was already run.
+        rm -f "${{ env.statuses }}" "${{ env.commit_log }}" "${{ env.single_log }}" "${{ env.verify_output }}"
+
+        echo Target: '${{ inputs.target }}'
+        git show --no-patch ${{ inputs.target }}
+        echo
+        echo
+        echo Source: '${{ inputs.source }}'
+        git show --no-patch ${{ inputs.source }}
+
+        # The (git <something>; echo) form adds back the trailing newline that git
+        # skips when piping or redirection output.
+
+        (git log --left-right --oneline --pretty=format:%H ${{ inputs.target }}...${{ inputs.source }}; echo) | while read hash
+        do
+          (git verify-commit ${hash}; echo) &> "${{ env.verify_output }}" || true
+
+          # collect the single line log entry
+          (git show --no-patch --pretty='format:%H|%aN|%aI|%s' ${hash}; echo) > "${{ env.single_log }}"
+
+          # Check the verify output for signature made from an openpgp signed commit
+          # or config needed from an ssh signed commit.  We're allowing _any_
+          # signature without verifying it.
+          if grep -E '(Signature made|gpg.ssh.allowedSignersFile needs to be configured)' "${{ env.verify_output }}" > /dev/null
+          then
+            echo -n '  signed: ' >> "${{ env.commit_log }}"
+            cat "${{ env.single_log }}" >> "${{ env.commit_log }}"
+            echo signed >> "${{ env.statuses }}"
+          else
+            echo -n 'UNSIGNED: ' >> "${{ env.commit_log }}"
+            cat "${{ env.single_log }}" >> "${{ env.commit_log }}"
+            echo unsigned >> "${{ env.statuses }}"
+          fi
+        done
+
+        echo '    ---- All commits in log:'
+        cat "${{ env.commit_log }}"
+        echo '    ----'
+
+        echo '    ---- Unsigned commits in log:'
+        grep '^UNSIGNED:' "${{ env.commit_log }}" || true
+        echo '    ----'
+
+        if grep '^unsigned$' "${{ env.statuses }}"
+        then
+          echo "status=unsigned" >> "${GITHUB_OUTPUT}"
+          false
+        else
+          echo "status=signed" >> "${GITHUB_OUTPUT}"
+        fi
