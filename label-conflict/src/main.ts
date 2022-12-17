@@ -19,6 +19,9 @@ import {
 
 async function main() {
   core.info(`Event: ${eventName}`);
+  core.info(`GITHUB_REF: ${github_ref}`);
+  core.info(`GITHUB_BASE_REF: ${github_baseRef}`);
+  core.info(`GITHUB_HEAD_REF: ${github_headRef}`);
   
   if(eventName !== "push"
     && eventName !== "pull_request"
@@ -48,7 +51,6 @@ async function main() {
     core.info("No action taken when pushing a tag");
     return;
   }
-  core.info(`Checking conflicts on this branch and branches whose target branch is: ${currentRef}`)
   
   const client = github.getOctokit(secretToken);
   

@@ -1,8 +1,8 @@
-import * as github from "@actions/github";
 import {getOctokit} from "@actions/github";
 import * as core from "@actions/core";
-import {postOpenPullRequestsQuery, PullRequestsNode} from "./query";
+import {GitHubContextPayloadPullRequest, postOpenPullRequestsQuery, PullRequestsNode} from "./query";
 import {updateLabel} from "./label";
+import * as github from "@actions/github";
 
 export type Octokit = ReturnType<typeof getOctokit>;
 
@@ -49,25 +49,35 @@ export async function checkConflict(context: CheckConflictContext): Promise<Reco
     retryIntervalSec,
     retryMax,
   } = context;
+  const repo = github.context.repo;
+  // `triggeringHead` is used to tell difference whether current running action is triggered by
+  // a branch on original repository or forked repository.
+  let triggeringHead: { login: string; ref: string };
+  if (github.context.payload.pull_request) {
+    const head = (github.context.payload.pull_request as GitHubContextPayloadPullRequest).head;
+    triggeringHead = {login: head.repo.owner.login, ref: head.ref};
+  } else {
+    triggeringHead = {login: repo.owner, ref: currentRef};
+  }
   
-  core.info(`Searching conflict between base branch and this branch(${currentRef}) if base branch exists`);
+  core.info(`>> Searching conflict between this branch(${currentRef}) and its base branch if the base branch exists`);
   // If pushing to a non-PR branch (main, master, ...), this returns empty array.
   let prsOfThisBranch = await postOpenPullRequestsQuery(client, {
     refName: currentRef,
     searchRefType: "currentBranch",
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
+    repo,
+    triggeringHead,
   });
   if(prsOfThisBranch.length <= 0){
     core.info(`No base branch for ${currentRef} was found.`);
   }
   
-  core.info(`Searching conflict between this branch(${currentRef}) and branches which target this branch`);
+  core.info(`>> Searching conflict between this branch(${currentRef}) and branches which target this branch`);
   let prsOfChildBranch = await postOpenPullRequestsQuery(client, {
     refName: currentRef,
     searchRefType: "baseBranch",
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
+    repo,
+    triggeringHead,
   });
   
   if (prsOfThisBranch.length === 0 && prsOfChildBranch.length === 0) {
@@ -91,7 +101,7 @@ export async function checkConflict(context: CheckConflictContext): Promise<Reco
   while(
     (prsOfThisBranch.length + prsOfChildBranch.length + prsOfThisBranchUnknown.length + prsOfChildBranchUnknown.length) > 0
   ){
-    core.info(`Retry loop #${currentTry}`);
+    core.info(`>> Retry loop #${currentTry}`);
     core.info(`There are ${prsOfThisBranch.length + prsOfChildBranch.length} PRs to update labels`);
     const prsToUpdateLabel = ([] as PullRequestsNode[]).concat(prsOfThisBranch, prsOfChildBranch);
     for(let i=0; i<prsToUpdateLabel.length; i++){
@@ -122,7 +132,7 @@ export async function checkConflict(context: CheckConflictContext): Promise<Reco
       throw new Error(`Multiple base branches have been reported for a single branch(${currentRef})`);
     }
   
-    core.info(`Sleeping ${retryIntervalSec} sec`);
+    core.info(`>> Sleeping ${retryIntervalSec} sec`);
     await sleep(retryIntervalSec);
     
     let checkConflictBetweenParentAndThisBranch: Promise<PullRequestsNode[]>|null = null;
@@ -131,24 +141,24 @@ export async function checkConflict(context: CheckConflictContext): Promise<Reco
     // prsOfThisBranchUnknown.length should be 0 or 1.
     if(prsOfThisBranchUnknown.length === 1){
       const pr = prsOfThisBranchUnknown[0];
-      core.info(`Searching conflict between base branch and this branch(${currentRef}) if base branch exists`);
+      core.info(`>> Searching conflict between this branch(${pr.headRefName}) and its base branch if the base branch exists`);
   
       checkConflictBetweenParentAndThisBranch = postOpenPullRequestsQuery(client, {
         refName: pr.headRefName,
         searchRefType: "currentBranch", // When "currentBranch" only one PR should be returned.
-        owner: github.context.repo.owner,
-        repo: github.context.repo.repo,
+        repo,
+        triggeringHead,
       });
     }
   
     if(prsOfChildBranchUnknown.length > 0){
-      core.info(`Searching conflict between this branch(${currentRef}) and branches which target this branch`);
+      core.info(`>> Searching conflict between this branch(${currentRef}) and branches which target this branch`);
   
       checkConflictBetweenThisAndChildBranches = postOpenPullRequestsQuery(client, {
         refName: currentRef,
         searchRefType: "baseBranch",
-        owner: github.context.repo.owner,
-        repo: github.context.repo.repo,
+        repo,
+        triggeringHead,
       });
     }
   

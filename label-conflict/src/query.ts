@@ -59,20 +59,41 @@ export interface OpenPullRequestsResponse {
   };
 }
 
+export interface GitHubContextPayloadPullRequest {
+  number: number;
+  html_url?: string;
+  body?: string;
+  head: {
+    ref: string;
+    repo: {
+      name: string;
+      owner: {
+        login: string;
+      };
+    }
+  }
+}
+
 export async function postOpenPullRequestsQuery(
   client: Octokit,
   params: {
     refName: string,
     searchRefType: "currentBranch" | "baseBranch",
-    owner: string,
-    repo: string,
+    repo: {owner: string; repo: string},
+    triggeringHead: { login: string; ref: string },
   },
 ): Promise<PullRequestsNode[]> {
+  const {repo, triggeringHead} = params;
+  
+  const isTriggeringRef = (login: string, headRefName: string) => {
+    return login === triggeringHead.login && headRefName === triggeringHead.ref;
+  };
+  
   const requestParams = {
     headRefName: params.searchRefType === "currentBranch" ? params.refName : undefined,
     baseRefName: params.searchRefType === "baseBranch" ? params.refName : undefined,
-    owner: params.owner,
-    repo: params.repo,
+    owner: repo.owner,
+    repo: repo.repo,
   };
   let start = Date.now();
   
@@ -95,15 +116,34 @@ export async function postOpenPullRequestsQuery(
     return [];
   }
   
-  if(params.searchRefType === "currentBranch"){
-    // This eliminates external branches whose headRefName is the same as `param.refName`.
-    // We aren't interested in conflicts between external branch and branches whose target is the external branch.
-    // By the code below, pullRequests with branches whose owner does not match the pullRequest repository owner
-    // will be eliminated.
-    response.repository.pullRequests.nodes = response.repository.pullRequests.nodes.filter(n => {
-      return n.headRepository && n.headRepository.owner.login === requestParams.owner;
-    });
-  }
+  // When searching PRs by headRefName, usually it returns only 1 PR.
+  // But there are cases where unintended PRs are returned because of the same branch name.
+  // i.e. When a user wants to check conflict for a PR whose headRef is `main`,
+  // it's possible that the GraphQL query returns 2 branches with the same name but from different repositories
+  // (For example, OriginalRepos:main and ForkedRepos:main).
+  // The code below will eliminate non-eligible PRs.
+  const filterPullRequests = (nodes: PullRequestsNode[]) => {
+    if (params.searchRefType === "currentBranch") {
+      const prevLen = nodes.length;
+      const prNodes = nodes.filter(n => {
+        if (!n.headRepository) {
+          // Usually this may not happen.
+          return true;
+        }
+        if (!isTriggeringRef(n.headRepository.owner.login, n.headRefName)) {
+          core.info(`PR#${n.number} from ${n.headRepository.owner.login}:${n.headRefName} is filtered out.`);
+          return false;
+        }
+        return true;
+      });
+      if (prevLen > prNodes.length) {
+        core.info(`The eligible branch for the target PR is ${triggeringHead.login}:${triggeringHead.ref}`);
+      }
+      return prNodes;
+    }
+    return nodes;
+  };
+  response.repository.pullRequests.nodes = filterPullRequests(response.repository.pullRequests.nodes);
   
   core.info(`Found ${response.repository.pullRequests.nodes.length} PRs for ${queryId}`);
   
@@ -124,12 +164,8 @@ export async function postOpenPullRequestsQuery(
       return [];
     }
   
-    if(params.searchRefType === "currentBranch"){
-      response.repository.pullRequests.nodes = response.repository.pullRequests.nodes.filter(n => {
-        return n.headRepository && n.headRepository.owner.login === requestParams.owner;
-      });
-    }
-    
+    response.repository.pullRequests.nodes = filterPullRequests(response.repository.pullRequests.nodes);
+  
     core.info(`Found ${response.repository.pullRequests.nodes.length} PRs`);
     retVal = retVal.concat(response.repository.pullRequests.nodes);
   }
