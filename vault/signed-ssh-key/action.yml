@@ -18,6 +18,10 @@ inputs:
     description: "Full path to the keypair to generate"
     default: "~/.ssh/id_rsa"
     required: false
+  ttl:
+    description: "Duration of the ssh keypair (subject to Vault configured limits)"
+    default: "3600s"
+    required: false
 runs:
   using: "composite"
   steps:
@@ -39,7 +43,7 @@ runs:
         data=$(curl -s \
           --header "X-Vault-Token: ${{ inputs.vault_token }}" \
           --request POST \
-          --data "{\"public_key\":\"$PUBLIC_KEY\"}" \
+          --data "{\"public_key\":\"$PUBLIC_KEY\",\"ttl\":\"${{ inputs.ttl }}\"}" \
           ${{ inputs.vault_url }}/v1/${{ inputs.backend_name }}/sign/${{ inputs.role_name }})
 
         echo $data | tr -d '\n' | jq -r '.data.signed_key' > ${{ inputs.keypair_path }}-cert.pub
