@@ -10,6 +10,9 @@ inputs:
   helm_chart:
     description: "Name or directory of the helm chart to deploy"
     required: true
+  helm_chart_repo:
+    description: URL to the helm chart repo the helm chart should be loaded from
+    required: false
   helm_values:
     description: "Values file to pass when running helm"
     required: true
@@ -26,4 +29,7 @@ runs:
     - name: Helm Upgrade / Install
       shell: sh
       run: |
-        helm upgrade --install --create-namespace --namespace ${{ inputs.namespace }} --values ${{ inputs.helm_values }} ${{ inputs.app_name }} ${{ inputs.helm_chart }}
+        if [ -n "${{ inputs.helm_chart_repo }}" ]; then
+          export REPO_PARAM="--repo ${{ inputs.helm_chart_repo }}"
+        fi
+        helm upgrade --install --create-namespace --namespace ${{ inputs.namespace }} ${REPO_PARAM} --values ${{ inputs.helm_values }} ${{ inputs.app_name }} ${{ inputs.helm_chart }}
