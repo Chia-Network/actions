@@ -37,8 +37,6 @@ runs:
         echo "MEM_TOTAL=$MEM_TOTAL" >>$env:GITHUB_ENV
       shell: bash
     - name: Set & Print ENV
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         echo "GitHub native job envs:"
         echo "――――――――――――――――――――――"
