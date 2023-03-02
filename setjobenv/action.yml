@@ -3,8 +3,8 @@ description: "Sets usable env for all job steps based on payload in GitHub Event
 runs:
   using: "composite"
   steps:
-    - name: Identify Runner Hardware (Linux/MacOS)
-      if: runner.os == 'Linux' || runner.os == 'macOS'
+    - name: Identify Runner Hardware (Linux)
+      if: runner.os == 'Linux'
       shell: bash
       run: |
         CPU_MODEL=$(lscpu | grep '^Model name:' | awk -F: '{print $2}' | xargs)
