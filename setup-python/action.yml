@@ -38,7 +38,7 @@ runs:
       env:
         PYTHON_VERSION: ${{ inputs.python-version }}
       run: |
-        if [ "${PYTHON_VERSION//[^.]}" == ".." ]
+        if [ "$(sed 's/[^.]//g' <<< ${PYTHON_VERSION})" == ".." ]
         then
           echo "patch-specified=true" >> "${GITHUB_OUTPUT}"
         else
