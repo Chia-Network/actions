@@ -5,6 +5,7 @@ runs:
   steps:
     - name: Identify Runner Hardware (Linux/MacOS)
       if: runner.os == 'Linux'
+      shell: bash
       run: |
         CPU_MODEL=$(lscpu | grep '^Model name:' | awk -F: '{print $2}' | xargs)
         echo "Set CPU_MODEL=$CPU_MODEL"
