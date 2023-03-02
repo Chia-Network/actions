@@ -4,7 +4,7 @@ runs:
   using: "composite"
   steps:
     - name: Identify Runner Hardware (Linux/MacOS)
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' || runner.os == 'macOS'
       shell: bash
       run: |
         CPU_MODEL=$(lscpu | grep '^Model name:' | awk -F: '{print $2}' | xargs)
@@ -22,20 +22,22 @@ runs:
     - name: Identify Runner Hardware (Windows)
       if: runner.os == 'Windows'
       run: |
-        $CPU_MODEL = (Get-CimInstance -ClassName Win32_Processor).Name
+        $CPU = Get-CimInstance -ClassName Win32_Processor
+        $CPU_MODEL = $CPU.Name
         echo "Set CPU_MODEL=$CPU_MODEL"
         echo "CPU_MODEL=$CPU_MODEL" >>$env:GITHUB_ENV
-        $CPU_CORES = (Get-CimInstance -ClassName Win32_Processor).NumberOfCores
+        $CPU_CORES = $CPU.NumberOfCores
         echo "Set CPU_CORES=$CPU_CORES"
         echo "CPU_CORES=$CPU_CORES" >>$env:GITHUB_ENV
-        $CPU_THREADS = (Get-CimInstance -ClassName Win32_Processor).NumberOfLogicalProcessors
+        $CPU_THREADS = $CPU.NumberOfLogicalProcessors
         echo "Set CPU_THREADS=$CPU_THREADS"
         echo "CPU_THREADS=$CPU_THREADS" >>$env:GITHUB_ENV
-        $MEM_TOTAL = (Get-CimInstance -ClassName Win32_PhysicalMemory).Capacity
+        $MEM = Get-CimInstance -ClassName Win32_PhysicalMemory
+        $MEM_TOTAL = $MEM.Capacity
         $MEM_TOTAL = [math]::Round($MEM_TOTAL / 1024 / 1024 / 1024, 2)
         echo "Set MEM_TOTAL=$MEM_TOTAL"
         echo "MEM_TOTAL=$MEM_TOTAL" >>$env:GITHUB_ENV
-      shell: bash
+      shell: powershell
     - name: Set & Print ENV
       run: |
         echo "GitHub native job envs:"
@@ -82,7 +84,7 @@ runs:
 
         # These are needed first for some of the functions and conditionals within this action
         REPO=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f2)
-        LANGUAGE=$(gh api repos/"GITHUB_REPOSITORY_OWNER"/"$GITHUB_REPOSITORY" "$GITHUB_REPOSITORY" --jq '.language')
+        LANGUAGE=$(gh api repos/"$GITHUB_REPOSITORY_OWNER"/"$GITHUB_REPOSITORY" "$GITHUB_REPOSITORY" --jq '.language')
         RFC_REPO=$(echo "$REPO" | sed 's/\./-/g; s/_/-/g')
         GIT_SHORT_HASH=$(echo "${GITHUB_SHA}" | cut -c1-8)
         GH_EVENT_ACTION=${{ github.event.action }}
