@@ -3,29 +3,41 @@ description: "Sets usable env for all job steps based on payload in GitHub Event
 runs:
   using: "composite"
   steps:
-    - name: Check Dependencies
+    - name: Identify Runner Hardware (Linux/MacOS)
+      if: runner.os == 'Linux'
       run: |
-        packagesNeeded='curl jq'
-        SUDO=$(command -v sudo)
-        if [ -x "$(command -v apk)" ]; then
-            $SUDO apk add --no-cache $packagesNeeded
-        elif [ -x "$(command -v apt-get)" ]; then
-            $SUDO apt-get update && $SUDO apt-get install -y $packagesNeeded
-        elif [ -x "$(command -v dnf)" ]; then
-            $SUDO dnf install -y $packagesNeeded
-        elif [ -x "$(command -v zypper)" ]; then
-            $SUDO zypper install -n $packagesNeeded
-        elif [ -x "$(command -v pacman)" ]; then
-            $SUDO pacman -S --needed --noconfirm $packagesNeeded
-        elif [ -x "$(command -v brew)" ]; then
-            $SUDO brew install $packagesNeeded
-        elif [ -x "$(command -v chocolatey)" ]; then
-            choco install -y $packagesNeeded
-        else
-            echo "FAILED TO INSTALL required packages: $packagesNeeded" >&2
-        fi
+        CPU_MODEL=$(lscpu | grep '^Model name:' | awk -F: '{print $2}' | xargs)
+        echo "Set CPU_MODEL=$CPU_MODEL"
+        echo "CPU_MODEL=$CPU_MODEL" >>$GITHUB_ENV
+        CPU_CORES=$(lscpu | awk '/Core\(s\) per socket/ {print $4}')
+        echo "Set CPU_CORES=$CPU_CORES"
+        echo "CPU_CORES=$CPU_CORES" >>$GITHUB_ENV
+        CPU_THREADS=$(lscpu | awk '/^CPU\(s\):/ {print $2}')
+        echo "Set CPU_THREADS=$CPU_THREADS"
+        echo "CPU_THREADS=$CPU_THREADS" >>$GITHUB_ENV
+        MEM_TOTAL=$(grep 'MemTotal' /proc/meminfo | awk '{print $2/1024/1024 "GB"}')
+        echo "Set MEM_TOTAL=$MEM_TOTAL"
+        echo "MEM_TOTAL=$MEM_TOTAL" >>$GITHUB_ENV
+    - name: Identify Runner Hardware (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        $CPU_MODEL = (Get-CimInstance -ClassName Win32_Processor).Name
+        echo "Set CPU_MODEL=$CPU_MODEL"
+        echo "CPU_MODEL=$CPU_MODEL" >>$env:GITHUB_ENV
+        $CPU_CORES = (Get-CimInstance -ClassName Win32_Processor).NumberOfCores
+        echo "Set CPU_CORES=$CPU_CORES"
+        echo "CPU_CORES=$CPU_CORES" >>$env:GITHUB_ENV
+        $CPU_THREADS = (Get-CimInstance -ClassName Win32_Processor).NumberOfLogicalProcessors
+        echo "Set CPU_THREADS=$CPU_THREADS"
+        echo "CPU_THREADS=$CPU_THREADS" >>$env:GITHUB_ENV
+        $MEM_TOTAL = (Get-CimInstance -ClassName Win32_PhysicalMemory).Capacity
+        $MEM_TOTAL = [math]::Round($MEM_TOTAL / 1024 / 1024 / 1024, 2)
+        echo "Set MEM_TOTAL=$MEM_TOTAL"
+        echo "MEM_TOTAL=$MEM_TOTAL" >>$env:GITHUB_ENV
       shell: bash
     - name: Set & Print ENV
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         echo "GitHub native job envs:"
         echo "――――――――――――――――――――――"
@@ -71,7 +83,7 @@ runs:
 
         # These are needed first for some of the functions and conditionals within this action
         REPO=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f2)
-        LANGUAGE=$(curl -s -X GET https://"$GPR_TOKEN":@api.github.com/repos/"$GITHUB_REPOSITORY" | jq -r '.language')
+        LANGUAGE=$(gh api repos/"GITHUB_REPOSITORY_OWNER"/"$GITHUB_REPOSITORY" $GITHUB_REPOSITORY" --jq '.language')
         RFC_REPO=$(echo "$REPO" | sed 's/\./-/g; s/_/-/g')
         GIT_SHORT_HASH=$(echo "${GITHUB_SHA}" | cut -c1-8)
         GH_EVENT_ACTION=${{ github.event.action }}
