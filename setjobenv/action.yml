@@ -7,18 +7,20 @@ runs:
       if: runner.os == 'Linux'
       shell: bash
       run: |
-        CPU_MODEL=$(lscpu | grep '^Model name:' | awk -F: '{print $2}' | xargs)
-        echo "Set CPU_MODEL=$CPU_MODEL"
-        echo "CPU_MODEL=$CPU_MODEL" >>$GITHUB_ENV
-        CPU_CORES=$(lscpu | awk '/Core\(s\) per socket/ {print $4}')
-        echo "Set CPU_CORES=$CPU_CORES"
-        echo "CPU_CORES=$CPU_CORES" >>$GITHUB_ENV
-        CPU_THREADS=$(lscpu | awk '/^CPU\(s\):/ {print $2}')
-        echo "Set CPU_THREADS=$CPU_THREADS"
-        echo "CPU_THREADS=$CPU_THREADS" >>$GITHUB_ENV
-        MEM_TOTAL=$(grep 'MemTotal' /proc/meminfo | awk '{print $2/1024/1024 "GB"}')
-        echo "Set MEM_TOTAL=$MEM_TOTAL"
-        echo "MEM_TOTAL=$MEM_TOTAL" >>$GITHUB_ENV
+        free -h
+        lscpu
+        # CPU_MODEL=$(lscpu | grep '^Model name:' | awk -F: '{print $2}' | xargs)
+        # echo "Set CPU_MODEL=$CPU_MODEL"
+        # echo "CPU_MODEL=$CPU_MODEL" >>$GITHUB_ENV
+        # CPU_CORES=$(lscpu | awk '/Core\(s\) per socket/ {print $4}')
+        # echo "Set CPU_CORES=$CPU_CORES"
+        # echo "CPU_CORES=$CPU_CORES" >>$GITHUB_ENV
+        # CPU_THREADS=$(lscpu | awk '/^CPU\(s\):/ {print $2}')
+        # echo "Set CPU_THREADS=$CPU_THREADS"
+        # echo "CPU_THREADS=$CPU_THREADS" >>$GITHUB_ENV
+        # MEM_TOTAL=$(grep 'MemTotal' /proc/meminfo | awk '{print $2/1024/1024 "GB"}')
+        # echo "Set MEM_TOTAL=$MEM_TOTAL"
+        # echo "MEM_TOTAL=$MEM_TOTAL" >>$GITHUB_ENV
     - name: Identify Runner Hardware (Windows)
       if: runner.os == 'Windows'
       run: |
@@ -34,7 +36,7 @@ runs:
         echo "CPU_THREADS=$CPU_THREADS" >>$env:GITHUB_ENV
         $MEM = Get-CimInstance -ClassName Win32_PhysicalMemory
         $MEM_TOTAL = $MEM.Capacity
-        $MEM_TOTAL = [math]::Round($MEM_TOTAL / 1024 / 1024 / 1024, 2)
+        $MEM_TOTAL = "$([int64]($MEM.Capacity | Measure-Object -Sum).Sum / 1GB)GB"
         echo "Set MEM_TOTAL=$MEM_TOTAL"
         echo "MEM_TOTAL=$MEM_TOTAL" >>$env:GITHUB_ENV
       shell: powershell
