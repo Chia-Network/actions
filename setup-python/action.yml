@@ -32,12 +32,25 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Inspect requested version
+      shell: sh
+      id: inspect
+      env:
+        PYTHON_VERSION: ${{ inputs.python-version }}
+      run: |
+        if [ "${PYTHON_VERSION//[^.]}" == ".." ]
+        then
+          echo "patch-specified=true" >> "${GITHUB_OUTPUT}"
+        else
+          echo "patch-specified=false" >> "${GITHUB_OUTPUT}"
+        fi
+
     - name: Call upstream setup-python action
       uses: actions/setup-python@v4
       # Requires native m1 runner software, not x64 running via arch flags
       if: runner.arch != 'ARM64' && inputs.force-pyenv == 'false'
       with:
-        python-version: ${{ format('{0}.0-alpha - {0}.X', inputs.python-version) }}
+        python-version: ${{ steps.inspect.outputs.patch-specified && inputs.python-version || format('{0}.0-alpha - {0}.X', inputs.python-version) }}
         architecture: ${{ inputs.architecture }}
         cache: ${{ inputs.cache }}
         token: ${{ inputs.token }}

@@ -62,6 +62,10 @@ jobs:
             action: '3.11'
             check: '3.11'
             matrix: 'py3.11'
+          - name: '3.12'
+            action: '3.12'
+            check: '3.12'
+            matrix: 'py3.12'
         arch:
           - name: ARM
             matrix: arm
