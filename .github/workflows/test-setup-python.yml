@@ -123,7 +123,6 @@ jobs:
     - name: Check Python version
       env:
         PYTHON_CHECK: ${{ matrix.python.check }}
-        PYTHON_VERSION_STRING: ${{ python-version-string }}
       run: |
         python ./setup-python/test_check_version.py
 
