@@ -63,7 +63,7 @@ runs:
       shell: sh
       id: select
       env:
-        SELECTED_PYTHON_VERSION: ${{ inputs.allow-prelease == 'true' && format('{0}.0-alpha - {0}.X', inputs.python-version) || inputs.python-version }}
+        SELECTED_PYTHON_VERSION: ${{ inputs.allow-prerelease == 'true' && format('{0}.0-alpha - {0}.X', inputs.python-version) || inputs.python-version }}
       run: |
         echo "version-string=${SELECTED_PYTHON_VERSION}" | tee -a "${GITHUB_OUTPUT}"
 
