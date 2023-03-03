@@ -50,7 +50,7 @@ runs:
       # Requires native m1 runner software, not x64 running via arch flags
       if: runner.arch != 'ARM64' && inputs.force-pyenv == 'false'
       with:
-        python-version: ${{ steps.inspect.outputs.patch-specified && inputs.python-version || format('{0}.0-alpha - {0}.X', inputs.python-version) }}
+        python-version: ${{ steps.inspect.outputs.patch-specified == 'true' && inputs.python-version || format('{0}.0-alpha - {0}.X', inputs.python-version) }}
         architecture: ${{ inputs.architecture }}
         cache: ${{ inputs.cache }}
         token: ${{ inputs.token }}
