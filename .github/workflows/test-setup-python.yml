@@ -16,8 +16,9 @@ concurrency:
   cancel-in-progress: true
 
 defaults:
-  shell:
-    bash
+  run:
+    shell:
+      bash
 
 jobs:
   test:
