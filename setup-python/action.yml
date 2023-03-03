@@ -55,7 +55,7 @@ runs:
       env:
         SELECTED_PYTHON_VERSION: ${{ steps.inspect.outputs.patch-specified == 'true' && inputs.python-version || format('{0}.0-alpha - {0}.X', inputs.python-version) }}
       run: |
-        echo "version-string=${SELECTED_PYTHON_VERSION" | tee -a "${GITHUB_OUTPUT}"
+        echo "version-string=${SELECTED_PYTHON_VERSION}" | tee -a "${GITHUB_OUTPUT}"
 
     - name: Call upstream setup-python action
       uses: actions/setup-python@v4
