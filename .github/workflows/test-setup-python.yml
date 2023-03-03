@@ -138,6 +138,6 @@ jobs:
 
     - name: Make sure pre-release version adjustment made if appropriate
       env:
-        VALUE: ${{ matrix.python.allow-prerelease && contains(steps.run-the-action.outputs.python-version-string, '.0-alpha') || ( steps.run-the-action.outputs.python-version-string == matrix.python.action ) }}
+        RESULT: ${{ matrix.python.allow-prerelease && contains(steps.run-the-action.outputs.python-version-string, '.0-alpha') || ( steps.run-the-action.outputs.python-version-string == matrix.python.action ) }}
       run: |
-        [ "${VALUE}" = 'true' ]
+        ${RESULT}
