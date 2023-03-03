@@ -53,7 +53,7 @@ runs:
       shell: sh
       id: select
       env:
-        SELECTED_PYTHON_VERSION: ${{ steps.inspect.outputs.patch-specified == 'true' && inputs.python-version || format('{0}.0-alpha - {0}.X', inputs.python-version) }}
+        SELECTED_PYTHON_VERSION: ${{ steps.inspect.outputs.patch-specified == 'false' && inputs.python-version || format('{0}.0-alpha - {0}.X', inputs.python-version) }}
       run: |
         echo "version-string=${SELECTED_PYTHON_VERSION}" | tee -a "${GITHUB_OUTPUT}"
 
