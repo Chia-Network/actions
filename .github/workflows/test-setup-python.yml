@@ -106,6 +106,7 @@ jobs:
               name: '3.7'
               action: '3.7'
               check: '3.7'
+              patch-specified: false
               matrix: 'py3.7'
             arch:
               name: ARM
