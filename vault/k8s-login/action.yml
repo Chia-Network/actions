@@ -16,6 +16,10 @@ inputs:
   cluster_url:
     description: "URL or IP with port of the kubernetes api server"
     required: true
+  ttl:
+    description: "Duration of the token (subject to Vault configured limits)"
+    default: "3600s"
+    required: false
 runs:
   using: "composite"
   steps:
@@ -29,7 +33,7 @@ runs:
         DATA=$(curl -s \
           --header "X-Vault-Token: ${{ inputs.vault_token }}" \
           --request POST \
-          --data "{\"common_name\":\"${{ github.actor }}@github\"}" \
+          --data "{\"ttl\":\"${{ inputs.ttl }}\",\"common_name\":\"${{ github.actor }}@github\"}" \
           ${{ inputs.vault_url }}/v1/${{ inputs.backend_name }}/issue/${{ inputs.role_name }})
 
         # Write the key data to a temp file
