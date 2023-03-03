@@ -15,6 +15,10 @@ concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}-${{ github.event_name }}-${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/') || startsWith(github.ref, 'refs/heads/long_lived/')) && github.sha || '' }}
   cancel-in-progress: true
 
+defaults:
+  shell:
+    bash
+
 jobs:
   test:
     name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.python.name }}
@@ -41,30 +45,37 @@ jobs:
           - name: '3.7'
             action: '3.7'
             check: '3.7'
+            patch-specified: false
             matrix: 'py3.7'
           - name: '3.8'
             action: '3.8'
             check: '3.8'
+            patch-specified: false
             matrix: 'py3.8'
           - name: '3.9'
             action: '3.9'
             check: '3.9'
+            patch-specified: false
             matrix: 'py3.9'
           - name: '3.10'
             action: '3.10'
             check: '3.10'
+            patch-specified: false
             matrix: 'py3.10'
           - name: '3.10.8'
             action: '3.10.8'
             check: '3.10.8'
+            patch-specified: true
             matrix: 'py3.10.8'
           - name: '3.11'
             action: '3.11'
             check: '3.11'
+            patch-specified: false
             matrix: 'py3.11'
           - name: '3.12'
             action: '3.12'
             check: '3.12'
+            patch-specified: false
             matrix: 'py3.12'
         arch:
           - name: ARM
@@ -104,11 +115,19 @@ jobs:
 
     - name: Run the action
       uses: ./setup-python/
+      id: run-the-action
       with:
         python-version: ${{ matrix.python.action }}
 
     - name: Check Python version
       env:
         PYTHON_CHECK: ${{ matrix.python.check }}
+        PYTHON_VERSION_STRING: ${{ python-version-string }}
       run: |
         python ./setup-python/test_check_version.py
+
+    - name: Make sure pre-release version adjustment made if appropriate
+      env:
+        VALUE: ${{ matrix.python.patch-specified && ( steps.run-the-action.outputs.python-version-string == matrix.python.action ) || contains(steps.run-the-action.outputs.python-version-string, '.0-alpha') }}
+      run: |
+        [ "${VALUE}" = 'true' ]

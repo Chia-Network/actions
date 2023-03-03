@@ -29,6 +29,9 @@ outputs:
     description: "The installed python version. Useful when given a version range as input."
   cache-hit:
     description: 'A boolean value to indicate a cache entry was found'
+  python-version-string:
+    description: "The python version string passed to upstream actions/setup-python"
+    value: ${{ steps.select.outputs.version-string }}
 runs:
   using: "composite"
   steps:
@@ -36,26 +39,35 @@ runs:
       shell: sh
       id: inspect
       env:
-        PYTHON_VERSION: ${{ inputs.python-version }}
+        REQUESTED_PYTHON_VERSION: ${{ inputs.python-version }}
       run: |
         set -vx
-        if [ "$(echo "${PYTHON_VERSION}" | sed 's/[^.]//g')" = "." ]
+        if [ "$(echo "${REQUESTED_PYTHON_VERSION}" | sed 's/[^.]//g')" = "." ]
         then
           echo "patch-specified=false" | tee -a "${GITHUB_OUTPUT}"
         else
           echo "patch-specified=true" | tee -a "${GITHUB_OUTPUT}"
         fi
 
+    - name: Create version string
+      shell: sh
+      id: select
+      env:
+        SELECTED_PYTHON_VERSION: ${{ steps.inspect.outputs.patch-specified == 'true' && inputs.python-version || format('{0}.0-alpha - {0}.X', inputs.python-version) }}
+      run: |
+        echo "version-string=${SELECTED_PYTHON_VERSION" | tee -a "${GITHUB_OUTPUT}"
+
     - name: Call upstream setup-python action
       uses: actions/setup-python@v4
       # Requires native m1 runner software, not x64 running via arch flags
       if: runner.arch != 'ARM64' && inputs.force-pyenv == 'false'
       with:
-        python-version: ${{ steps.inspect.outputs.patch-specified == 'true' && inputs.python-version || format('{0}.0-alpha - {0}.X', inputs.python-version) }}
+        python-version: ${{ steps.select.outputs.version-string }}
         architecture: ${{ inputs.architecture }}
         cache: ${{ inputs.cache }}
         token: ${{ inputs.token }}
         cache-dependency-path: ${{ inputs.cache-dependency-path }}
+
     - name: Setup Python on ARM64 (pyenv)
       if: runner.arch == 'ARM64' || inputs.force-pyenv != 'false'
       shell: sh
