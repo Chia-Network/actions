@@ -38,11 +38,11 @@ runs:
       env:
         PYTHON_VERSION: ${{ inputs.python-version }}
       run: |
-        if [ "$(echo "${PYTHON_VERSION}" | sed 's/[^.]//g')" == ".." ]
+        if [ "$(echo "${PYTHON_VERSION}" | sed 's/[^.]//g')" == "." ]
         then
-          echo "patch-specified=true" >> "${GITHUB_OUTPUT}"
+          echo "patch-specified=false" | tee -a "${GITHUB_OUTPUT}"
         else
-          echo "patch-specified=false" >> "${GITHUB_OUTPUT}"
+          echo "patch-specified=true" | tee -a "${GITHUB_OUTPUT}"
         fi
 
     - name: Call upstream setup-python action
