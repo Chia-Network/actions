@@ -114,6 +114,7 @@ jobs:
               action: '3.7'
               check: '3.7'
               patch-specified: false
+              allow-prerelease: false
               matrix: 'py3.7'
             arch:
               name: ARM
