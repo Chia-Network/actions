@@ -24,6 +24,10 @@ inputs:
     required: false
     default: 'false'
     description: "Will force using pyenv instead of the upstream action if set to 'true'"
+  allow-prerelease:
+    required: false
+    default: 'false'
+    description: "Adjusts the passed in Python version to allow for pre-releases based on a simple major.minor request."
 outputs:
   python-version:
     description: "The installed python version. Useful when given a version range as input."
@@ -48,6 +52,12 @@ runs:
         else
           echo "patch-specified=true" | tee -a "${GITHUB_OUTPUT}"
         fi
+
+    - name: Disallow specifying a patch version when allowing pre-releases
+      if: steps.inspect.outputs.patch-specified == 'true' && inputs.allow-prelease
+      shell: sh
+      run: |
+        false
 
     - name: Create version string
       shell: sh
