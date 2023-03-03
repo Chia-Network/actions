@@ -39,7 +39,7 @@ runs:
         PYTHON_VERSION: ${{ inputs.python-version }}
       run: |
         set -vx
-        if [ "$(echo "${PYTHON_VERSION}" | sed 's/[^.]//g')" == "." ]
+        if [ "$(echo "${PYTHON_VERSION}" | sed 's/[^.]//g')" = "." ]
         then
           echo "patch-specified=false" | tee -a "${GITHUB_OUTPUT}"
         else
