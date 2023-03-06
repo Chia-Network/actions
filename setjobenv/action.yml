@@ -7,20 +7,24 @@ runs:
       if: runner.os == 'Linux'
       shell: bash
       run: |
-        free -h
-        lscpu
-        # CPU_MODEL=$(lscpu | grep '^Model name:' | awk -F: '{print $2}' | xargs)
-        # echo "Set CPU_MODEL=$CPU_MODEL"
-        # echo "CPU_MODEL=$CPU_MODEL" >>$GITHUB_ENV
-        # CPU_CORES=$(lscpu | awk '/Core\(s\) per socket/ {print $4}')
-        # echo "Set CPU_CORES=$CPU_CORES"
-        # echo "CPU_CORES=$CPU_CORES" >>$GITHUB_ENV
-        # CPU_THREADS=$(lscpu | awk '/^CPU\(s\):/ {print $2}')
-        # echo "Set CPU_THREADS=$CPU_THREADS"
-        # echo "CPU_THREADS=$CPU_THREADS" >>$GITHUB_ENV
-        # MEM_TOTAL=$(grep 'MemTotal' /proc/meminfo | awk '{print $2/1024/1024 "GB"}')
-        # echo "Set MEM_TOTAL=$MEM_TOTAL"
-        # echo "MEM_TOTAL=$MEM_TOTAL" >>$GITHUB_ENV
+        if [[ $RUNNER_DEBUG = 1 ]]; then
+          free -h
+          echo "――――――――――――――――――――――"
+          lscpu
+          echo "――――――――――――――――――――――"
+        fi
+        CPU_MODEL=$(lscpu | grep '^Model name:' | awk -F: '{print $2}' | xargs)
+        echo "Set CPU_MODEL=$CPU_MODEL"
+        echo "CPU_MODEL=$CPU_MODEL" >>$GITHUB_ENV
+        CPU_CORES=$(lscpu | awk '/Core\(s\) per socket/ {print $4}')
+        echo "Set CPU_CORES=$CPU_CORES"
+        echo "CPU_CORES=$CPU_CORES" >>$GITHUB_ENV
+        CPU_THREADS=$(lscpu | awk '/^CPU\(s\):/ {print $2}')
+        echo "Set CPU_THREADS=$CPU_THREADS"
+        echo "CPU_THREADS=$CPU_THREADS" >>$GITHUB_ENV
+        MEM_TOTAL=$(grep 'MemTotal' /proc/meminfo | awk '{print $2/1024/1024 "GB"}')
+        echo "Set MEM_TOTAL=$MEM_TOTAL"
+        echo "MEM_TOTAL=$MEM_TOTAL" >>$GITHUB_ENV
     - name: Identify Runner Hardware (Windows)
       if: runner.os == 'Windows'
       run: |
@@ -40,6 +44,10 @@ runs:
         echo "Set MEM_TOTAL=$MEM_TOTAL"
         echo "MEM_TOTAL=$MEM_TOTAL" >>$env:GITHUB_ENV
       shell: powershell
+    - name: Catch Payload
+      if:  runner.debug == '1'
+      run: |
+        jq '.' "$GITHUB_EVENT_PATH"
     - name: Set & Print ENV
       run: |
         echo "GitHub native job envs:"
