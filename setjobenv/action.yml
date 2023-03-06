@@ -46,6 +46,7 @@ runs:
       shell: powershell
     - name: Catch Payload
       if:  runner.debug == '1'
+      shell: bash
       run: |
         jq '.' "$GITHUB_EVENT_PATH"
     - name: Set & Print ENV
