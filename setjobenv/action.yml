@@ -47,7 +47,7 @@ runs:
     - name: Get EMD
       if: runner.os == 'Ubuntu' || runner.os == 'Linux'
       run: |
-        apt update && apt install gh eatmydata jq
+        sudo apt update && sudo apt install gh eatmydata jq
       shell: bash
     - name: Catch Payload
       if:  runner.debug == '1'
