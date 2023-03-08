@@ -50,7 +50,7 @@ runs:
     - name: Get EMD
       if: runner.os == 'Ubuntu'
       run: |
-        apt install eatmydata
+        apt update && apt install gh eatmydata
       shell: bash
       run: |
         jq '.' "$GITHUB_EVENT_PATH"
