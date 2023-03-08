@@ -45,7 +45,7 @@ runs:
         echo "MEM_TOTAL=$MEM_TOTAL" >>$env:GITHUB_ENV
       shell: powershell
     - name: Get EMD
-      if: runner.os == 'Ubuntu'
+      if: runner.os == 'Ubuntu' || runner.os == 'Linux'
       run: |
         apt update && apt install gh eatmydata jq
       shell: bash
