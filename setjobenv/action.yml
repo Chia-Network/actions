@@ -47,6 +47,11 @@ runs:
     - name: Catch Payload
       if:  runner.debug == '1'
       shell: bash
+    - name: Get EMD
+      if: runner.os == 'Ubuntu'
+      run: |
+        apt install eatmydata
+      shell: bash
       run: |
         jq '.' "$GITHUB_EVENT_PATH"
     - name: Set & Print ENV
