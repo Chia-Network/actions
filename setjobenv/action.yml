@@ -3,6 +3,27 @@ description: "Sets usable env for all job steps based on payload in GitHub Event
 runs:
   using: "composite"
   steps:
+    - name: Check Dependencies
+      run: |
+        packagesNeeded='curl jq gh'
+        SUDO=$(command -v sudo)
+        if [ -x "$(command -v apk)" ]; then
+            $SUDO apk add --no-cache $packagesNeeded
+        elif [ -x "$(command -v apt-get)" ]; then
+            $SUDO apt-get update && $SUDO apt-get install -y $packagesNeeded
+        elif [ -x "$(command -v dnf)" ]; then
+            $SUDO dnf install -y $packagesNeeded
+        elif [ -x "$(command -v zypper)" ]; then
+            $SUDO zypper install -n $packagesNeeded
+        elif [ -x "$(command -v pacman)" ]; then
+            $SUDO pacman -S --needed --noconfirm $packagesNeeded
+        elif [ -x "$(command -v brew)" ]; then
+            $SUDO brew install $packagesNeeded
+        elif [ -x "$(command -v chocolatey)" ]; then
+            choco install -y $packagesNeeded
+        else
+            echo "FAILED TO INSTALL required packages: $packagesNeeded" >&2
+        fi
     - name: Identify Runner Hardware (Linux)
       if: runner.os == 'Linux' && runner.arch == 'X86' || runner.os == 'Linux' && runner.arch == 'X64'
       shell: bash
@@ -48,7 +69,7 @@ runs:
       if:  runner.debug == '1'
       shell: bash
       run: |
-        jq '.' "$GITHUB_EVENT_PATH"
+        [[ command -v jq >/dev/null ]] && jq '.' "$GITHUB_EVENT_PATH"
     - name: Set & Print ENV
       run: |
         echo "GitHub native job envs:"
