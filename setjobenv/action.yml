@@ -4,7 +4,7 @@ runs:
   using: "composite"
   steps:
     - name: Identify Runner Hardware (Linux)
-      if: runner.os == 'Linux' && runner.arch == 'X86' && runner.arch == 'X64'
+      if: runner.os == 'Linux' && runner.arch == 'X86' || runner.arch == 'X64'
       shell: bash
       run: |
         if [[ $RUNNER_DEBUG = 1 ]]; then
@@ -95,7 +95,7 @@ runs:
 
         # These are needed first for some of the functions and conditionals within this action
         REPO=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f2)
-        LANGUAGE=$(gh api repos/"$GITHUB_REPOSITORY" --jq '.language')
+        #LANGUAGE=$(gh api repos/"$GITHUB_REPOSITORY" --jq '.language')
         RFC_REPO=$(echo "$REPO" | sed 's/\./-/g; s/_/-/g')
         GIT_SHORT_HASH=$(echo "${GITHUB_SHA}" | cut -c1-8)
         GH_EVENT_ACTION=${{ github.event.action }}
@@ -123,8 +123,8 @@ runs:
         # Begin custom
         echo "GH_EVENT_ACTION=$GH_EVENT_ACTION" >>GITHUB_ENV
         echo "Set GH_EVENT_ACTION=$GH_EVENT_ACTION"
-        echo "LANGUAGE=$LANGUAGE" >>$GITHUB_ENV
-        echo "Set LANGUAGE=$LANGUAGE"
+        #echo "LANGUAGE=$LANGUAGE" >>$GITHUB_ENV
+        #echo "Set LANGUAGE=$LANGUAGE"
         echo "GH_WORKFLOW_URL="$GITHUB_SERVER_URL"/"$GITHUB_REPOSITORY"/actions/runs/"$GITHUB_RUN_ID"" >>$GITHUB_ENV
         echo "Set GH_WORKFLOW_URL=$GH_WORKFLOW_URL"
         # RFC_REPO: the repo name represented in a RFC1035 format
