@@ -10,15 +10,24 @@ runs:
         if [ -x "$(command -v apk)" ]; then
             $SUDO apk add --no-cache $packagesNeeded
         elif [ -x "$(command -v apt-get)" ]; then
-            $SUDO apt-get update && $SUDO apt-get install -y $packagesNeeded
+            type -p curl >/dev/null || sudo apt install curl -y
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+            && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+            && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+            && sudo apt update \
+            && $SUDO apt-get install -y $packagesNeeded
         elif [ -x "$(command -v dnf)" ]; then
+            sudo dnf install 'dnf-command(config-manager)'
+            sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
             $SUDO dnf install -y $packagesNeeded
         elif [ -x "$(command -v zypper)" ]; then
+            sudo zypper addrepo https://cli.github.com/packages/rpm/gh-cli.repo
+            sudo zypper ref
             $SUDO zypper install -n $packagesNeeded
         elif [ -x "$(command -v pacman)" ]; then
             $SUDO pacman -S --needed --noconfirm $packagesNeeded
         elif [ -x "$(command -v brew)" ]; then
-            $SUDO brew install $packagesNeeded
+            brew install $packagesNeeded
         elif [ -x "$(command -v chocolatey)" ]; then
             choco install -y $packagesNeeded
         else
