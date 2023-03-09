@@ -79,7 +79,7 @@ runs:
       if:  runner.debug == '1'
       shell: bash
       run: |
-        [[ command -v jq >/dev/null ]] && jq '.' "$GITHUB_EVENT_PATH"
+        jq '.' "$GITHUB_EVENT_PATH"
     - name: Set & Print ENV
       run: |
         echo "GitHub native job envs:"
