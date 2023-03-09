@@ -10,12 +10,6 @@ runs:
       run: |
         python --version --version
 
-    - name: Installed packages
-      shell: sh
-      run: |
-        python -m pip --version
-        python -m pip freeze
-
     - name: SQLite
       shell: sh
       run: |
@@ -26,6 +20,12 @@ runs:
       run: |
         python -c 'import ssl; print(f"ssl.OPENSSL_VERSION: {ssl.OPENSSL_VERSION}")'
         python -c 'import ssl; print(f"ssl.OPENSSL_VERSION_NUMBER: {ssl.OPENSSL_VERSION_NUMBER}")'
+
+    - name: Installed packages
+      shell: sh
+      run: |
+        python -m pip --version
+        python -m pip freeze
 
     - name: Python sysconfig
       shell: sh
