@@ -47,7 +47,10 @@ runs:
       if: runner.os == 'Windows'
       run: |
         $env:packagesNeeded='curl,jq,gh'
-        choco install -y $env:packagesNeeded
+        $packages = $env:packagesNeeded.Split(',')
+        foreach ($package in $packages) {
+          choco install -y $package
+        }
       shell: powershell
     - name: Identify Runner Hardware (Linux)
       if: runner.os == 'Linux' && runner.arch == 'X86' || runner.os == 'Linux' && runner.arch == 'X64'
