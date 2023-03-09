@@ -24,6 +24,7 @@ runs:
         else
             echo "FAILED TO INSTALL required packages: $packagesNeeded" >&2
         fi
+      shell: bash
     - name: Identify Runner Hardware (Linux)
       if: runner.os == 'Linux' && runner.arch == 'X86' || runner.os == 'Linux' && runner.arch == 'X64'
       shell: bash
