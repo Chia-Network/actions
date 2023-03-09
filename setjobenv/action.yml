@@ -46,7 +46,7 @@ runs:
     - name: Check Dependencies (Windows)
       if: runner.os == 'Windows'
       run: |
-        $env:packagesNeeded='curl jq gh'
+        $env:packagesNeeded='curl,jq,gh'
         choco install -y $env:packagesNeeded
       shell: powershell
     - name: Identify Runner Hardware (Linux)
