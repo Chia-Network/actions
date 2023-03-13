@@ -64,34 +64,34 @@ runs:
         fi
         CPU_MODEL=$(lscpu | grep '^Model name:' | awk -F: '{print $2}' | xargs)
         echo "Set CPU_MODEL=$CPU_MODEL"
-        echo "CPU_MODEL=$CPU_MODEL" >>$GITHUB_ENV
+        echo "CPU_MODEL=$CPU_MODEL" >>"$GITHUB_ENV"
         CPU_CORES=$(lscpu | awk '/Core\(s\) per socket/ {print $4}')
         echo "Set CPU_CORES=$CPU_CORES"
-        echo "CPU_CORES=$CPU_CORES" >>$GITHUB_ENV
+        echo "CPU_CORES=$CPU_CORES" >>"$GITHUB_ENV"
         CPU_THREADS=$(lscpu | awk '/^CPU\(s\):/ {print $2}')
         echo "Set CPU_THREADS=$CPU_THREADS"
-        echo "CPU_THREADS=$CPU_THREADS" >>$GITHUB_ENV
+        echo "CPU_THREADS=$CPU_THREADS" >>"$GITHUB_ENV"
         MEM_TOTAL=$(grep 'MemTotal' /proc/meminfo | awk '{print $2/1024/1024 "GB"}')
         echo "Set MEM_TOTAL=$MEM_TOTAL"
-        echo "MEM_TOTAL=$MEM_TOTAL" >>$GITHUB_ENV
+        echo "MEM_TOTAL=$MEM_TOTAL" >>"$GITHUB_ENV"
     - name: Identify Runner Hardware (Windows)
       if: runner.os == 'Windows'
       run: |
         $CPU = Get-CimInstance -ClassName Win32_Processor
         $CPU_MODEL = $CPU.Name
         echo "Set CPU_MODEL=$CPU_MODEL"
-        echo "CPU_MODEL=$CPU_MODEL" >>$env:GITHUB_ENV
+        echo "CPU_MODEL=$CPU_MODEL" >>"$env:GITHUB_ENV"
         $CPU_CORES = $CPU.NumberOfCores
         echo "Set CPU_CORES=$CPU_CORES"
-        echo "CPU_CORES=$CPU_CORES" >>$env:GITHUB_ENV
+        echo "CPU_CORES=$CPU_CORES" >>"$env:GITHUB_ENV"
         $CPU_THREADS = $CPU.NumberOfLogicalProcessors
         echo "Set CPU_THREADS=$CPU_THREADS"
-        echo "CPU_THREADS=$CPU_THREADS" >>$env:GITHUB_ENV
+        echo "CPU_THREADS=$CPU_THREADS" >>"$env:GITHUB_ENV"
         $MEM = Get-CimInstance -ClassName Win32_PhysicalMemory
         $MEM_TOTAL = $MEM.Capacity
         $MEM_TOTAL = "$([int64]($MEM.Capacity | Measure-Object -Sum).Sum / 1GB)GB"
         echo "Set MEM_TOTAL=$MEM_TOTAL"
-        echo "MEM_TOTAL=$MEM_TOTAL" >>$env:GITHUB_ENV
+        echo "MEM_TOTAL=$MEM_TOTAL" >>"$env:GITHUB_ENV"
       shell: powershell
     - name: Catch Payload
       if:  runner.debug == '1'
@@ -102,42 +102,78 @@ runs:
       run: |
         echo "GitHub native job envs:"
         echo "――――――――――――――――――――――"
-        echo "CI="$CI
-        echo "GITHUB_ACTION="$GITHUB_ACTION
-        echo "GITHUB_ACTION_PATH="$GITHUB_ACTION_PATH
-        echo "GITHUB_ACTION_REPOSITORY="$GITHUB_ACTION_REPOSITORY
-        echo "GITHUB_ACTIONS="$GITHUB_ACTIONS
-        echo "GITHUB_ACTOR="$GITHUB_ACTOR
-        echo "GITHUB_API_URL="$GITHUB_API_URL
-        echo "GITHUB_BASE_REF="$GITHUB_BASE_REF
-        echo "GITHUB_ENV="$GITHUB_ENV
-        echo "GITHUB_EVENT_NAME="$GITHUB_EVENT_NAME
-        echo "GITHUB_EVENT_PATH="$GITHUB_EVENT_PATH
-        echo "GITHUB_GRAPHQL_URL="$GITHUB_GRAPHQL_URL
-        echo "GITHUB_HEAD_REF="$GITHUB_HEAD_REF
-        echo "GITHUB_JOB="$GITHUB_JOB
-        echo "GITHUB_PATH="$GITHUB_PATH
-        echo "GITHUB_REF="$GITHUB_REF
-        echo "GITHUB_REF_NAME="$GITHUB_REF_NAME
-        echo "GITHUB_REF_PROTECTED="$GITHUB_REF_PROTECTED
-        echo "GITHUB_REF_TYPE="$GITHUB_REF_TYPE
-        echo "GITHUB_REPOSITORY="$GITHUB_REPOSITORY
-        echo "GITHUB_REPOSITORY_OWNER="$GITHUB_REPOSITORY_OWNER
-        echo "GITHUB_RETENTION_DAYS="$GITHUB_RETENTION_DAYS
-        echo "GITHUB_RUN_ATTEMPT="$GITHUB_RUN_ATTEMPT
-        echo "GITHUB_RUN_ID="$GITHUB_RUN_ID
-        echo "GITHUB_RUN_NUMBER="$GITHUB_RUN_NUMBER
-        echo "GITHUB_SERVER_URL="$GITHUB_SERVER_URL
-        echo "GITHUB_SHA="$GITHUB_SHA
-        echo "GITHUB_STEP_SUMMARY="$GITHUB_STEP_SUMMARY
-        echo "GITHUB_WORKFLOW="$GITHUB_WORKFLOW
-        echo "GITHUB_WORKSPACE="$GITHUB_WORKSPACE
-        echo "RUNNER_ARCH="$RUNNER_ARCH
-        echo "RUNNER_DEBUG="$RUNNER_DEBUG
-        echo "RUNNER_NAME="$RUNNER_NAME
-        echo "RUNNER_OS="$RUNNER_OS
-        echo "RUNNER_TEMP="$RUNNER_TEMP
-        echo "RUNNER_TOOL_CACHE="$RUNNER_TOOL_CACHE
+        echo "CI=$CI"
+        echo "CI=$CI" >>"$GITHUB_ENV"
+        echo "GITHUB_ACTION=$GITHUB_ACTION"
+        echo "GITHUB_ACTION=$GITHUB_ACTION" >>"$GITHUB_ENV"
+        echo "GITHUB_ACTION_PATH=$GITHUB_ACTION_PATH"
+        echo "GITHUB_ACTION_PATH=$GITHUB_ACTION_PATH" >>"$GITHUB_ENV"
+        echo "GITHUB_ACTION_REPOSITORY=$GITHUB_ACTION_REPOSITORY"
+        echo "GITHUB_ACTION_REPOSITORY=$GITHUB_ACTION_REPOSITORY" >>"$GITHUB_ENV"
+        echo "GITHUB_ACTIONS=$GITHUB_ACTIONS"
+        echo "GITHUB_ACTIONS=$GITHUB_ACTIONS" >>"$GITHUB_ENV"
+        echo "GITHUB_ACTOR=$GITHUB_ACTOR"
+        echo "GITHUB_ACTOR=$GITHUB_ACTOR" >>"$GITHUB_ENV"
+        echo "GITHUB_API_URL=$GITHUB_API_URL"
+        echo "GITHUB_API_URL=$GITHUB_API_URL" >>"$GITHUB_ENV"
+        echo "GITHUB_BASE_REF=$GITHUB_BASE_REF"
+        echo "GITHUB_BASE_REF=$GITHUB_BASE_REF" >>"$GITHUB_ENV"
+        echo "GITHUB_ENV=$GITHUB_ENV"
+        echo "GITHUB_ENV=$GITHUB_ENV" >>"$GITHUB_ENV"
+        echo "GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME"
+        echo "GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME" >>"$GITHUB_ENV"
+        echo "GITHUB_EVENT_PATH=$GITHUB_EVENT_PATH"
+        echo "GITHUB_EVENT_PATH=$GITHUB_EVENT_PATH" >>"$GITHUB_ENV"
+        echo "GITHUB_GRAPHQL_URL=$GITHUB_GRAPHQL_URL"
+        echo "GITHUB_GRAPHQL_URL=$GITHUB_GRAPHQL_URL" >>"$GITHUB_ENV"
+        echo "GITHUB_HEAD_REF=$GITHUB_HEAD_REF"
+        echo "GITHUB_HEAD_REF=$GITHUB_HEAD_REF" >>"$GITHUB_ENV"
+        echo "GITHUB_JOB=$GITHUB_JOB"
+        echo "GITHUB_JOB=$GITHUB_JOB" >>"$GITHUB_ENV"
+        echo "GITHUB_PATH=$GITHUB_PATH"
+        echo "GITHUB_PATH=$GITHUB_PATH" >>"$GITHUB_ENV"
+        echo "GITHUB_REF=$GITHUB_REF"
+        echo "GITHUB_REF=$GITHUB_REF" >>"$GITHUB_ENV"
+        echo "GITHUB_REF_NAME=$GITHUB_REF_NAME"
+        echo "GITHUB_REF_NAME=$GITHUB_REF_NAME" >>"$GITHUB_ENV"
+        echo "GITHUB_REF_PROTECTED=$GITHUB_REF_PROTECTED"
+        echo "GITHUB_REF_PROTECTED=$GITHUB_REF_PROTECTED" >>"$GITHUB_ENV"
+        echo "GITHUB_REF_TYPE=$GITHUB_REF_TYPE"
+        echo "GITHUB_REF_TYPE=$GITHUB_REF_TYPE" >>"$GITHUB_ENV"
+        echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
+        echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" >>"$GITHUB_ENV"
+        echo "GITHUB_REPOSITORY_OWNER=$GITHUB_REPOSITORY_OWNER"
+        echo "GITHUB_REPOSITORY_OWNER=$GITHUB_REPOSITORY_OWNER" >>"$GITHUB_ENV"
+        echo "GITHUB_RETENTION_DAYS=$GITHUB_RETENTION_DAYS"
+        echo "GITHUB_RETENTION_DAYS=$GITHUB_RETENTION_DAYS" >>"$GITHUB_ENV"
+        echo "GITHUB_RUN_ATTEMPT=$GITHUB_RUN_ATTEMPT"
+        echo "GITHUB_RUN_ATTEMPT=$GITHUB_RUN_ATTEMPT" >>"$GITHUB_ENV"
+        echo "GITHUB_RUN_ID=$GITHUB_RUN_ID"
+        echo "GITHUB_RUN_ID=$GITHUB_RUN_ID" >>"$GITHUB_ENV"
+        echo "GITHUB_RUN_NUMBER=$GITHUB_RUN_NUMBER"
+        echo "GITHUB_RUN_NUMBER=$GITHUB_RUN_NUMBER" >>"$GITHUB_ENV"
+        echo "GITHUB_SERVER_URL=$GITHUB_SERVER_URL"
+        echo "GITHUB_SERVER_URL=$GITHUB_SERVER_URL" >>"$GITHUB_ENV"
+        echo "GITHUB_SHA=$GITHUB_SHA"
+        echo "GITHUB_SHA=$GITHUB_SHA" >>"$GITHUB_ENV"
+        echo "GITHUB_STEP_SUMMARY=$GITHUB_STEP_SUMMARY"
+        echo "GITHUB_STEP_SUMMARY=$GITHUB_STEP_SUMMARY" >>"$GITHUB_ENV"
+        echo "GITHUB_WORKFLOW=$GITHUB_WORKFLOW"
+        echo "GITHUB_WORKFLOW=$GITHUB_WORKFLOW" >>"$GITHUB_ENV"
+        echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+        echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE" >>"$GITHUB_ENV"
+        echo "RUNNER_ARCH=$RUNNER_ARCH"
+        echo "RUNNER_ARCH=$RUNNER_ARCH" >>"$GITHUB_ENV"
+        echo "RUNNER_DEBUG=$RUNNER_DEBUG"
+        echo "RUNNER_DEBUG=$RUNNER_DEBUG" >>"$GITHUB_ENV"
+        echo "RUNNER_NAME=$RUNNER_NAME"
+        echo "RUNNER_NAME=$RUNNER_NAME" >>"$GITHUB_ENV"
+        echo "RUNNER_OS=$RUNNER_OS"
+        echo "RUNNER_OS=$RUNNER_OS" >>"$GITHUB_ENV"
+        echo "RUNNER_TEMP=$RUNNER_TEMP"
+        echo "RUNNER_TEMP=$RUNNER_TEMP" >>"$GITHUB_ENV"
+        echo "RUNNER_TOOL_CACHE=$RUNNER_TOOL_CACHE"
+        echo "RUNNER_TOOL_CACHE=$RUNNER_TOOL_CACHE" >>"$GITHUB_ENV"
         echo "――――――――――――――――――――――"
         echo "Setting env for steps:"
         echo "――――――――――――――――――――――"
@@ -173,22 +209,22 @@ runs:
         # Begin custom
         echo "GH_EVENT_ACTION=$GH_EVENT_ACTION" >>GITHUB_ENV
         echo "Set GH_EVENT_ACTION=$GH_EVENT_ACTION"
-        echo "LANGUAGE=$LANGUAGE" >>$GITHUB_ENV
+        echo "LANGUAGE=$LANGUAGE" >>"$GITHUB_ENV"
         echo "Set LANGUAGE=$LANGUAGE"
-        echo "GH_WORKFLOW_URL="$GITHUB_SERVER_URL"/"$GITHUB_REPOSITORY"/actions/runs/"$GITHUB_RUN_ID"" >>$GITHUB_ENV
+        echo "GH_WORKFLOW_URL="$GITHUB_SERVER_URL"/"$GITHUB_REPOSITORY"/actions/runs/"$GITHUB_RUN_ID"" >>"$GITHUB_ENV"
         echo "Set GH_WORKFLOW_URL=$GH_WORKFLOW_URL"
         # RFC_REPO: the repo name represented in a RFC1035 format
         # which is useful if you want the repo name = a valid k8s namespace/service/deployment etc.
-        echo "RFC_REPO=$RFC_REPO" >>$GITHUB_ENV
+        echo "RFC_REPO=$RFC_REPO" >>"$GITHUB_ENV"
         echo "Set RFC_REPO=$RFC_REPO"
-        echo "GIT_SHORT_HASH=$GIT_SHORT_HASH" >>$GITHUB_ENV
+        echo "GIT_SHORT_HASH=$GIT_SHORT_HASH" >>"$GITHUB_ENV"
         echo "Set GIT_SHORT_HASH=$GIT_SHORT_HASH"
         # GPR_PROJECT: Use if you want to publish artifacts to GitHub Package Repository
         export GPR_PROJECT=ghcr.io/$GITHUB_REPOSITORY_OWNER/$REPO
-        echo "GPR_PROJECT=$GPR_PROJECT" >>$GITHUB_ENV
+        echo "GPR_PROJECT=$GPR_PROJECT" >>"$GITHUB_ENV"
         echo "Set GPR_PROJECT=$GPR_PROJECT"
         export REVISION=${GITHUB_REF##*/}
-        echo "REVISION=$REVISION" >>$GITHUB_ENV
+        echo "REVISION=$REVISION" >>"$GITHUB_ENV"
         echo "Set REVISION=$REVISION"
         # ADD YOUR OWN ENVS BELOW
         #
