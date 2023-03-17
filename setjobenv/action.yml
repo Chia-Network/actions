@@ -53,7 +53,9 @@ runs:
         }
       shell: powershell
     - name: Identify Runner Hardware (Linux)
-      if: runner.os == 'Linux' && runner.arch == 'X86' || runner.os == 'Linux' && runner.arch == 'X64'
+      if: |
+        (runner.os == 'Linux' && runner.arch == 'X86') ||
+        (runner.os == 'Linux' && runner.arch == 'X64')
       shell: bash
       run: |
         if [[ $RUNNER_DEBUG = 1 ]]; then
@@ -72,6 +74,25 @@ runs:
         echo "Set CPU_THREADS=$CPU_THREADS"
         echo "CPU_THREADS=$CPU_THREADS" >>"$GITHUB_ENV"
         MEM_TOTAL=$(grep 'MemTotal' /proc/meminfo | awk '{print $2/1024/1024 "GB"}')
+        echo "Set MEM_TOTAL=$MEM_TOTAL"
+        echo "MEM_TOTAL=$MEM_TOTAL" >>"$GITHUB_ENV"
+    - name: Identify Runner Hardware (macOS)
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        if [[ $RUNNER_DEBUG = 1 ]]; then
+          sysctl -a
+        fi
+        CPU_MODEL=$(sysctl -n machdep.cpu.brand_string)
+        echo "Set CPU_MODEL=$CPU_MODEL"
+        echo "CPU_MODEL=$CPU_MODEL" >>"$GITHUB_ENV"
+        CPU_CORES=$(sysctl -n hw.physicalcpu)
+        echo "Set CPU_CORES=$CPU_CORES"
+        echo "CPU_CORES=$CPU_CORES" >>"$GITHUB_ENV"
+        CPU_THREADS=$(sysctl -n hw.logicalcpu)
+        echo "Set CPU_THREADS=$CPU_THREADS"
+        echo "CPU_THREADS=$CPU_THREADS" >>"$GITHUB_ENV"
+        MEM_TOTAL=$(sysctl -n hw.memsize | awk '{print $1/1024/1024/1024 "GB"}')
         echo "Set MEM_TOTAL=$MEM_TOTAL"
         echo "MEM_TOTAL=$MEM_TOTAL" >>"$GITHUB_ENV"
     - name: Identify Runner Hardware (Windows)
