@@ -6,37 +6,55 @@ runs:
     - name: Check Dependencies (Linux)
       if: runner.os == 'Linux'
       run: |
+        if [[ $RUNNER_DEBUG = 1 ]]; then
+          set -x
+        fi
         packagesNeeded='curl jq gh'
-        SUDO=$(command -v sudo)
-        if [ -x "$(command -v apk)" ]; then
-            $SUDO apk add --no-cache $packagesNeeded
-        elif [ -x "$(command -v apt-get)" ]; then
-            type -p curl >/dev/null || $SUDO apt install curl -y
-            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
-            $SUDO dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-            $SUDO chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
-            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | \
-            $SUDO tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-            $SUDO apt update
-            $SUDO apt-get install -y $packagesNeeded
-        elif [ -x "$(command -v dnf)" ]; then
-            $SUDO dnf install 'dnf-command(config-manager)'
-            $SUDO dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
-            $SUDO dnf install -y $packagesNeeded
-        elif [ -x "$(command -v zypper)" ]; then
-            $SUDO zypper addrepo https://cli.github.com/packages/rpm/gh-cli.repo
-            $SUDO zypper ref
-            $SUDO zypper install -n $packagesNeeded
-        elif [ -x "$(command -v pacman)" ]; then
-            $SUDO pacman -S --needed --noconfirm $packagesNeeded
-        else
-            echo "FAILED TO INSTALL required packages: $packagesNeeded" >&2
+        for cmd in $packagesNeeded; do
+          if command -v "$cmd" >/dev/null 2>&1; then
+            packagesNeeded=$(echo "$packagesNeeded" | sed "s/\b$cmd\b//g" | tr -s ' ')
+          fi
+        done
+        if [ -n "$packagesNeeded" ]; then
+          SUDO=$(command -v sudo)
+          if [ -x "$(command -v apk)" ]; then
+              $SUDO apk add --no-cache $packagesNeeded
+          elif [ -x "$(command -v apt-get)" ]; then
+              type -p curl >/dev/null || $SUDO apt install curl -y
+              curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
+              $SUDO dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+              $SUDO chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+              echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | \
+              $SUDO tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+              $SUDO apt update
+              $SUDO apt-get install -y $packagesNeeded
+          elif [ -x "$(command -v dnf)" ]; then
+              $SUDO dnf install 'dnf-command(config-manager)'
+              $SUDO dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+              $SUDO dnf install -y $packagesNeeded
+          elif [ -x "$(command -v zypper)" ]; then
+              $SUDO zypper addrepo https://cli.github.com/packages/rpm/gh-cli.repo
+              $SUDO zypper ref
+              $SUDO zypper install -n $packagesNeeded
+          elif [ -x "$(command -v pacman)" ]; then
+              $SUDO pacman -S --needed --noconfirm $packagesNeeded
+          else
+              echo "FAILED TO INSTALL required packages: $packagesNeeded" >&2
+          fi
         fi
       shell: bash
     - name: Check Dependencies (macOS)
       if: runner.os == 'macOS'
       run: |
+        if [[ $RUNNER_DEBUG = 1 ]]; then
+          set -x
+        fi
         packagesNeeded='curl jq gh'
+        for cmd in $packagesNeeded; do
+          if command -v "$cmd" >/dev/null 2>&1; then
+            packagesNeeded=$(echo "$packagesNeeded" | sed "s/\b$cmd\b//g" | tr -s ' ')
+          fi
+        done
         if [ -x "$(command -v brew)" ]; then
             brew install $packagesNeeded
         else
