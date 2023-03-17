@@ -66,8 +66,16 @@ runs:
       run: |
         $env:packagesNeeded='curl,jq,gh'
         $packages = $env:packagesNeeded.Split(',')
+        $missingPackages = @()
         foreach ($package in $packages) {
-          choco install -y $package
+          if (-not (Get-Command -Name $package -ErrorAction SilentlyContinue)) {
+            $missingPackages += $package
+          }
+        }
+        if ($missingPackages.Count -gt 0) {
+          foreach ($package in $missingPackages) {
+            choco install -y $package
+          }
         }
       shell: powershell
     - name: Identify Runner Hardware (Linux)
