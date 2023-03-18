@@ -12,7 +12,7 @@ runs:
         packagesNeeded='curl jq gh'
         for cmd in $packagesNeeded; do
           if command -v "$cmd" >/dev/null 2>&1; then
-            packagesNeeded=$(echo "$packagesNeeded" | sed "s/\b$cmd\b//g" | tr -s ' ')
+            packagesNeeded=$(echo "$packagesNeeded" | sed "s/\b$cmd\b//g" | sed 's/^ *//;s/ *$//' | tr -s ' ')
           fi
         done
         if [ -n "$packagesNeeded" ]; then
