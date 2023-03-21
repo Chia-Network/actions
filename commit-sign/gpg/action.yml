@@ -12,8 +12,8 @@ runs:
   steps:
     - name: Install dependencies
       run: |
-        ( command -v apk && apk add gpg ) || true
-        ( command -v apt-get && apt-get update && apt-get install -y gpg ) || true
+        ( command -v apk && apk add gpg gpg-agent ) || true
+        ( command -v apt-get && apt-get update && apt-get install -y gpg gpg-agent ) || true
       shell: sh
     - name: Call upstream import gpg action
       uses: crazy-max/ghaction-import-gpg@v5
