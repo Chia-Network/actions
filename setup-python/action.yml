@@ -24,24 +24,60 @@ inputs:
     required: false
     default: 'false'
     description: "Will force using pyenv instead of the upstream action if set to 'true'"
+  allow-prerelease:
+    required: false
+    default: 'false'
+    description: "Adjusts the passed in Python version to allow for pre-releases based on a simple major.minor request."
 outputs:
   python-version:
     description: "The installed python version. Useful when given a version range as input."
   cache-hit:
     description: 'A boolean value to indicate a cache entry was found'
+  python-version-string:
+    description: "The python version string passed to upstream actions/setup-python"
+    value: ${{ steps.select.outputs.version-string }}
 runs:
   using: "composite"
   steps:
+    - name: Inspect requested version
+      shell: sh
+      id: inspect
+      env:
+        REQUESTED_PYTHON_VERSION: ${{ inputs.python-version }}
+      run: |
+        set -vx
+        if [ "$(echo "${REQUESTED_PYTHON_VERSION}" | sed 's/[^.]//g')" = "." ]
+        then
+          echo "patch-specified=false" | tee -a "${GITHUB_OUTPUT}"
+        else
+          echo "patch-specified=true" | tee -a "${GITHUB_OUTPUT}"
+        fi
+
+    - name: Disallow specifying a patch version when allowing pre-releases
+      if: steps.inspect.outputs.patch-specified == 'true' && inputs.allow-prelease
+      shell: sh
+      run: |
+        false
+
+    - name: Create version string
+      shell: sh
+      id: select
+      env:
+        SELECTED_PYTHON_VERSION: ${{ inputs.allow-prerelease == 'true' && format('{0}.0-alpha - {0}.X', inputs.python-version) || inputs.python-version }}
+      run: |
+        echo "version-string=${SELECTED_PYTHON_VERSION}" | tee -a "${GITHUB_OUTPUT}"
+
     - name: Call upstream setup-python action
       uses: actions/setup-python@v4
       # Requires native m1 runner software, not x64 running via arch flags
       if: runner.arch != 'ARM64' && inputs.force-pyenv == 'false'
       with:
-        python-version: ${{ format('{0}.0-alpha - {0}.X', inputs.python-version) }}
+        python-version: ${{ steps.select.outputs.version-string }}
         architecture: ${{ inputs.architecture }}
         cache: ${{ inputs.cache }}
         token: ${{ inputs.token }}
         cache-dependency-path: ${{ inputs.cache-dependency-path }}
+
     - name: Setup Python on ARM64 (pyenv)
       if: runner.arch == 'ARM64' || inputs.force-pyenv != 'false'
       shell: sh
