@@ -8,8 +8,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    # I just haven't tested this on Mac yet - will add the Mac part when I have a project
-    # that needs it.
+    # This hasn't been tested on Mac yet. Pull requests encouraged to add proper Mac logic.
     - name: MacOS not supported currently
       shell: bash
       run: |
