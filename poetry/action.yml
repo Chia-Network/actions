@@ -11,6 +11,7 @@ runs:
     # I just haven't tested this on Mac yet - will add the Mac part when I have a project
     # that needs it.
     - name: MacOS not supported currently
+      shell: bash
       run: |
         echo "MacOS currently not supported by this Action"
         exit 1
@@ -45,6 +46,7 @@ runs:
       if: runner.os == 'Linux'
 
     - name: Install Poetry (Windows)
+      shell: pwsh
       run: |
         if (-not(Test-Path -Path C:\Users\runneradmin\AppData\Roaming\Python\Scripts\poetry -PathType Leaf)) {
           (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
@@ -52,11 +54,13 @@ runs:
       if: runner.os == 'Windows'
 
     - name: Run Poetry command (Linux)
+      shell: bash
       run: |
         poetry ${{ inputs.poetry-command }}
       if: runner.os == 'Linux'
 
     - name: Run Poetry command (Windows)
+      shell: pwsh
       run: |
         C:\Users\runneradmin\AppData\Roaming\Python\Scripts\poetry ${{ inputs.poetry-command }}
       if: runner.os == 'Windows'
