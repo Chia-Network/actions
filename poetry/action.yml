@@ -1,0 +1,62 @@
+name: "Poetry"
+description: 'Install Poetry (Python packaging and dependency manager) and run `poetry install`'
+inputs:
+  poetry-command:
+    description: "Poetry command to run. Does install by default."
+    required: false
+    default: 'install'
+runs:
+  using: "composite"
+  steps:
+    # I just haven't tested this on Mac yet - will add the Mac part when I have a project
+    # that needs it.
+    - name: MacOS not supported currently
+      run: |
+        echo "MacOS currently not supported by this Action"
+        exit 1
+      if: runner.os == 'macOS'
+
+    - name: Confirm Python and Pip are installed
+      shell: bash
+      run: |
+        PYTHON_INSTALLED=0
+        PIP_INSTALLED=0
+        command -v python >/dev/null 2>&1 && { PYTHON_INSTALLED=1; }
+        command -v python3 >/dev/null 2>&1 && { PYTHON_INSTALLED=1; }
+        command -v pip >/dev/null 2>&1 && { PIP_INSTALLED=1; }
+        if [ $PYTHON_INSTALLED == 0 ]
+        then
+          echo "Python or python3 command not found - please ensure Python is installed and try again"
+          exit 1
+        fi
+        if [ $PIP_INSTALLED == 0 ]
+        then
+          echo "Pip command not found - please ensure python pip is installed and try again"
+          exit 1
+        fi
+
+    - name: Install Poetry (Linux)
+      shell: bash
+      run: |
+        if ! command -v poetry &> /dev/null
+        then
+          pip install poetry
+        fi
+      if: runner.os == 'Linux'
+
+    - name: Install Poetry (Windows)
+      run: |
+        if (-not(Test-Path -Path C:\Users\runneradmin\AppData\Roaming\Python\Scripts\poetry -PathType Leaf)) {
+          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
+        }
+      if: runner.os == 'Windows'
+
+    - name: Run Poetry command (Linux)
+      run: |
+        poetry ${{ inputs.poetry-command }}
+      if: runner.os == 'Linux'
+
+    - name: Run Poetry command (Windows)
+      run: |
+        C:\Users\runneradmin\AppData\Roaming\Python\Scripts\poetry ${{ inputs.poetry-command }}
+      if: runner.os == 'Windows'
