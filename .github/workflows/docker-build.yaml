@@ -2,6 +2,11 @@ name: Build Docker Image
 
 on:
   workflow_call:
+    inputs:
+      docker-platforms:
+        required: false
+        type: string
+        default: "linux/amd64,linux/arm64"
 
 jobs:
   package:
@@ -38,6 +43,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ inputs.docker-platforms }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
