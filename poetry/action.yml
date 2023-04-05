@@ -33,9 +33,9 @@ runs:
     - name: Install Poetry
       shell: bash
       run: |
-        ${{ steps.create-venv.outputs.temp-python-executable }} -m pip install poetry
+        ${{ steps.create-venv.outputs.python-executable }} -m pip install poetry
 
     - name: Run Poetry command (Linux)
       shell: bash
       run: |
-        ${{ steps.create-venv.outputs.temp-python-executable }} -m poetry ${{ inputs.poetry-command }}
+        ${{ steps.create-venv.outputs.python-executable }} -m poetry ${{ inputs.poetry-command }}
