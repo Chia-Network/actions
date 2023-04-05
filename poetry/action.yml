@@ -27,7 +27,7 @@ runs:
           exit 1
         fi
 
-    - uses: Chia-Network/actions/create-venv@main
+    - uses: Chia-Network/actions/create-venv@use_temp_venv_for_poetry_itself
       id: create-venv
 
     - name: Install Poetry
