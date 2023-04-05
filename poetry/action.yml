@@ -8,14 +8,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    # This hasn't been tested on Mac yet. Pull requests encouraged to add proper Mac logic.
-    - name: MacOS not supported currently
-      shell: bash
-      run: |
-        echo "MacOS currently not supported by this Action"
-        exit 1
-      if: runner.os == 'macOS'
-
     - name: Confirm Python and Pip are installed
       shell: bash
       run: |
@@ -35,31 +27,15 @@ runs:
           exit 1
         fi
 
-    - name: Install Poetry (Linux)
+    - uses: Chia-Network/actions/create-venv@main
+      id: create-venv
+
+    - name: Install Poetry
       shell: bash
       run: |
-        if ! command -v poetry &> /dev/null
-        then
-          pip install poetry
-        fi
-      if: runner.os == 'Linux'
-
-    - name: Install Poetry (Windows)
-      shell: pwsh
-      run: |
-        if (-not(Test-Path -Path C:\Users\runneradmin\AppData\Roaming\Python\Scripts\poetry -PathType Leaf)) {
-          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
-        }
-      if: runner.os == 'Windows'
+        ${{ steps.create-venv.outputs.temp-python-executable }} -m pip install poetry
 
     - name: Run Poetry command (Linux)
       shell: bash
       run: |
-        poetry ${{ inputs.poetry-command }}
-      if: runner.os == 'Linux'
-
-    - name: Run Poetry command (Windows)
-      shell: pwsh
-      run: |
-        C:\Users\runneradmin\AppData\Roaming\Python\Scripts\poetry ${{ inputs.poetry-command }}
-      if: runner.os == 'Windows'
+        ${{ steps.create-venv.outputs.temp-python-executable }} -m poetry ${{ inputs.poetry-command }}
