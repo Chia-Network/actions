@@ -1,6 +1,10 @@
 name: "Poetry"
 description: 'Install Poetry (Python packaging and dependency manager) and run `poetry install`'
 inputs:
+  python-executable:
+    description: "The Python executable used to install and run Poetry."
+    required: false
+    default: 'python'
   poetry-command:
     description: "Poetry command to run. Does install by default."
     required: false
@@ -27,15 +31,12 @@ runs:
           exit 1
         fi
 
-    - uses: Chia-Network/actions/create-venv@use_temp_venv_for_poetry_itself
-      id: create-venv
-
     - name: Install Poetry
       shell: bash
       run: |
-        ${{ steps.create-venv.outputs.python_executable }} -m pip install poetry
+        ${{ inputs.python-executable }} -m pip install poetry
 
     - name: Run Poetry command (Linux)
       shell: bash
       run: |
-        ${{ steps.create-venv.outputs.python_executable }} -m poetry ${{ inputs.poetry-command }}
+        ${{ inputs.python-executable }} -m poetry ${{ inputs.poetry-command }}
