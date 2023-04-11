@@ -18,8 +18,11 @@ else:
 activate_venv_directories = json.dumps([os.fspath(temporary_directory)])
 
 with github_output.open("a") as file:
-    print(f"temp-venv-path={os.fspath(temporary_directory)}", file=file)
-    print(f"temp-python-executable={os.fspath(python_executable)}", file=file)
+    print(f"temp-venv-path={os.fspath(temporary_directory.as_posix())}", file=file)
+    print(
+        f"temp-python-executable={os.fspath(python_executable.as_posix())}",
+        file=file,
+    )
     print(f"activate-venv-directories={activate_venv_directories}", file=file)
 
 venv.create(env_dir=temporary_directory, with_pip=True)
