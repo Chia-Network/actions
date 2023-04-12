@@ -34,7 +34,10 @@ runs:
     - name: Install Poetry
       shell: bash
       run: |
-        ${{ inputs.python-executable }} -m pip install poetry
+        if ! ${{ inputs.python-executable }} -m poetry --help &> /dev/null
+        then
+          ${{ inputs.python-executable }} -m pip install poetry
+        fi
 
     - name: Run Poetry command (Linux)
       shell: bash
