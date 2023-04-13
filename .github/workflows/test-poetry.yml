@@ -190,10 +190,10 @@ jobs:
       with:
         directories: ${{ steps.create-venv.outputs.activate-venv-directories }}
 
-    - name: Create a dummy project
+    - name: Create a test project
       uses: ./repo/poetry
       with:
-        poetry-command: init --quiet
+        poetry-command: init --no-interaction
         python-executable: ${{ steps.create-poetry-venv.outputs.python_executable }}
 
     - name: Add a dependency to test for
@@ -204,7 +204,7 @@ jobs:
 
     - name: Check that Poetry is not in the activated env
       run: |
-        if python -m poetry --help >/dev/null 2>&1
+        if python -m poetry --help
         then
           false
         fi
