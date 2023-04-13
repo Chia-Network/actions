@@ -211,11 +211,11 @@ jobs:
 
     - name: Dependency not installed in Poetry env
       run: |
-        if ${{ steps.create-poetry-venv.outputs.python_executable }} -m mypy --help >/dev/null 2>&1
+        if ${{ steps.create-poetry-venv.outputs.python_executable }} -m mypy --help
         then
           false
         fi
 
     - name: Dependency installed in activated env
       run: |
-        ${{ steps.create-poetry-venv.outputs.python_executable }} -m mypy --help >/dev/null 2>&1
+        python -m mypy --help
