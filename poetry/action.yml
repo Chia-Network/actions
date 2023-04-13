@@ -15,19 +15,18 @@ runs:
     - name: Confirm Python and Pip are installed
       shell: bash
       run: |
-        PYTHON_INSTALLED=0
-        PIP_INSTALLED=0
-        command -v python >/dev/null 2>&1 && { PYTHON_INSTALLED=1; }
-        command -v python3 >/dev/null 2>&1 && { PYTHON_INSTALLED=1; }
-        command -v pip >/dev/null 2>&1 && { PIP_INSTALLED=1; }
-        if [ $PYTHON_INSTALLED == 0 ]
+        OUTPUT_TEMP_PATH=$(mktemp)
+        if ! ${{ inputs.python-executable }} --version >"${OUTPUT_TEMP_PATH}" 2>&1
         then
-          echo "Python or python3 command not found - please ensure Python is installed and try again"
+          echo "provided python failed to run: ${{ inputs.python-executable }}"
+          cat "${OUTPUT_TEMP_PATH}"
           exit 1
         fi
-        if [ $PIP_INSTALLED == 0 ]
+        
+        if ! ${{ inputs.python-executable }} pip --version >"${OUTPUT_TEMP_PATH}" 2>&1
         then
-          echo "Pip command not found - please ensure python pip is installed and try again"
+          echo "provided python failed to run pip: ${{ inputs.python-executable }}"
+          cat "${OUTPUT_TEMP_PATH}"
           exit 1
         fi
 
