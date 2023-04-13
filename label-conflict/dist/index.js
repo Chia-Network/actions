@@ -9532,7 +9532,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ignorePermissionError = exports.commentToAddOnClean = exports.commentToAddOnConflict = exports.retryMax = exports.retryIntervalSec = exports.labelToRemoveOnConflict = exports.labelToAddOnConflict = exports.secretToken = void 0;
+exports.ignoreRetryTimeout = exports.ignorePermissionError = exports.commentToAddOnClean = exports.commentToAddOnConflict = exports.retryMax = exports.retryIntervalSec = exports.labelToRemoveOnConflict = exports.labelToAddOnConflict = exports.secretToken = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 exports.secretToken = core.getInput("secretToken", { required: true });
 exports.labelToAddOnConflict = core.getInput("labelToAddOnConflict", { required: true });
@@ -9542,6 +9542,7 @@ exports.retryMax = parseInt(core.getInput("retryMax"), 10);
 exports.commentToAddOnConflict = core.getInput("commentToAddOnConflict");
 exports.commentToAddOnClean = core.getInput("commentToAddOnClean");
 exports.ignorePermissionError = core.getInput("ignorePermissionError") === "true"; // Default: false
+exports.ignoreRetryTimeout = core.getInput("ignoreRetryTimeout") === "true"; // Default: false
 
 
 /***/ }),
@@ -9768,9 +9769,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkConflict = exports.refIsTag = exports.isPullRequestBranch = exports.getBranchName = void 0;
 const core = __importStar(__nccwpck_require__(2186));
+const github = __importStar(__nccwpck_require__(5438));
 const query_1 = __nccwpck_require__(3709);
 const label_1 = __nccwpck_require__(2008);
-const github = __importStar(__nccwpck_require__(5438));
+const input_1 = __nccwpck_require__(6747);
 function getBranchName(ref) {
     return ref.replace(/^refs\/heads\//, "");
 }
@@ -9932,7 +9934,9 @@ function checkConflict(context) {
                 const pr = prs[i];
                 core.info(`  #${pr.number} (${pr.title})`);
             }
-            throw new Error("Failed to check conflict");
+            if (!input_1.ignoreRetryTimeout) {
+                throw new Error("Failed to check conflict");
+            }
         }
         return conflictStatus;
     });
