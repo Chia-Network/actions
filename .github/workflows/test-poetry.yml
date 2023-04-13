@@ -160,7 +160,7 @@ jobs:
               matrix: arm
 
     steps:
-    - uses: Chia-Network/actions/clean-workspace@main
+    - uses: ./repo/clean-workspace@main
 
     - uses: actions/checkout@v3
       with:
@@ -178,7 +178,7 @@ jobs:
         poetry-command: --help
 
     - name: Create virtual environment for Poetry
-      uses: Chia-Network/actions/create-venv@main
+      uses: ./repo/create-venv@main
       id: create-poetry-venv
 
     - name: Run the action in a temp venv
@@ -188,11 +188,11 @@ jobs:
         python-executable: ${{ steps.create-poetry-venv.outputs.python_executable }}
 
     - name: Create virtual environment for testing
-      uses: Chia-Network/actions/create-venv@main
+      uses: ./repo/create-venv@main
       id: create-venv
 
     - name: Activate virtual environment
-      uses: Chia-Network/actions/activate-venv@main
+      uses: ./repo/activate-venv@main
       with:
         directories: ${{ steps.create-venv.outputs.activate-venv-directories }}
 
