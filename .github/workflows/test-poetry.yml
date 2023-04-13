@@ -180,3 +180,42 @@ jobs:
       with:
         poetry-command: --help
         python-executable: ${{ steps.create-poetry-venv.outputs.python_executable }}
+
+    - name: Create virtual environment for testing
+      uses: Chia-Network/actions/create-venv@main
+      id: create-venv
+
+    - name: Activate virtual environment
+      uses: Chia-Network/actions/activate-venv@main
+      with:
+        directories: ${{ steps.create-venv.outputs.activate-venv-directories }}
+
+    - name: Create a dummy project
+      uses: ./repo/poetry
+      with:
+        poetry-command: init --quiet
+        python-executable: ${{ steps.create-poetry-venv.outputs.python_executable }}
+
+    - name: Add a dependency to test for
+      uses: ./repo/poetry
+      with:
+        poetry-command: add mypy
+        python-executable: ${{ steps.create-poetry-venv.outputs.python_executable }}
+
+    - name: Check that Poetry is not in the activated env
+      run: |
+        if python -m poetry --help >/dev/null 2>&1
+        then
+          false
+        fi
+
+    - name: Dependency not installed in Poetry env
+      run: |
+        if ${{ steps.create-poetry-venv.outputs.python_executable }} -m mypy --help >/dev/null 2>&1
+        then
+          false
+        fi
+
+    - name: Dependency installed in activated env
+      run: |
+        ${{ steps.create-poetry-venv.outputs.python_executable }} -m mypy --help >/dev/null 2>&1
