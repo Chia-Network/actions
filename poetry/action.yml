@@ -23,7 +23,7 @@ runs:
           exit 1
         fi
         
-        if ! ${{ inputs.python-executable }} pip --version >"${OUTPUT_TEMP_PATH}" 2>&1
+        if ! ${{ inputs.python-executable }} -m pip --version >"${OUTPUT_TEMP_PATH}" 2>&1
         then
           echo "provided python failed to run pip: ${{ inputs.python-executable }}"
           cat "${OUTPUT_TEMP_PATH}"
