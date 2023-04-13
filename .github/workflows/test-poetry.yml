@@ -160,7 +160,7 @@ jobs:
               matrix: arm
 
     steps:
-    - uses: ./repo/clean-workspace@main
+    - uses: Chia-Network/actions/clean-workspace@main
 
     - uses: actions/checkout@v3
       with:
