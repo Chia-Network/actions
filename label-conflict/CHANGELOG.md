@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.1.0]
+### Added
+- Added `ignoreRetryTimeout` option, which indicates whether to mark the action success when unknown
+  PRs still exist after all retry. (Default to `false` so there's no behavior change when you update from version `2.0.1`)
+
 ## [2.0.1]
 ### Fixed
 - Fixed incorrect retry sleep location.  

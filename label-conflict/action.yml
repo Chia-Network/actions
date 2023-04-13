@@ -17,6 +17,8 @@ inputs:
     default: "5"
   ignorePermissionError:
     description: "Boolean. Whether to continue or fail when the provided token is missing permissions. By default pull requests from a fork do not have access to secrets and get a read only github token, resulting in a failure to update tags."
+  ignoreRetryTimeout:
+    description: "Boolean. Whether to mark the action success when unknown PRs still exist after all retry"
   commentToAddOnConflict:
     description: "Comment to add when conflict is detected. Supports Markdown"
   commentToAddOnClean:
