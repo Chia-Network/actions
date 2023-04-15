@@ -9542,7 +9542,7 @@ exports.retryMax = parseInt(core.getInput("retryMax"), 10);
 exports.commentToAddOnConflict = core.getInput("commentToAddOnConflict");
 exports.commentToAddOnClean = core.getInput("commentToAddOnClean");
 exports.ignorePermissionError = core.getInput("ignorePermissionError") === "true"; // Default: false
-exports.ignoreRetryTimeout = core.getInput("ignoreRetryTimeout") === "true"; // Default: false
+exports.ignoreRetryTimeout = core.getInput("ignoreRetryTimeout") !== "false"; // Default: true
 
 
 /***/ }),

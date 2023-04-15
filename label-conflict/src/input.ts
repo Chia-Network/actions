@@ -8,4 +8,4 @@ export const retryMax = parseInt(core.getInput("retryMax"), 10);
 export const commentToAddOnConflict = core.getInput("commentToAddOnConflict");
 export const commentToAddOnClean = core.getInput("commentToAddOnClean");
 export const ignorePermissionError = core.getInput("ignorePermissionError") === "true"; // Default: false
-export const ignoreRetryTimeout = core.getInput("ignoreRetryTimeout") === "true"; // Default: false
+export const ignoreRetryTimeout = core.getInput("ignoreRetryTimeout") !== "false"; // Default: true

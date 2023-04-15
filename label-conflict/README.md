@@ -102,7 +102,7 @@ resulting in a failure to update tags.
 
 Boolean. Whether to mark the action success when unknown PRs still exist after all retry.
 
-**Default**: false
+**Default**: true
 
 ### `commentToAddOnConflict`
 
