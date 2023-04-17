@@ -3,7 +3,7 @@ description: "Cleans the current workspace before checking out code, to ensure a
 runs:
   using: "composite"
   steps:
-    - name: Install dependencies
+    - name: Clean Files
       run: |
         # This step needs both sudo and non-sudo versions of the same command in case this is run in a container
         # without sudo installed
@@ -12,4 +12,10 @@ runs:
         
         sudo rm -rf $HOME/.npm || true
         rm -rf $HOME/.npm || true
+      shell: sh
+    - name: Clean macOS Keychain
+      if: runner.os == 'macOS'
+      run: |
+        # relevant to https://github.com/Apple-Actions/import-codesign-certs
+        security delete-keychain signing_temp.keychain || true
       shell: sh
