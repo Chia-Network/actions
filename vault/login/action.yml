@@ -12,7 +12,7 @@ runs:
   steps:
     - name: Ensure dependencies are present
       run: |
-        ( command -v apk && apk add jq curl ) || true
+        ( command -v apk && apk add jq curl curl-dev ) || true
         ( command -v apt-get && apt-get update && apt-get install -y jq curl ) || true
       shell: sh
     - name: Get JWT from GitHub
