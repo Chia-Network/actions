@@ -56,14 +56,16 @@ runs:
         packagesNeeded='curl jq gh'
         for cmd in $packagesNeeded; do
           if command -v "$cmd" >/dev/null 2>&1; then
-            packagesNeeded=$(echo "$packagesNeeded" | sed "s/\b$cmd\b//g" | tr -s ' ')
+            echo "$cmd is installed"
+          else
+            echo "$cmd is not installed, attempting to install with brew"
+            if [ -x "$(command -v brew)" ]; then
+              brew install "$cmd"
+            else
+              echo "FAILED TO INSTALL required packages: $cmd" >&2
+            fi
           fi
         done
-        if [ -x "$(command -v brew)" ]; then
-            brew install $packagesNeeded
-        else
-            echo "FAILED TO INSTALL required packages: $packagesNeeded" >&2
-        fi
       shell: bash
     - name: Check Dependencies (Windows)
       if: runner.os == 'Windows'
