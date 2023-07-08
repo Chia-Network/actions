@@ -33,7 +33,7 @@ jobs:
       - name: Set image name
         id: image
         run: |
-          if [ ${{ inputs.image-subpath }} == "" ]; then
+          if [ "${{ inputs.image-subpath }}" == "" ]; then
             echo "imagename=ghcr.io/${{ github.repository }}" >> $GITHUB_OUTPUT
           else
             echo "imagename=ghcr.io/${{ github.repository }}/${{ inputs.image-subpath }}" >> $GITHUB_OUTPUT
