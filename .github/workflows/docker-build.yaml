@@ -30,17 +30,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - name: Get image name with subpath
+      - name: Set image name
         id: image
-        if: "${{ github.event.inputs.image-subpath != '' }}"
         run: |
-          echo "imagename=ghcr.io/${{ github.repository }}/${{ inputs.image-subpath }}" >> $GITHUB_OUTPUT
-
-      - name: Get basic image name
-        id: image
-        if: "${{ github.event.inputs.image-subpath == '' }}"
-        run: |
-          echo "imagename=ghcr.io/${{ github.repository }}" >> $GITHUB_OUTPUT
+          if [ ${{ inputs.image-subpath }} == "" ]; then
+            echo "imagename=ghcr.io/${{ github.repository }}" >> $GITHUB_OUTPUT
+          else
+            echo "imagename=ghcr.io/${{ github.repository }}/${{ inputs.image-subpath }}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Docker meta
         id: meta
