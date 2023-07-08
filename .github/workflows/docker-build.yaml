@@ -35,7 +35,7 @@ jobs:
         env:
           subpath: "{{ inputs.image-subpath }}"
         run: |
-          if [ -z "${subpath}" ]; then
+          if [ "${subpath}" == '' ]; then
             echo "imagename=ghcr.io/${{ github.repository }}" >> $GITHUB_OUTPUT
           else
             echo "imagename=ghcr.io/${{ github.repository }}/${subpath}" >> $GITHUB_OUTPUT
