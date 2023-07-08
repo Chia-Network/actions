@@ -33,10 +33,10 @@ jobs:
       - name: Set image name
         id: image
         run: |
-          if [ "{{ inputs.image-subpath }}" == '' ]; then
+          if [ "${{ github.event.inputs.image-subpath }}" == '' ]; then
             echo "imagename=ghcr.io/${{ github.repository }}" >> $GITHUB_OUTPUT
           else
-            echo "imagename=ghcr.io/${{ github.repository }}/{{ inputs.image-subpath }}" >> $GITHUB_OUTPUT
+            echo "imagename=ghcr.io/${{ github.repository }}/${{ github.event.inputs.image-subpath }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Docker meta
