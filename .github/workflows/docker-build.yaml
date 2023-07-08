@@ -7,7 +7,7 @@ on:
         required: false
         type: string
         default: "linux/amd64,linux/arm64"
-      image-subpath:
+      image_subpath:
         required: false
         type: string
 
@@ -33,10 +33,11 @@ jobs:
       - name: Set image name
         id: image
         run: |
-          if [ "${{ github.event.inputs.image-subpath }}" == '' ]; then
+          export subpath="${{ inputs.image_subpath }}"
+          if [ "$subpath" == '' ]; then
             echo "imagename=ghcr.io/${{ github.repository }}" >> $GITHUB_OUTPUT
           else
-            echo "imagename=ghcr.io/${{ github.repository }}/${{ github.event.inputs.image-subpath }}" >> $GITHUB_OUTPUT
+            echo "imagename=ghcr.io/${{ github.repository }}/${subpath}" >> $GITHUB_OUTPUT
           fi
 
       - name: Docker meta
