@@ -7,6 +7,9 @@ on:
         required: false
         type: string
         default: "linux/amd64,linux/arm64"
+      image_subpath:
+        required: false
+        type: string
 
 jobs:
   package:
@@ -27,12 +30,22 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
+      - name: Set image name
+        id: image
+        run: |
+          export subpath="${{ inputs.image_subpath }}"
+          if [ "$subpath" == '' ]; then
+            echo "imagename=ghcr.io/${{ github.repository }}" >> $GITHUB_OUTPUT
+          else
+            echo "imagename=ghcr.io/${{ github.repository }}/${subpath}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v4
         with:
           images: |
-            ghcr.io/${{ github.repository }}
+            ${{ steps.image.outputs.imagename }}
           # generate Docker tags based on the following events/attributes
           # latest is only tagged if we're on the default branch
           tags: |
