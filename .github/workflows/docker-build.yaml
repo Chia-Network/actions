@@ -40,6 +40,7 @@ jobs:
 
       - name: Set image name
         id: image
+        # shellcheck disable=SC2086
         run: |
           export subpath="${{ inputs.image_subpath }}"
           if [ "$subpath" == '' ]; then
