@@ -7,6 +7,14 @@ on:
         required: false
         type: string
         default: "linux/amd64,linux/arm64"
+      docker-context:
+        required: false
+        type: string
+        default: .
+      dockerfile:
+        required: false
+        type: string
+        default: "./Dockerfile"
       image_subpath:
         required: false
         type: string
@@ -35,9 +43,9 @@ jobs:
         run: |
           export subpath="${{ inputs.image_subpath }}"
           if [ "$subpath" == '' ]; then
-            echo "imagename=ghcr.io/${{ github.repository }}" >> $GITHUB_OUTPUT
+            echo "imagename=ghcr.io/${{ github.repository }}" >> "$GITHUB_OUTPUT"
           else
-            echo "imagename=ghcr.io/${{ github.repository }}/${subpath}" >> $GITHUB_OUTPUT
+            echo "imagename=ghcr.io/${{ github.repository }}/${subpath}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Docker meta
@@ -55,7 +63,8 @@ jobs:
       - name: Build Docker Container
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ${{ inputs.docker-context }}
+          file: ${{ inputs.dockerfile }}
           platforms: ${{ inputs.docker-platforms }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
