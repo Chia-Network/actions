@@ -60,8 +60,6 @@ jobs:
 
       - name: Set image name
         id: image
-        env:
-          dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |
           export subpath="${{ inputs.image_subpath }}"
           if [ "$subpath" == '' ]; then
