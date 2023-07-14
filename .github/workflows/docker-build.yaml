@@ -18,6 +18,16 @@ on:
       image_subpath:
         required: false
         type: string
+      dockerhub_imagename:
+        required: false
+        type: string
+        default: ""
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: false
+      DOCKERHUB_PAT:
+        required: false
+
 
 jobs:
   package:
@@ -38,8 +48,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
+      - name: Login to DockerHub
+        env:
+          dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub_pat: ${{ secrets.DOCKERHUB_PAT }}
+        if: ${{ env.dockerhub_username != '' && env.dockerhub_pat != '' }}
+        uses: docker/login-action@v2
+        with:
+          username: ${{ env.dockerhub_username }}
+          password: ${{ env.dockerhub_pat }}
+
       - name: Set image name
         id: image
+        env:
+          dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |
           export subpath="${{ inputs.image_subpath }}"
           if [ "$subpath" == '' ]; then
@@ -54,6 +76,7 @@ jobs:
         with:
           images: |
             ${{ steps.image.outputs.imagename }}
+            ${{ inputs.dockerhub_imagename }}
           # generate Docker tags based on the following events/attributes
           # latest is only tagged if we're on the default branch
           tags: |
