@@ -108,6 +108,13 @@ runs:
         MEM_TOTAL=$(grep 'MemTotal' /proc/meminfo | awk '{print $2/1024/1024 "GB"}')
         echo "Set MEM_TOTAL=$MEM_TOTAL"
         echo "MEM_TOTAL=$MEM_TOTAL" >>"$GITHUB_ENV"
+    - name: Legacy macOS support
+      if: runner.os == 'macOS' && runner.arch == 'X64'
+      shell: bash
+      run: |
+        if [ "$GITHUB_WORKFLOW" == "📦🚀 Build Installers - MacOS" ]; then
+            echo "NX_NON_NATIVE_HASHER=true" >>"$GITHUB_ENV"
+        fi
     - name: Identify Runner Hardware (macOS)
       if: runner.os == 'macOS'
       shell: bash
