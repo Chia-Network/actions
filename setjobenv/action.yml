@@ -29,6 +29,9 @@ runs:
               $SUDO apt update
               $SUDO apt-get install -y $packagesNeeded
           elif [ -x "$(command -v dnf)" ]; then
+              if [[ $(id -u) -eq 0 ]]; then
+                  SUDO=""
+              fi
               $SUDO dnf install 'dnf-command(config-manager)'
               $SUDO dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
               $SUDO dnf install -y $packagesNeeded
