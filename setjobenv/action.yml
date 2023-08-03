@@ -16,35 +16,37 @@ runs:
           fi
         done
         if [ -n "$packagesNeeded" ]; then
-          SUDO=$(command -v sudo || echo "")
+            # If running as root, then dont use sudo
+            if [ "$(id -u)" -eq 0 ]; then
+                SUDO=""
+            else
+                SUDO=$(command -v sudo || echo "")
+            fi
           if [ -x "$(command -v apk)" ]; then
-              $SUDO apk add --no-cache $packagesNeeded
+              ${SUDO} apk add --no-cache $packagesNeeded
           elif [ -x "$(command -v apt-get)" ]; then
               type -p curl >/dev/null || $SUDO apt install curl -y
               curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
-              $SUDO dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-              $SUDO chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+              ${SUDO} dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+              ${SUDO} chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
               echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | \
-              $SUDO tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-              $SUDO apt update
-              $SUDO apt-get install -y $packagesNeeded
+              ${SUDO} tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+              ${SUDO} apt update
+              ${SUDO} apt-get install -y $packagesNeeded
           elif [ -x "$(command -v dnf)" ]; then
-              if [[ $(id -u) -eq 0 ]]; then
-                  SUDO=""
-              fi
-              $SUDO dnf install 'dnf-command(config-manager)'
-              $SUDO dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
-              $SUDO dnf install -y $packagesNeeded
+              ${SUDO} dnf install 'dnf-command(config-manager)'
+              ${SUDO} dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+              ${SUDO} dnf install -y $packagesNeeded
           elif [ -x "$(command -v yum)" ]; then
-              $SUDO yum install -y yum-utils
-              $SUDO yum-config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
-              $SUDO yum install -y $packagesNeeded
+              ${SUDO} yum install -y yum-utils
+              ${SUDO} yum-config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+              ${SUDO} yum install -y $packagesNeeded
           elif [ -x "$(command -v zypper)" ]; then
-              $SUDO zypper addrepo https://cli.github.com/packages/rpm/gh-cli.repo
-              $SUDO zypper ref
-              $SUDO zypper install -n $packagesNeeded
+              ${SUDO} zypper addrepo https://cli.github.com/packages/rpm/gh-cli.repo
+              ${SUDO} zypper ref
+              ${SUDO} zypper install -n $packagesNeeded
           elif [ -x "$(command -v pacman)" ]; then
-              $SUDO pacman -S --needed --noconfirm $packagesNeeded
+              ${SUDO} pacman -S --needed --noconfirm $packagesNeeded
           else
               echo "FAILED TO INSTALL required packages: $packagesNeeded" >&2
           fi
