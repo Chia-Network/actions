@@ -3,7 +3,8 @@ description: "Signs the specified file with signtool and digicert HSM"
 inputs:
   sm_host:
     description: "Digicert signing host"
-    required: true
+    default: "https://clientauth.one.digicert.com"
+    required: false
   sm_api_key:
     description: "API Key for digicert"
     required: true
