@@ -53,9 +53,9 @@ runs:
     - name: Sign file
       shell: pwsh
       run: |
-        signtool.exe sign /sha1 $env:SM_CODE_SIGNING_CERT_SHA1_HASH /tr http://timestamp.digicert.com /td SHA256 /fd SHA256 ${{ inputs.file }}
+        signtool.exe sign /sha1 $env:SM_CODE_SIGNING_CERT_SHA1_HASH /tr http://timestamp.digicert.com /td SHA256 /fd SHA256 "${{ inputs.file }}"
 
     - name: Validate signature
       shell: pwsh
       run: |
-        signtool.exe verify /v /pa ${{ inputs.file }}
+        signtool.exe verify /v /pa "${{ inputs.file }}"
