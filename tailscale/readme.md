@@ -4,7 +4,7 @@ Wrapper around tailscale/github-action that works w/ containers and sets up SSH 
 
 ```yaml
 - name: Tailscale
-  uses: chia-network/actions/tailscale@tailscale
+  uses: chia-network/actions/tailscale@main
   with:
     oauth-client-id: ${{ env.TAILSCALE_CLIENT_ID }}
     oauth-secret: ${{ env.TAILSCALE_SECRET }}
