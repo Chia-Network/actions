@@ -1,8 +1,9 @@
 import {getOctokit} from "@actions/github";
 import * as core from "@actions/core";
+import * as github from "@actions/github";
 import {GitHubContextPayloadPullRequest, postOpenPullRequestsQuery, PullRequestsNode} from "./query";
 import {updateLabel} from "./label";
-import * as github from "@actions/github";
+import {ignoreRetryTimeout} from "./input";
 
 export type Octokit = ReturnType<typeof getOctokit>;
 
@@ -223,7 +224,9 @@ export async function checkConflict(context: CheckConflictContext): Promise<Reco
       const pr = prs[i];
       core.info(`  #${pr.number} (${pr.title})`);
     }
-    throw new Error("Failed to check conflict");
+    if(!ignoreRetryTimeout){
+      throw new Error("Failed to check conflict");
+    }
   }
   
   return conflictStatus;
