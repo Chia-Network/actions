@@ -7,6 +7,10 @@ on:
         required: false
         type: string
         default: "ubuntu-latest"
+      timeout-minutes:
+        required: false
+        type: number
+        default: 360
       docker-platforms:
         required: false
         type: string
@@ -36,6 +40,7 @@ on:
 jobs:
   package:
     runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
       - uses: actions/checkout@v3
 
