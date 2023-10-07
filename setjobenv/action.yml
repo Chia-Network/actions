@@ -229,7 +229,7 @@ runs:
         fi
 
         # Begin custom
-        echo "GH_EVENT_ACTION=$GH_EVENT_ACTION" >>GITHUB_ENV
+        echo "GH_EVENT_ACTION=$GH_EVENT_ACTION" >>"$GITHUB_ENV"
         echo "Set GH_EVENT_ACTION=$GH_EVENT_ACTION"
         # echo "LANGUAGE=$LANGUAGE" >>"$GITHUB_ENV"
         # echo "Set LANGUAGE=$LANGUAGE"
