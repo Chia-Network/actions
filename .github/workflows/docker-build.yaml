@@ -30,6 +30,14 @@ on:
         required: false
         type: string
         default: ""
+      build-args:
+        required: false
+        type: string
+        default: ""
+      additional-tag:
+        required: false
+        type: string
+        default: ""
     secrets:
       DOCKERHUB_USERNAME:
         required: false
@@ -88,6 +96,7 @@ jobs:
           # latest is only tagged if we're on the default branch
           tags: |
             type=raw,value=latest,enable=${{ endsWith(github.ref, github.event.repository.default_branch) }}
+            type=raw,value=${{ inputs.additional-tag }},enable=${{ inputs.additional-tag != '' }}
             type=sha,format=long
 
       - name: Build Docker Container
@@ -98,3 +107,4 @@ jobs:
           platforms: ${{ inputs.docker-platforms }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+          build-args: ${{ inputs.build-args }}
