@@ -30,6 +30,10 @@ on:
         required: false
         type: string
         default: ""
+      build-args:
+        required: false
+        type: string
+        default: ""
     secrets:
       DOCKERHUB_USERNAME:
         required: false
@@ -98,3 +102,4 @@ jobs:
           platforms: ${{ inputs.docker-platforms }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+          build-args: ${{ inputs.build-args }}
