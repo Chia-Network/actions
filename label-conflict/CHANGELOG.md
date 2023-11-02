@@ -1,5 +1,9 @@
 # Changelog
 
+## [3.0.1]
+### Changed
+- Upgraded Node.js runtime version to `20` from `16`.
+
 ## [3.0.0]
 ### Added
 - Added `ignoreRetryTimeout` option, which indicates whether to mark the action success when unknown

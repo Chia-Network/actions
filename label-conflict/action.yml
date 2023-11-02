@@ -25,7 +25,7 @@ inputs:
   commentToAddOnClean:
     description: "Comment to add when conflict is resolved. Supports Markdown"
 runs:
-  using: "node16"
+  using: "node20"
   main: "dist/index.js"
 author: "Izumi Hoshino"
 branding:
