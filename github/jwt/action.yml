@@ -20,6 +20,6 @@ runs:
       shell: sh
       run: |
         if [ -z "${{ env.JWT_TOKEN }}" ]; then
-            echo "Error: JWT_TOKEN is empty! Ensure `id-token: write` is set in permissions."
+            echo "Error: JWT_TOKEN is empty! Ensure \"id-token: write\" is set in permissions."
             exit 1
         fi
