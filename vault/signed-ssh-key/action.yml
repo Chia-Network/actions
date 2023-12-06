@@ -30,13 +30,26 @@ runs:
         ( command -v apk && apk add openssh-keygen openssh-client jq curl curl-dev ) || true
         ( command -v apt-get && apt-get update && apt-get install -y ssh-client jq curl ) || true
       shell: sh
+
+    # GitHub sets $HOME to /github/home, but doesn't update /etc/passwd
+    # OpenSSH looks in /etc/passwd FIRST and ignores $HOME if a home dir is set in passwd
+    # This updates /etc/passwd to match $HOME
+    - name: Fix /etc/passwd file for alternate $HOME path
+      shell: sh
+      run: |
+        if [ "$(id -u)" -eq 0 ]; then
+          sed -i "s~root:/root~root:$HOME~g" /etc/passwd
+        fi
+
     - name: Ensure directory for keypair exists
       run: |
         mkdir -p $(dirname ${{ inputs.keypair_path }})
       shell: sh
+
     - name: Generate keypair
       run: ssh-keygen -b 2048 -t rsa -f ${{ inputs.keypair_path }} -q -N ""
       shell: sh
+
     - name: Sign key
       run: |
         PUBLIC_KEY=$(cat ${{ inputs.keypair_path }}.pub)
