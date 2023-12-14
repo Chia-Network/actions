@@ -15,9 +15,22 @@ runs:
   steps:
     - name: Ensure dependencies are present
       run: |
-        ( command -v apk && apk add python3 py-pip && pip3 install j2cli ) || true
-        ( command -v apt-get && apt-get update && apt-get install -y python3 && pip3 install j2cli ) || true
+        ( command -v apk && apk add python3 ) || true
+        ( command -v apt-get && apt-get update && apt-get install -y python3 python3-venv ) || true
       shell: sh
+
+    - uses: Chia-Network/actions/create-venv@main
+      id: create-venv
+
+    - uses: Chia-Network/actions/activate-venv@main
+      with:
+        directories: ${{ steps.create-venv.outputs.activate-venv-directories }}
+
+    - name: Install j2
+      shell: sh
+      run: |
+        pip install j2cli
+
     - name: Template values
       working-directory: ${{ inputs.terraform_dir }}
       shell: sh
@@ -26,19 +39,23 @@ runs:
            echo "Var file is .j2 - Processing with j2..."
            j2 "${{ inputs.varfile }}.j2" -o "${{ inputs.varfile }}"
         fi
+
     - name: Init
       working-directory: ${{ inputs.terraform_dir }}
       run: terraform init
       shell: sh
+
     - name: Ensure workspace exists
       working-directory: ${{ inputs.terraform_dir }}
       run: |
         terraform workspace new ${{ inputs.workspace }} || true
       shell: sh
+
     - name: Select Workspace
       working-directory: ${{ inputs.terraform_dir }}
       run: terraform workspace select ${{ inputs.workspace }}
       shell: sh
+
     - name: Show Plan
       working-directory: ${{ inputs.terraform_dir }}
       run: terraform plan -var-file=${{ inputs.varfile }}
