@@ -38,7 +38,7 @@ on:
         required: false
         type: string
         default: ""
-      tag-latest-override:
+      alternate-latest-mode:
         required: false
         type: boolean
         default: false
@@ -102,7 +102,7 @@ jobs:
             suffix=
           tags: |
             type=raw,value=main,enable={{is_default_branch}}
-            type=raw,value=latest,enable=${{ inputs.tag-latest-override && endsWith(github.ref, github.event.repository.default_branch) }}
+            type=raw,value=latest,enable=${{ inputs.alternate-latest-mode && endsWith(github.ref, github.event.repository.default_branch) }}
             type=raw,value=${{ inputs.additional-tag }},enable=${{ inputs.additional-tag != '' }}
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
