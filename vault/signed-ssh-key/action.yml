@@ -41,9 +41,10 @@ runs:
           sed -i "s~root:/root~root:$HOME~g" /etc/passwd
         fi
 
-    - name: Ensure directory for keypair exists
+    - name: Ensure directory for keypair exists and existing keypairs are deleted
       run: |
         mkdir -p $(dirname ${{ inputs.keypair_path }})
+        rm -f ${{ inputs.keypair_path }}*
       shell: sh
 
     - name: Generate keypair
