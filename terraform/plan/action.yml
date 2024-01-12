@@ -15,21 +15,9 @@ runs:
   steps:
     - name: Ensure dependencies are present
       run: |
-        ( command -v apk && apk add python3 ) || true
-        ( command -v apt-get && apt-get update && apt-get install -y python3 python3-venv ) || true
+        ( command -v apk && apk add jinja2-cli && ln -s $(which jinja2) $(dirname $(which jinja2))/j2 ) || true
+        ( command -v apt-get && apt-get update && apt-get install -y j2cli ) || true
       shell: sh
-
-    - uses: Chia-Network/actions/create-venv@main
-      id: create-venv
-
-    - uses: Chia-Network/actions/activate-venv@main
-      with:
-        directories: ${{ steps.create-venv.outputs.activate-venv-directories }}
-
-    - name: Install j2
-      shell: sh
-      run: |
-        pip install j2cli
 
     - name: Template values
       working-directory: ${{ inputs.terraform_dir }}
