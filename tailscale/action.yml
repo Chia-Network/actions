@@ -24,7 +24,7 @@ runs:
     - name: Install deps
       shell: sh
       run: |
-        ( command -v apk && apk add bash curl netcat-openbsd openssh sudo ) || true
+        ( command -v apk && apk add bash curl netcat-openbsd openssh-client sudo ) || true
         ( command -v apt-get && apt-get update && apt-get install -y curl netcat-openbsd openssh-client sudo ) || true
 
     - name: Tailscale
