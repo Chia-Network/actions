@@ -15,8 +15,16 @@ runs:
     - name: Get credentials from vault
       shell: sh
       run: |
-        creds=$(curl -s --request POST -d "{\"jwt\":\"$JWT_TOKEN\",\"role\":\"${{ inputs.role_name }}\"}" ${{ inputs.vault_url }}/v1/auth/github-jwt/login)
+        temp_file=$(mktemp)
+        http_status=$(curl -s -o ${temp_file} -w "%{http_code}" --request POST -d "{\"jwt\":\"$JWT_TOKEN\",\"role\":\"${{ inputs.role_name }}\"}" ${{ inputs.vault_url }}/v1/auth/github-jwt/login)
+        creds=$(cat ${temp_file})
+        rm -f ${temp_file}
 
-        VAULT_TOKEN=$(echo $creds | jq -r '.auth.client_token')
-        echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
-        echo "::add-mask::$VAULT_TOKEN"
+        if [ $http_status -ge 200 ] && [ $http_status -le 299 ]; then
+          VAULT_TOKEN=$(echo $creds | jq -r '.auth.client_token')
+          echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
+          echo "::add-mask::$VAULT_TOKEN"
+        else
+          echo "Error: HTTP Status Code return ${http_status}"
+          exit 1
+        fi

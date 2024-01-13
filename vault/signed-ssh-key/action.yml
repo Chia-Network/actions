@@ -54,11 +54,22 @@ runs:
     - name: Sign key
       run: |
         PUBLIC_KEY=$(cat ${{ inputs.keypair_path }}.pub)
-        data=$(curl -s \
+
+        temp_file=$(mktemp)
+        http_status=$(curl -s \
           --header "X-Vault-Token: ${{ inputs.vault_token }}" \
           --request POST \
+          -o ${temp_file} \
+          -w "%{http_code}" \
           --data "{\"public_key\":\"$PUBLIC_KEY\",\"ttl\":\"${{ inputs.ttl }}\"}" \
           ${{ inputs.vault_url }}/v1/${{ inputs.backend_name }}/sign/${{ inputs.role_name }})
+        data=$(cat ${temp_file})
+        rm -f ${temp_file}
 
-        echo $data | tr -d '\n' | jq -r '.data.signed_key' > ${{ inputs.keypair_path }}-cert.pub
+        if [ $http_status -ge 200 ] && [ $http_status -le 299 ]; then
+          echo $data | tr -d '\n' | jq -r '.data.signed_key' > ${{ inputs.keypair_path }}-cert.pub
+        else
+          echo "Error: HTTP Status Code return ${http_status}"
+          exit 1
+        fi
       shell: sh
