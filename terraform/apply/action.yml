@@ -15,7 +15,7 @@ runs:
   steps:
     - name: Ensure dependencies are present
       run: |
-        ( command -v apk && apk add jinja2-cli && ln -s $(which jinja2) $(dirname $(which jinja2))/j2 ) || true
+        ( command -v apk && apk add python3 py3-pip && pip install --break-system-packages j2cli ) || true
         ( command -v apt-get && apt-get update && apt-get install -y j2cli ) || true
       shell: sh
 
