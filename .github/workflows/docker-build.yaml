@@ -115,6 +115,6 @@ jobs:
           context: ${{ inputs.docker-context }}
           file: ${{ inputs.dockerfile }}
           platforms: ${{ inputs.docker-platforms }}
-          push: ${{ (github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == github.repository) && 'true' || 'false' }}
+          push: ${{ (github.event_name != 'pull_request' && !startsWith(github.ref, 'refs/heads/dependabot/')) || (github.event.pull_request.head.repo.full_name == github.repository) && 'true' || 'false' }}
           tags: ${{ steps.meta.outputs.tags }}
           build-args: ${{ inputs.build-args }}
