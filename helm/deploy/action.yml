@@ -16,6 +16,10 @@ inputs:
   helm_values:
     description: "Values file to pass when running helm"
     required: true
+  helm_wait:
+    description: "Whether or not to use the --wait flag so that the job isn't complete until all pods are updated"
+    required: false
+    default: "true"
 runs:
   using: "composite"
   steps:
@@ -32,4 +36,7 @@ runs:
         if [ -n "${{ inputs.helm_chart_repo }}" ]; then
           export REPO_PARAM="--repo ${{ inputs.helm_chart_repo }}"
         fi
-        helm upgrade --install --create-namespace --namespace ${{ inputs.namespace }} ${REPO_PARAM} --values ${{ inputs.helm_values }} ${{ inputs.app_name }} ${{ inputs.helm_chart }}
+        if [ "${{ inputs.helm_wait }}" = "true" ]; then
+          export WAIT_PARAM="--wait"
+        fi
+        helm upgrade --install --create-namespace --namespace ${{ inputs.namespace }} ${REPO_PARAM} ${WAIT_PARAM} --values ${{ inputs.helm_values }} ${{ inputs.app_name }} ${{ inputs.helm_chart }}
