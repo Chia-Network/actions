@@ -20,6 +20,10 @@ inputs:
     description: "Whether or not to use the --wait flag so that the job isn't complete until all pods are updated"
     required: false
     default: "true"
+  helm_timeout:
+    description: "How long to wait for helm to finish doing things before giving up"
+    required: false
+    default: "900s"
 runs:
   using: "composite"
   steps:
@@ -39,4 +43,4 @@ runs:
         if [ "${{ inputs.helm_wait }}" = "true" ]; then
           export WAIT_PARAM="--wait"
         fi
-        helm upgrade --install --create-namespace --namespace ${{ inputs.namespace }} ${REPO_PARAM} ${WAIT_PARAM} --values ${{ inputs.helm_values }} ${{ inputs.app_name }} ${{ inputs.helm_chart }}
+        helm upgrade --install --create-namespace --namespace ${{ inputs.namespace }} ${REPO_PARAM} ${WAIT_PARAM} --timeout ${{ inputs.helm_timeout }} --values ${{ inputs.helm_values }} ${{ inputs.app_name }} ${{ inputs.helm_chart }}
