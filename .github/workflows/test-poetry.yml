@@ -143,7 +143,7 @@ jobs:
     steps:
     - uses: Chia-Network/actions/clean-workspace@main
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         path: repo
 
