@@ -108,16 +108,16 @@ jobs:
               matrix: arm
           - os:
               name: Chia Network CentOS Intel Builder
-              matrix: docker-chia-network-centos-intel-builder
+              matrix: docker-chia-network-rocky-intel-builder
               native-python: true
               runs-on:
                 intel: [ubuntu-latest]
               container:
-                '3.9': chianetwork/centos7-builder:latest
+                '3.10': chianetwork/rocky8-builder:latest
             python:
-              name: '3.9'
-              check: '3.9'
-              matrix: '3.9'
+              name: '3.10'
+              check: '3.10'
+              matrix: '3.10'
             arch:
               name: Intel
               matrix: intel
