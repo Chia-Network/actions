@@ -100,7 +100,7 @@ jobs:
               matrix: arm
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Run the action
       uses: ./setup-python/
