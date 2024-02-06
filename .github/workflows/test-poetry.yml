@@ -87,11 +87,11 @@ jobs:
               runs-on:
                 intel: [ubuntu-latest]
               container:
-                '3.8': chianetwork/ubuntu-20.04-builder:latest
+                '3.10': chianetwork/ubuntu-20.04-builder:latest
             python:
-              name: '3.8'
-              check: '3.8'
-              matrix: '3.8'
+              name: '3.10'
+              check: '3.10'
+              matrix: '3.10'
             arch:
               name: Intel
               matrix: intel
@@ -102,11 +102,11 @@ jobs:
               runs-on:
                 arm: [Linux, ARM64]
               container:
-                '3.8': chianetwork/ubuntu-20.04-builder:latest
+                '3.10': chianetwork/ubuntu-20.04-builder:latest
             python:
-              name: '3.8'
-              check: '3.8'
-              matrix: '3.8'
+              name: '3.10'
+              check: '3.10'
+              matrix: '3.10'
             arch:
               name: ARM
               matrix: arm
