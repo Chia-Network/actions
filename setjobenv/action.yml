@@ -15,6 +15,10 @@ runs:
             packagesNeeded=$(echo "$packagesNeeded" | sed "s/\b$cmd\b//g" | sed 's/^ *//;s/ *$//' | tr -s ' ')
           fi
         done
+        # Make sure lscpu is installed (not always in containers)
+        if ! command -v lscpu >/dev/null 2>&1; then
+          packagesNeeded=$(echo "$packagesNeeded util-linux")
+        fi
         if [ -n "$packagesNeeded" ]; then
             # If running as root, then dont use sudo
             if [ "$(id -u)" -eq 0 ]; then
@@ -23,6 +27,7 @@ runs:
                 SUDO=$(command -v sudo || echo "")
             fi
           if [ -x "$(command -v apk)" ]; then
+              packagesNeeded=$(echo "$packagesNeeded" | sed "s/gh/github-cli/g")
               ${SUDO} apk add --no-cache $packagesNeeded
           elif [ -x "$(command -v apt-get)" ]; then
               type -p curl >/dev/null || $SUDO apt install curl -y
