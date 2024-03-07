@@ -3,18 +3,44 @@ description: "Gets JWT token from github"
 runs:
   using: "composite"
   steps:
+    # This action could sometimes be called by other actions multiple times in a single workflow
+    # We only need to get the JWT_TOKEN the first time
+    - name: Check if JWT_TOKEN is already set
+      id: check_token
+      shell: bash
+      run: |
+        if [ ! -z "${{ env.JWT_TOKEN }}" ]; then
+          echo "JWT_TOKEN is already set."
+          echo "Skipping steps..."
+          echo "skip=true" >> $GITHUB_OUTPUT
+        else
+          echo "skip=false" >> $GITHUB_OUTPUT
+        fi
+
     - name: Ensure dependencies are present
+      if: steps.check_token.outputs.skip == 'false'
       shell: sh
       run: |
         ( command -v apk && apk add jq curl curl-dev ) || true
         ( command -v apt-get && apt-get update && apt-get install -y jq curl ) || true
 
     - name: Get JWT from GitHub
+      if: steps.check_token.outputs.skip == 'false'
       shell: sh
       run: |
-        JWT_TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL" | jq -r '.value')
-        echo "::add-mask::$JWT_TOKEN"
-        echo "JWT_TOKEN=$JWT_TOKEN" >> $GITHUB_ENV
+        success=false
+        for attempt in {1..5}; do
+          JWT_TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL" | jq -r '.value')
+          if [ ! -z "$JWT_TOKEN" ]; then
+            echo "::add-mask::$JWT_TOKEN"
+            echo "JWT_TOKEN=$JWT_TOKEN" >> $GITHUB_ENV
+            success=true
+            break
+          else
+            echo "Attempt $attempt failed. Retrying in 15 seconds..."
+            sleep 15
+          fi
+        done
 
     - name: Check that token isn't empty
       shell: sh
