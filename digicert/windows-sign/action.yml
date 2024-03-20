@@ -62,13 +62,13 @@ runs:
         smksp_cert_sync.exe
 
     - name: Sign file
-      if: inputs.sign == "true"
+      if: ${{ inputs.sign == 'true' }}
       shell: pwsh
       run: |
         signtool.exe sign /sha1 $env:SM_CODE_SIGNING_CERT_SHA1_HASH /tr http://timestamp.digicert.com /td SHA256 /fd SHA256 "${{ inputs.file }}"
 
     - name: Validate signature
-      if: inputs.sign == "true"
+      if: ${{ inputs.sign == 'true' }}
       shell: pwsh
       run: |
         signtool.exe verify /v /pa "${{ inputs.file }}"
