@@ -1,6 +1,10 @@
 name: "Windows Code Sign"
 description: "Signs the specified file with signtool and digicert HSM"
 inputs:
+  sm_tools_download_url:
+    description: "URL to download smtools-windows-x64.msi from. If set in env SM_TOOLS_DOWNLOAD_URL, env wins"
+    default: "https://one.digicert.com/signingmanager/api-ui/v1/releases/smtools-windows-x64.msi/download"
+    required: false
   sm_host:
     description: "Digicert signing host"
     default: "https://clientauth.one.digicert.com"
@@ -31,6 +35,9 @@ runs:
     - name: Set signing variables
       shell: bash
       run: |
+        if [[ -z $SM_TOOLS_DOWNLOAD_URL ]]; then
+          echo "SM_TOOLS_DOWNLOAD_URL=${{ inputs.sm_tools_download_url }}" >> "$GITHUB_ENV"
+        fi
         echo "SM_HOST=${{ inputs.sm_host }}" >> "$GITHUB_ENV"
         echo "SM_API_KEY=${{ inputs.sm_api_key }}" >> "$GITHUB_ENV"
         echo "SM_CLIENT_CERT_FILE=D:\\Certificate_pkcs12.p12" >> "$GITHUB_ENV"
@@ -43,7 +50,7 @@ runs:
     - name: Setup SSM KSP
       shell: cmd
       run: |
-        curl -X GET  https://one.digicert.com/signingmanager/api-ui/v1/releases/smtools-windows-x64.msi/download -H "x-api-key:%SM_API_KEY%" -o smtools-windows-x64.msi
+        curl -X GET "%SM_TOOLS_DOWNLOAD_URL%" -H "x-api-key:%SM_API_KEY%" -o smtools-windows-x64.msi
         msiexec /i smtools-windows-x64.msi /quiet /qn
         smksp_registrar.exe list
         smctl.exe keypair ls
