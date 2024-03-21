@@ -19,9 +19,7 @@ def main() -> None:
     assert (
         pip_cache_path.is_absolute()
     ), f"pip cache path is not absolute: {pip_cache_path!r}"
-    assert (
-        pip_cache_path.exists()
-    ), f"pip cache path does not exist: {pip_cache_path!r}"
+    assert pip_cache_path.exists(), f"pip cache path does not exist: {pip_cache_path!r}"
     assert (
         pip_cache_path.is_dir()
     ), f"pip cache path exists but is not a directory: {pip_cache_path!r}"
