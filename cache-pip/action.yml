@@ -8,7 +8,7 @@ runs:
       id: create-directory
       shell: bash
       run: |
-        DIR=$(mktemp -d -p "${RUNNER_TEMP}")
+        DIR=$(mktemp -d")
         echo temporary pip cache directory created at: "${DIR}"
         ls -la "${DIR}"
         echo "PIP_CACHE_DIR=${DIR}" >> "$GITHUB_ENV"
