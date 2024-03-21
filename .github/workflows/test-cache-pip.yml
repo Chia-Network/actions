@@ -151,7 +151,5 @@ jobs:
       uses: ./repo/cache-pip
 
     - name: Check pip cache directory
-      env:
-        REFERENCE_PATH: ${{ runner.temp }}
       run: |
         python repo/cache-pip/test_pip_cache_directory.py
