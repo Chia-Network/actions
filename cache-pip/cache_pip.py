@@ -1,13 +1,21 @@
 import os
 import pathlib
-import tempfile
+import shutil
 
 
 def main() -> None:
+    pre_delete = os.environ["PRE_DELETE"] == "true"
     directory = pathlib.Path(
         os.environ["RUNNER_TEMP"],
         ".chia-network-actions-cache-pip",
     )
+
+    if pre_delete:
+        try:
+            shutil.rmtree(directory)
+        except FileNotFoundError:
+            pass
+
     directory.mkdir(parents=True, exist_ok=False)
 
     print(f"Cache directory: {directory}")

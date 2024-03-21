@@ -149,6 +149,17 @@ jobs:
 
     - name: Run the action
       uses: ./repo/cache-pip
+      with:
+        pre-delete: "false"
+
+    - name: Check pip cache directory
+      run: |
+        python repo/cache-pip/test_pip_cache_directory.py
+
+    - name: Run the action
+      uses: ./repo/cache-pip
+      with:
+        pre-delete: "true"
 
     - name: Check pip cache directory
       run: |

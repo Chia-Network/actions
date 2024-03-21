@@ -1,12 +1,20 @@
 name: "Cache pip"
 description: "Use GitHub Actions cache for pip"
 
+inputs:
+  pre-delete:
+    description: "Start by deleting the target directory"
+    required: false
+    default: "true"
+
 runs:
   using: "composite"
   steps:
     - name: Set pip cache directory environment variable
       id: create-directory
       shell: bash
+      env:
+        PRE_DELETE: ${{ inputs.pre-delete }}
       run: |
         python "${GITHUB_ACTION_PATH}/cache_pip.py"
 
