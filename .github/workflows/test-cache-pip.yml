@@ -1,0 +1,187 @@
+name: test-cache-pip
+
+on:
+  push:
+    branches:
+    - main
+    tags:
+    - '**'
+  pull_request:
+    branches:
+    - '**'
+
+concurrency:
+  # SHA is added to the end if on `main` to let all main workflows run
+  group: ${{ github.ref }}-${{ github.workflow }}-${{ github.event_name }}-${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/') || startsWith(github.ref, 'refs/heads/long_lived/')) && github.sha || '' }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test:
+    name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.python.name }}
+    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
+    container: ${{ matrix.os.container[matrix.python.matrix] }}
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - name: macOS
+            matrix: macos
+            native-python: false
+            runs-on:
+              arm: [macOS, ARM64]
+              intel: [macos-latest]
+          - name: Ubuntu
+            matrix: ubuntu
+            native-python: false
+            runs-on:
+              arm: [Linux, ARM64]
+              intel: [ubuntu-latest]
+          - name: Docker Debian
+            matrix: docker-debian
+            native-python: true
+            runs-on:
+              arm: [Linux, ARM64]
+              intel: [ubuntu-latest]
+            container:
+              'py3.8': docker://python:3.8-bullseye
+              'py3.9': docker://python:3.9-bullseye
+              'py3.10': docker://python:3.10-bullseye
+              'py3.11': docker://python:3.11-bullseye
+          - name: Windows
+            matrix: windows
+            native-python: false
+            runs-on:
+              intel: [windows-latest]
+        python:
+          - name: '3.8'
+            action: '3.8'
+            check: '3.8'
+            matrix: 'py3.8'
+          - name: '3.9'
+            action: '3.9'
+            check: '3.9'
+            matrix: 'py3.9'
+          - name: '3.10'
+            action: '3.10'
+            check: '3.10'
+            matrix: 'py3.10'
+          - name: '3.11'
+            action: '3.11'
+            check: '3.11'
+            matrix: 'py3.11'
+        arch:
+          - name: ARM
+            matrix: arm
+          - name: Intel
+            matrix: intel
+        include:
+          - os:
+              name: Chia Network Ubuntu Intel Builder
+              matrix: docker-chia-network-ubuntu-intel-builder
+              native-python: true
+              runs-on:
+                intel: [ubuntu-latest]
+              container:
+                '3.10': chianetwork/ubuntu-20.04-builder:latest
+            python:
+              name: '3.10'
+              check: '3.10'
+              matrix: '3.10'
+            arch:
+              name: Intel
+              matrix: intel
+          - os:
+              name: Chia Network Ubuntu ARM Builder
+              matrix: docker-chia-network-ubuntu-arm-builder
+              native-python: true
+              runs-on:
+                arm: [Linux, ARM64]
+              container:
+                '3.10': chianetwork/ubuntu-20.04-builder:latest
+            python:
+              name: '3.10'
+              check: '3.10'
+              matrix: '3.10'
+            arch:
+              name: ARM
+              matrix: arm
+          - os:
+              name: Chia Network CentOS Intel Builder
+              matrix: docker-chia-network-rocky-intel-builder
+              native-python: true
+              runs-on:
+                intel: [ubuntu-latest]
+              container:
+                '3.10': chianetwork/rocky8-builder:latest
+            python:
+              name: '3.10'
+              check: '3.10'
+              matrix: '3.10'
+            arch:
+              name: Intel
+              matrix: intel
+        exclude:
+          # Only partial entries are required here by GitHub Actions so generally I
+          # only specify the `matrix:` entry.  The super linter complains so for now
+          # all entries are included to avoid that.  Reported at
+          # https://github.com/rhysd/actionlint/issues/249
+          - os:
+              name: Windows
+              matrix: windows
+              native-python: false
+              runs-on:
+                intel: [windows-latest]
+            arch:
+              name: ARM
+              matrix: arm
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        path: repo
+
+    - name: Set up ${{ matrix.python.name }}
+      if: ${{ ! matrix.os.native-python }}
+      uses: ./repo/setup-python
+      with:
+        python-version: ${{ matrix.python.action }}
+
+    - name: Run the action (with pre-delete)
+      uses: ./repo/cache-pip
+      with:
+        pre-delete: "true"
+
+    - name: Check pip cache directory
+      run: |
+        python repo/cache-pip/test_pip_cache_directory.py
+
+    - name: Delete the directory
+      run: |
+        rm -rf "${PIP_CACHE_DIR}"
+
+    - name: Run the action (no pre-delete)
+      uses: ./repo/cache-pip
+      with:
+        pre-delete: "false"
+
+    - name: Check pip cache directory
+      run: |
+        python repo/cache-pip/test_pip_cache_directory.py
+
+    - name: Touch sentinel file
+      run: |
+        touch "${PIP_CACHE_DIR}"/cache_pip_sentinel_file
+
+    - name: Run the action (with pre-delete)
+      uses: ./repo/cache-pip
+      with:
+        pre-delete: "true"
+
+    - name: Check no sentinel file
+      run: |
+        [ ! -e "${PIP_CACHE_DIR}"/cache_pip_sentinel_file ]
