@@ -147,7 +147,7 @@ jobs:
       with:
         python-version: ${{ matrix.python.action }}
 
-    - name: Run the action
+    - name: Run the action (no pre-delete)
       uses: ./repo/cache-pip
       with:
         pre-delete: "false"
@@ -156,7 +156,7 @@ jobs:
       run: |
         python repo/cache-pip/test_pip_cache_directory.py
 
-    - name: Run the action
+    - name: Run the action (with pre-delete)
       uses: ./repo/cache-pip
       with:
         pre-delete: "true"
