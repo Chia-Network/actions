@@ -9,6 +9,7 @@ runs:
       shell: bash
       run: |
         DIR=$(mktemp -d -p "${RUNNER_TEMP}")
+        echo temporary pip cache directory created at: "${DIR}"
         ls -la "${DIR}"
         echo "PIP_CACHE_DIR=${DIR}" >> "$GITHUB_ENV"
         echo "dir=${DIR}" >> "$GITHUB_OUTPUT"
