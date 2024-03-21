@@ -8,7 +8,7 @@ runs:
       id: pip-cache
       shell: bash
       run: |
-        DIR=$(mktemp -d)
+        DIR=$(mktemp -d -p "${RUNNER_TEMP}")
         echo "PIP_CACHE_DIR=${DIR}" >> "$GITHUB_ENV"
         echo "dir=${DIR}" >> "$GITHUB_OUTPUT"
 
