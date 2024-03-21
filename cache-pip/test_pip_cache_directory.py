@@ -11,7 +11,7 @@ def main() -> None:
         stdout=subprocess.PIPE,
         encoding="utf-8",
     )
-    pip_cache_path = pathlib.Path(completed_process.stdout)
+    pip_cache_path = pathlib.Path(completed_process.stdout.strip())
 
     assert reference_path.is_absolute(), f"reference path is not absolute: {reference_path!r}"
     assert pip_cache_path.is_absolute(), f"pip cache path is not absolute: {pip_cache_path!r}"
