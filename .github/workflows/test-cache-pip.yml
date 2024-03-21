@@ -15,6 +15,10 @@ concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}-${{ github.event_name }}-${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/') || startsWith(github.ref, 'refs/heads/long_lived/')) && github.sha || '' }}
   cancel-in-progress: true
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   test:
     name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.python.name }}
@@ -147,6 +151,19 @@ jobs:
       with:
         python-version: ${{ matrix.python.action }}
 
+    - name: Run the action (with pre-delete)
+      uses: ./repo/cache-pip
+      with:
+        pre-delete: "true"
+
+    - name: Check pip cache directory
+      run: |
+        python repo/cache-pip/test_pip_cache_directory.py
+
+    - name: Delete the directory
+      run: |
+        rm -rf "${PIP_CACHE_DIR}"
+
     - name: Run the action (no pre-delete)
       uses: ./repo/cache-pip
       with:
@@ -156,11 +173,15 @@ jobs:
       run: |
         python repo/cache-pip/test_pip_cache_directory.py
 
+    - name: Touch sentinel file
+      run: |
+        touch "${PIP_CACHE_DIR}"/cache_pip_sentinel_file
+
     - name: Run the action (with pre-delete)
       uses: ./repo/cache-pip
       with:
         pre-delete: "true"
 
-    - name: Check pip cache directory
+    - name: Check no sentinel file
       run: |
-        python repo/cache-pip/test_pip_cache_directory.py
+        [ ! -e "${PIP_CACHE_DIR}"/cache_pip_sentinel_file ]
