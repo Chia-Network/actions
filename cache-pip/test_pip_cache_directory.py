@@ -13,10 +13,10 @@ def main() -> None:
     )
     pip_cache_path = pathlib.Path(completed_process.stdout)
 
-    assert reference_path.is_absolute(), f"reference path is not absolute: {reference_path}"
-    assert pip_cache_path.is_absolute(), f"pip cache path is not absolute: {pip_cache_path}"
-    assert pip_cache_path.exists(), f"pip cache path does not exist: {pip_cache_path}"
-    assert pip_cache_path.is_dir(), f"pip cache path exists but is not a directory: {pip_cache_path}"
+    assert reference_path.is_absolute(), f"reference path is not absolute: {reference_path!r}"
+    assert pip_cache_path.is_absolute(), f"pip cache path is not absolute: {pip_cache_path!r}"
+    assert pip_cache_path.exists(), f"pip cache path does not exist: {pip_cache_path!r}"
+    assert pip_cache_path.is_dir(), f"pip cache path exists but is not a directory: {pip_cache_path!r}"
     pip_cache_path.relative_to(reference_path)
 
 
