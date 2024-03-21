@@ -1,0 +1,21 @@
+name: "Cache pip"
+description: "Use GitHub Actions cache for pip"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set pip cache directory environment variable
+      id: pip-cache
+      shell: bash
+      run: |
+        DIR=$(mktemp -d -p "${{ runner.temp }}")
+        echo "PIP_CACHE_DIR=${DIR}" >> "$GITHUB_ENV"
+        echo "dir=${DIR}" >> "$GITHUB_OUTPUT"
+
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.pip-cache.outputs.dir }}
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
