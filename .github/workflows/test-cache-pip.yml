@@ -52,6 +52,7 @@ jobs:
               'py3.9': docker://python:3.9-bullseye
               'py3.10': docker://python:3.10-bullseye
               'py3.11': docker://python:3.11-bullseye
+              'py3.12': docker://python:3.12-bullseye
           - name: Windows
             matrix: windows
             native-python: false
@@ -74,6 +75,10 @@ jobs:
             action: '3.11'
             check: '3.11'
             matrix: 'py3.11'
+          - name: '3.12'
+            action: '3.12'
+            check: '3.12'
+            matrix: 'py3.12'
         arch:
           - name: ARM
             matrix: arm
