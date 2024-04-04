@@ -1,0 +1,553 @@
+version: 2
+updates:
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "activate-venv"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "ansible/run-playbook"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "cache-pip"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "check-commit-signing"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "clean-workspace"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "commit-sign/gpg"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "create-venv"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "digicert/windows-sign"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "enforce-semver"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "git-mark-workspace-safe"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "git-ssh-to-https"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "github/jwt"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "github/keep-alive"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "helm/deploy"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "k8s/image-pull-secret"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "label-conflict"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "poetry"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "setjobenv"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "setup-python"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "sign/windows"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "tailscale"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "terraform/apply"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "terraform/destroy"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "terraform/plan"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "vault/aws-sts"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "vault/k8s-login"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "vault/login"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"
+  # generated
+  - package-ecosystem: "github-actions"
+    directory: "vault/signed-ssh-key"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - dependencies
+      - github_actions
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "-"
+    reviewers:
+      - "altendky"
+      - "cmmarslender"

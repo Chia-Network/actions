@@ -15,9 +15,10 @@ runs:
   steps:
     - name: Ensure dependencies are present
       run: |
-        ( command -v apk && apk add python3 py-pip && pip3 install j2cli ) || true
-        ( command -v apt-get && apt-get update && apt-get install -y python3 && pip3 install j2cli ) || true
+        ( command -v apk && apk add python3 py3-pip && pip install --break-system-packages j2cli ) || true
+        ( command -v apt-get && apt-get update && apt-get install -y j2cli ) || true
       shell: sh
+
     - name: Template values
       shell: sh
       working-directory: ${{ inputs.terraform_dir }}
@@ -26,19 +27,23 @@ runs:
            echo "Var file is .j2 - Processing with j2..."
            j2 "${{ inputs.varfile }}.j2" -o "${{ inputs.varfile }}"
         fi
+
     - name: Init
       working-directory: ${{ inputs.terraform_dir }}
       run: terraform init
       shell: sh
+
     - name: Ensure workspace exists
       working-directory: ${{ inputs.terraform_dir }}
       run: |
         terraform workspace new ${{ inputs.workspace }} || true
       shell: sh
+
     - name: Select Workspace
       working-directory: ${{ inputs.terraform_dir }}
       run: terraform workspace select ${{ inputs.workspace }}
       shell: sh
+
     - name: Apply
       working-directory: ${{ inputs.terraform_dir }}
       run: terraform apply -auto-approve -var-file=${{ inputs.varfile }}

@@ -1,7 +1,13 @@
 import os
 import sys
 
-version = ".".join(str(segment) for segment in sys.version_info[:2])
+check = os.environ["PYTHON_CHECK"]
+segments = check.split(".")
 
-if version != os.environ["PYTHON_CHECK"]:
+version = ".".join(str(segment) for segment in sys.version_info[: len(segments)])
+
+print(f"  actual version: {version!r}")
+print(f"expected version: {check!r}")
+
+if version != check:
     sys.exit(1)

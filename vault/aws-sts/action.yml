@@ -23,22 +23,30 @@ runs:
   steps:
     - name: Ensure dependencies are present
       run: |
-        ( command -v apk && apk add jq curl ) || true
+        ( command -v apk && apk add jq curl curl-dev ) || true
         ( command -v apt-get && apt-get update && apt-get install -y jq curl ) || true
       shell: sh
     - name: Get credentials from vault
       run: |
-        creds=$(curl -s --header "X-Vault-Token: ${{ inputs.vault_token }}" --request PUT -d "{\"ttl\":\"${{ inputs.ttl }}\"}" ${{ inputs.vault_url }}/v1/${{ inputs.backend_name }}/sts/${{ inputs.role_name }})
+        temp_file=$(mktemp)
+        http_status=$(curl -s -o ${temp_file} -w "%{http_code}" --header "X-Vault-Token: ${{ inputs.vault_token }}" --request PUT -d "{\"ttl\":\"${{ inputs.ttl }}\"}" ${{ inputs.vault_url }}/v1/${{ inputs.backend_name }}/sts/${{ inputs.role_name }})
+        creds=$(cat ${temp_file})
+        rm -f ${temp_file}
 
-        AWS_ACCESS_KEY_ID=$(echo $creds | jq -r '.data.access_key')
-        echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
-        echo "::add-mask::$AWS_ACCESS_KEY_ID"
+        if [ $http_status -ge 200 ] && [ $http_status -le 299 ]; then
+          AWS_ACCESS_KEY_ID=$(echo $creds | jq -r '.data.access_key')
+          echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
+          echo "::add-mask::$AWS_ACCESS_KEY_ID"
 
-        AWS_SECRET_ACCESS_KEY=$(echo $creds | jq -r '.data.secret_key')
-        echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
-        echo "::add-mask::$AWS_SECRET_ACCESS_KEY"
+          AWS_SECRET_ACCESS_KEY=$(echo $creds | jq -r '.data.secret_key')
+          echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
+          echo "::add-mask::$AWS_SECRET_ACCESS_KEY"
 
-        AWS_SESSION_TOKEN=$(echo $creds | jq -r '.data.security_token')
-        echo "AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN" >> $GITHUB_ENV
-        echo "::add-mask::$AWS_SESSION_TOKEN"
+          AWS_SESSION_TOKEN=$(echo $creds | jq -r '.data.security_token')
+          echo "AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN" >> $GITHUB_ENV
+          echo "::add-mask::$AWS_SESSION_TOKEN"
+        else
+          echo "Error: HTTP Status Code return ${http_status}"
+          exit 1
+        fi
       shell: sh

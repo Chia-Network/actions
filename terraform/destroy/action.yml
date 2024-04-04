@@ -15,9 +15,10 @@ runs:
   steps:
     - name: Ensure dependencies are present
       run: |
-        ( command -v apk && apk add python3 py-pip && pip3 install j2cli ) || true
-        ( command -v apt-get && apt-get update && apt-get install -y python3 && pip3 install j2cli ) || true
+        ( command -v apk && apk add python3 py3-pip && pip install --break-system-packages j2cli ) || true
+        ( command -v apt-get && apt-get update && apt-get install -y j2cli ) || true
       shell: sh
+
     - name: Template values
       working-directory: ${{ inputs.terraform_dir }}
       shell: sh
@@ -26,24 +27,29 @@ runs:
            echo "Var file is .j2 - Processing with j2..."
            j2 "${{ inputs.varfile }}.j2" -o "${{ inputs.varfile }}"
         fi
+
     - name: Init
       working-directory: ${{ inputs.terraform_dir }}
       run: terraform init
       shell: sh
+
       # We don't create the workspace - if it doesn't exist, just error and let this fail, since there is nothing to delete
     - name: Select Workspace
       working-directory: ${{ inputs.terraform_dir }}
       run: terraform workspace select ${{ inputs.workspace }}
       shell: sh
+
     - name: Destroy
       working-directory: ${{ inputs.terraform_dir }}
       run: terraform destroy -auto-approve -var-file=${{ inputs.varfile }}
       shell: sh
+
     # Select the default workspace so that the current ephemeral one can be deleted
     - name: Select Default Workspace
       working-directory: ${{ inputs.terraform_dir }}
       run: terraform workspace select default
       shell: sh
+
     - name: Delete Workspace
       working-directory: ${{ inputs.terraform_dir }}
       run: terraform workspace delete ${{ inputs.workspace }}

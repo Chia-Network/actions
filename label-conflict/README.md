@@ -98,6 +98,12 @@ resulting in a failure to update tags.
 
 **Default**: false
 
+### `ignoreRetryTimeout`
+
+Boolean. Whether to mark the action success when unknown PRs still exist after all retry.
+
+**Default**: true
+
 ### `commentToAddOnConflict`
 
 Comment to add when conflict is detected. Supports Markdown

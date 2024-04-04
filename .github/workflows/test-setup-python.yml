@@ -15,11 +15,16 @@ concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}-${{ github.event_name }}-${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/') || startsWith(github.ref, 'refs/heads/long_lived/')) && github.sha || '' }}
   cancel-in-progress: true
 
+defaults:
+  run:
+    shell:
+      bash
+
 jobs:
   test:
     name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.python.name }}
     runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
-    container: ${{ matrix.os.container[matrix.python.matrix] }}
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
@@ -34,42 +39,47 @@ jobs:
             runs-on:
               arm: [Linux, ARM64]
               intel: [ubuntu-latest]
-          - name: Docker Debian
-            matrix: docker-debian
-            runs-on:
-              arm: [Linux, ARM64]
-              intel: [ubuntu-latest]
-            container:
-              'py3.7': docker://python:3.7-bullseye
-              'py3.8': docker://python:3.8-bullseye
-              'py3.9': docker://python:3.9-bullseye
-              'py3.10': docker://python:3.10-bullseye
-              'py3.11': docker://python:3.11-bullseye
           - name: Windows
             matrix: windows
             runs-on:
               intel: [windows-latest]
         python:
-          - name: '3.7'
-            action: '3.7'
-            check: '3.7'
-            matrix: 'py3.7'
           - name: '3.8'
             action: '3.8'
             check: '3.8'
+            patch-specified: false
+            allow-prerelease: false
             matrix: 'py3.8'
           - name: '3.9'
             action: '3.9'
             check: '3.9'
+            patch-specified: false
+            allow-prerelease: false
             matrix: 'py3.9'
           - name: '3.10'
             action: '3.10'
             check: '3.10'
+            patch-specified: false
+            allow-prerelease: false
             matrix: 'py3.10'
+          - name: '3.10.8'
+            action: '3.10.8'
+            check: '3.10.8'
+            patch-specified: true
+            allow-prerelease: false
+            matrix: 'py3.10.8'
           - name: '3.11'
             action: '3.11'
             check: '3.11'
+            patch-specified: false
+            allow-prerelease: false
             matrix: 'py3.11'
+          - name: '3.12'
+            action: '3.12'
+            check: '3.12'
+            patch-specified: false
+            allow-prerelease: true
+            matrix: 'py3.12'
         arch:
           - name: ARM
             matrix: arm
@@ -88,31 +98,25 @@ jobs:
             arch:
               name: ARM
               matrix: arm
-          - os:
-              name: macOS
-              matrix: macos
-              runs-on:
-                arm: [macOS, ARM64]
-                intel: [macos-latest]
-            python:
-              name: '3.7'
-              action: '3.7'
-              check: '3.7'
-              matrix: 'py3.7'
-            arch:
-              name: ARM
-              matrix: arm
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Run the action
       uses: ./setup-python/
+      id: run-the-action
       with:
         python-version: ${{ matrix.python.action }}
+        allow-prerelease: ${{ matrix.python.allow-prerelease }}
 
     - name: Check Python version
       env:
         PYTHON_CHECK: ${{ matrix.python.check }}
       run: |
         python ./setup-python/test_check_version.py
+
+    - name: Make sure pre-release version adjustment made if appropriate
+      env:
+        RESULT: ${{ matrix.python.allow-prerelease && contains(steps.run-the-action.outputs.python-version-string, '.0-alpha') || ( steps.run-the-action.outputs.python-version-string == matrix.python.action ) }}
+      run: |
+        ${RESULT}

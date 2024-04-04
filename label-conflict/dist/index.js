@@ -9532,7 +9532,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ignorePermissionError = exports.commentToAddOnClean = exports.commentToAddOnConflict = exports.retryMax = exports.retryIntervalSec = exports.labelToRemoveOnConflict = exports.labelToAddOnConflict = exports.secretToken = void 0;
+exports.ignoreRetryTimeout = exports.ignorePermissionError = exports.commentToAddOnClean = exports.commentToAddOnConflict = exports.retryMax = exports.retryIntervalSec = exports.labelToRemoveOnConflict = exports.labelToAddOnConflict = exports.secretToken = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 exports.secretToken = core.getInput("secretToken", { required: true });
 exports.labelToAddOnConflict = core.getInput("labelToAddOnConflict", { required: true });
@@ -9542,6 +9542,7 @@ exports.retryMax = parseInt(core.getInput("retryMax"), 10);
 exports.commentToAddOnConflict = core.getInput("commentToAddOnConflict");
 exports.commentToAddOnClean = core.getInput("commentToAddOnClean");
 exports.ignorePermissionError = core.getInput("ignorePermissionError") === "true"; // Default: false
+exports.ignoreRetryTimeout = core.getInput("ignoreRetryTimeout") !== "false"; // Default: true
 
 
 /***/ }),
@@ -9767,10 +9768,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkConflict = exports.refIsTag = exports.isPullRequestBranch = exports.getBranchName = void 0;
-const github = __importStar(__nccwpck_require__(5438));
 const core = __importStar(__nccwpck_require__(2186));
+const github = __importStar(__nccwpck_require__(5438));
 const query_1 = __nccwpck_require__(3709);
 const label_1 = __nccwpck_require__(2008);
+const input_1 = __nccwpck_require__(6747);
 function getBranchName(ref) {
     return ref.replace(/^refs\/heads\//, "");
 }
@@ -9794,23 +9796,34 @@ function sleep(sec) {
 function checkConflict(context) {
     return __awaiter(this, void 0, void 0, function* () {
         const { currentRef, client, commentToAddOnClean, commentToAddOnConflict, labelToAddOnConflict, labelToRemoveOnConflict, retryIntervalSec, retryMax, } = context;
-        core.info(`Searching conflict between base branch and this branch(${currentRef}) if base branch exists`);
+        const repo = github.context.repo;
+        // `triggeringHead` is used to tell difference whether current running action is triggered by
+        // a branch on original repository or forked repository.
+        let triggeringHead;
+        if (github.context.payload.pull_request) {
+            const head = github.context.payload.pull_request.head;
+            triggeringHead = { login: head.repo.owner.login, ref: head.ref };
+        }
+        else {
+            triggeringHead = { login: repo.owner, ref: currentRef };
+        }
+        core.info(`>> Searching conflict between this branch(${currentRef}) and its base branch if the base branch exists`);
         // If pushing to a non-PR branch (main, master, ...), this returns empty array.
         let prsOfThisBranch = yield (0, query_1.postOpenPullRequestsQuery)(client, {
             refName: currentRef,
             searchRefType: "currentBranch",
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
+            repo,
+            triggeringHead,
         });
         if (prsOfThisBranch.length <= 0) {
             core.info(`No base branch for ${currentRef} was found.`);
         }
-        core.info(`Searching conflict between this branch(${currentRef}) and branches which target this branch`);
+        core.info(`>> Searching conflict between this branch(${currentRef}) and branches which target this branch`);
         let prsOfChildBranch = yield (0, query_1.postOpenPullRequestsQuery)(client, {
             refName: currentRef,
             searchRefType: "baseBranch",
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
+            repo,
+            triggeringHead,
         });
         if (prsOfThisBranch.length === 0 && prsOfChildBranch.length === 0) {
             core.warning("Found no pull requests associated with this branch");
@@ -9827,7 +9840,7 @@ function checkConflict(context) {
         const finishedPRs = new Set();
         let currentTry = 0;
         while ((prsOfThisBranch.length + prsOfChildBranch.length + prsOfThisBranchUnknown.length + prsOfChildBranchUnknown.length) > 0) {
-            core.info(`Retry loop #${currentTry}`);
+            core.info(`>> Retry loop #${currentTry}`);
             core.info(`There are ${prsOfThisBranch.length + prsOfChildBranch.length} PRs to update labels`);
             const prsToUpdateLabel = [].concat(prsOfThisBranch, prsOfChildBranch);
             for (let i = 0; i < prsToUpdateLabel.length; i++) {
@@ -9844,29 +9857,31 @@ function checkConflict(context) {
                 core.warning(`Retry count reached a threshold(${retryMax})`);
                 break;
             }
-            let checkConflictBetweenParentAndThisBranch = null;
-            let checkConflictBetweenThisAndChildBranches = null;
-            // prsOfThisBranchUnknown.length should be 0 or 1.
             if (prsOfThisBranchUnknown.length > 1) {
                 throw new Error(`Multiple base branches have been reported for a single branch(${currentRef})`);
             }
-            else if (prsOfThisBranchUnknown.length === 1) {
+            core.info(`>> Sleeping ${retryIntervalSec} sec`);
+            yield sleep(retryIntervalSec);
+            let checkConflictBetweenParentAndThisBranch = null;
+            let checkConflictBetweenThisAndChildBranches = null;
+            // prsOfThisBranchUnknown.length should be 0 or 1.
+            if (prsOfThisBranchUnknown.length === 1) {
                 const pr = prsOfThisBranchUnknown[0];
-                core.info(`Searching conflict between base branch and this branch(${currentRef}) if base branch exists`);
+                core.info(`>> Searching conflict between this branch(${pr.headRefName}) and its base branch if the base branch exists`);
                 checkConflictBetweenParentAndThisBranch = (0, query_1.postOpenPullRequestsQuery)(client, {
                     refName: pr.headRefName,
                     searchRefType: "currentBranch",
-                    owner: github.context.repo.owner,
-                    repo: github.context.repo.repo,
+                    repo,
+                    triggeringHead,
                 });
             }
             if (prsOfChildBranchUnknown.length > 0) {
-                core.info(`Searching conflict between this branch(${currentRef}) and branches which target this branch`);
+                core.info(`>> Searching conflict between this branch(${currentRef}) and branches which target this branch`);
                 checkConflictBetweenThisAndChildBranches = (0, query_1.postOpenPullRequestsQuery)(client, {
                     refName: currentRef,
                     searchRefType: "baseBranch",
-                    owner: github.context.repo.owner,
-                    repo: github.context.repo.repo,
+                    repo,
+                    triggeringHead,
                 });
             }
             prsOfThisBranch = [];
@@ -9908,8 +9923,6 @@ function checkConflict(context) {
                 }
             }
             core.info(`Number of PRs whose mergeable status is UNKNOWN: ${prsOfThisBranchUnknown.length} + ${prsOfChildBranchUnknown.length}`);
-            core.info(`Sleeping ${retryIntervalSec} sec`);
-            yield sleep(retryIntervalSec);
             currentTry++;
         }
         yield Promise.all(labelTasks);
@@ -9921,7 +9934,9 @@ function checkConflict(context) {
                 const pr = prs[i];
                 core.info(`  #${pr.number} (${pr.title})`);
             }
-            throw new Error("Failed to check conflict");
+            if (!input_1.ignoreRetryTimeout) {
+                throw new Error("Failed to check conflict");
+            }
         }
         return conflictStatus;
     });
@@ -9977,6 +9992,9 @@ const input_1 = __nccwpck_require__(6747);
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         core.info(`Event: ${env_1.eventName}`);
+        core.info(`GITHUB_REF: ${env_1.github_ref}`);
+        core.info(`GITHUB_BASE_REF: ${env_1.github_baseRef}`);
+        core.info(`GITHUB_HEAD_REF: ${env_1.github_headRef}`);
         if (env_1.eventName !== "push"
             && env_1.eventName !== "pull_request"
             && env_1.eventName !== "pull_request_target"
@@ -10002,7 +10020,6 @@ function main() {
             core.info("No action taken when pushing a tag");
             return;
         }
-        core.info(`Checking conflicts on this branch and branches whose target branch is: ${currentRef}`);
         const client = github.getOctokit(input_1.secretToken);
         yield (0, lib_1.checkConflict)({
             currentRef,
@@ -10095,11 +10112,15 @@ query openPullRequests($owner: String!, $repo: String!, $after: String, $baseRef
   `;
 function postOpenPullRequestsQuery(client, params) {
     return __awaiter(this, void 0, void 0, function* () {
+        const { repo, triggeringHead } = params;
+        const isTriggeringRef = (login, headRefName) => {
+            return login === triggeringHead.login && headRefName === triggeringHead.ref;
+        };
         const requestParams = {
             headRefName: params.searchRefType === "currentBranch" ? params.refName : undefined,
             baseRefName: params.searchRefType === "baseBranch" ? params.refName : undefined,
-            owner: params.owner,
-            repo: params.repo,
+            owner: repo.owner,
+            repo: repo.repo,
         };
         let start = Date.now();
         const onRejection = (err) => {
@@ -10118,15 +10139,34 @@ function postOpenPullRequestsQuery(client, params) {
         if (!response) {
             return [];
         }
-        if (params.searchRefType === "currentBranch") {
-            // This eliminates external branches whose headRefName is the same as `param.refName`.
-            // We aren't interested in conflicts between external branch and branches whose target is the external branch.
-            // By the code below, pullRequests with branches whose owner does not match the pullRequest repository owner
-            // will be eliminated.
-            response.repository.pullRequests.nodes = response.repository.pullRequests.nodes.filter(n => {
-                return n.headRepository && n.headRepository.owner.login === requestParams.owner;
-            });
-        }
+        // When searching PRs by headRefName, usually it returns only 1 PR.
+        // But there are cases where unintended PRs are returned because of the same branch name.
+        // i.e. When a user wants to check conflict for a PR whose headRef is `main`,
+        // it's possible that the GraphQL query returns 2 branches with the same name but from different repositories
+        // (For example, OriginalRepos:main and ForkedRepos:main).
+        // The code below will eliminate non-eligible PRs.
+        const filterPullRequests = (nodes) => {
+            if (params.searchRefType === "currentBranch") {
+                const prevLen = nodes.length;
+                const prNodes = nodes.filter(n => {
+                    if (!n.headRepository) {
+                        // Usually this may not happen.
+                        return true;
+                    }
+                    if (!isTriggeringRef(n.headRepository.owner.login, n.headRefName)) {
+                        core.info(`PR#${n.number} from ${n.headRepository.owner.login}:${n.headRefName} is filtered out.`);
+                        return false;
+                    }
+                    return true;
+                });
+                if (prevLen > prNodes.length) {
+                    core.info(`The eligible branch for the target PR is ${triggeringHead.login}:${triggeringHead.ref}`);
+                }
+                return prNodes;
+            }
+            return nodes;
+        };
+        response.repository.pullRequests.nodes = filterPullRequests(response.repository.pullRequests.nodes);
         core.info(`Found ${response.repository.pullRequests.nodes.length} PRs for ${queryId}`);
         let retVal = response.repository.pullRequests.nodes;
         while (response.repository.pullRequests.pageInfo.hasNextPage) {
@@ -10138,11 +10178,7 @@ function postOpenPullRequestsQuery(client, params) {
             if (!response) {
                 return [];
             }
-            if (params.searchRefType === "currentBranch") {
-                response.repository.pullRequests.nodes = response.repository.pullRequests.nodes.filter(n => {
-                    return n.headRepository && n.headRepository.owner.login === requestParams.owner;
-                });
-            }
+            response.repository.pullRequests.nodes = filterPullRequests(response.repository.pullRequests.nodes);
             core.info(`Found ${response.repository.pullRequests.nodes.length} PRs`);
             retVal = retVal.concat(response.repository.pullRequests.nodes);
         }

@@ -16,35 +16,50 @@ inputs:
   cluster_url:
     description: "URL or IP with port of the kubernetes api server"
     required: true
+  ttl:
+    description: "Duration of the token (subject to Vault configured limits)"
+    default: "3600s"
+    required: false
 runs:
   using: "composite"
   steps:
     - name: Ensure dependencies are present
       run: |
-        ( command -v apk && apk add jq curl ) || true
+        ( command -v apk && apk add jq curl curl-dev ) || true
         ( command -v apt-get && apt-get update && apt-get install -y jq curl ) || true
       shell: sh
     - name: Get certificate
       run: |
-        DATA=$(curl -s \
+        temp_file=$(mktemp)
+        http_status=$(curl -s \
           --header "X-Vault-Token: ${{ inputs.vault_token }}" \
           --request POST \
-          --data "{\"common_name\":\"${{ github.actor }}@github\"}" \
+          -o ${temp_file} \
+          -w "%{http_code}" \
+          --data "{\"ttl\":\"${{ inputs.ttl }}\",\"common_name\":\"${{ github.actor }}@github\"}" \
           ${{ inputs.vault_url }}/v1/${{ inputs.backend_name }}/issue/${{ inputs.role_name }})
 
-        # Write the key data to a temp file
-        CERT_FILE=$(mktemp)
-        KEY_FILE=$(mktemp)
-        printf '%s' "$DATA" | jq -r '.data.certificate' > $CERT_FILE
-        printf '%s' "$DATA" | jq -r '.data.private_key' > $KEY_FILE
+        DATA=$(cat ${temp_file})
+        rm -f ${temp_file}
 
-        # Generate a kubeconfig with the provided data
-        kubectl config set-cluster 'cluster' --server=${{ inputs.cluster_url }}
-        kubectl config set clusters.cluster.certificate-authority-data "$(printf '%s' "$DATA" | jq -r '.data.issuing_ca' | base64)"
-        kubectl config set-credentials 'cluster-user' --embed-certs=true --client-certificate="$CERT_FILE" --client-key="$KEY_FILE"
-        kubectl config set-context 'cluster' --cluster=cluster --user=cluster-user
-        kubectl config use-context 'cluster'
+        if [ $http_status -ge 200 ] && [ $http_status -le 299 ]; then
+          # Write the key data to a temp file
+          CERT_FILE=$(mktemp)
+          KEY_FILE=$(mktemp)
+          printf '%s' "$DATA" | jq -r '.data.certificate' > $CERT_FILE
+          printf '%s' "$DATA" | jq -r '.data.private_key' > $KEY_FILE
 
-        rm -f $CERT_FILE || true
-        rm -f $KEY_FILE || true
+          # Generate a kubeconfig with the provided data
+          kubectl config set-cluster 'cluster' --server=${{ inputs.cluster_url }}
+          kubectl config set clusters.cluster.certificate-authority-data "$(printf '%s' "$DATA" | jq -r '.data.issuing_ca' | base64)"
+          kubectl config set-credentials 'cluster-user' --embed-certs=true --client-certificate="$CERT_FILE" --client-key="$KEY_FILE"
+          kubectl config set-context 'cluster' --cluster=cluster --user=cluster-user
+          kubectl config use-context 'cluster'
+
+          rm -f $CERT_FILE || true
+          rm -f $KEY_FILE || true
+        else
+          echo "Error: HTTP Status Code return ${http_status}"
+          exit 1
+        fi
       shell: sh

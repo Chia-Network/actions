@@ -1,0 +1,56 @@
+name: 'Connect Tailscale'
+description: 'Wrapper around the official tailscale action to add support for containers and ssh connections'
+inputs:
+  oauth-client-id:
+    description: 'Your Tailscale OAuth Client ID.'
+    required: true
+  oauth-secret:
+    description: 'Your Tailscale OAuth Client Secret.'
+    required: true
+  tags:
+    description: 'Comma separated list of Tags to be applied to nodes. The OAuth client must have permission to apply these tags.'
+    required: true
+  args:
+    description: 'Optional additional arguments to `tailscale up`'
+    required: false
+    default: ''
+  hostname:
+    description: 'Fixed hostname to use.'
+    required: false
+    default: ''
+runs:
+  using: 'composite'
+  steps:
+    - name: Install deps
+      shell: sh
+      run: |
+        ( command -v apk && apk add bash curl netcat-openbsd openssh-client sudo ) || true
+        ( command -v apt-get && apt-get update && apt-get install -y curl netcat-openbsd openssh-client sudo ) || true
+
+    - name: Tailscale
+      uses: tailscale/github-action@v2
+      with:
+        oauth-client-id: ${{ inputs.oauth-client-id }}
+        oauth-secret: ${{ inputs.oauth-secret }}
+        tags: ${{ inputs.tags }}
+        args: ${{ inputs.args }}
+        tailscaled-args: "--tun=userspace-networking --socks5-server=localhost:1055"
+        hostname: ${{ inputs.hostname }}
+
+    - name: Add SSH Proxy Config
+      shell: sh
+      run: |
+        mkdir -p ~/.ssh
+        echo -e "Host 100.*\n    ProxyCommand /usr/bin/nc -X 5 -x 127.0.0.1:1055 %h %p\n    StrictHostKeyChecking no\n" >> ~/.ssh/config
+        echo -e "Host ip-10-*\n    ProxyCommand /usr/bin/nc -X 5 -x 127.0.0.1:1055 %h %p\n    StrictHostKeyChecking no\n" >> ~/.ssh/config
+        chmod 0700 ~/.ssh
+        chmod 0600 ~/.ssh/config
+
+    # GitHub sets $HOME to /github/home, but doesn't update /etc/passwd
+    # OpenSSH looks in /etc/passwd FIRST and ignores $HOME if a home dir is set in passwd
+    # This updates /etc/passwd to match $HOME
+    - name: Fix /etc/passwd file for alternate $HOME path
+      shell: sh
+      run: |
+        sed -i "s~root:/root~root:$HOME~g" /etc/passwd
+
