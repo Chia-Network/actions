@@ -70,4 +70,4 @@ Generate a new ssh key and have vault sign it with the SSH CA
 
 ### workflows/docker/build
 
-Job definition that builds a docker image and pushes to ghcr.io
+Job definition that builds a docker image and pushes to ghcr.io 
