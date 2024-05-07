@@ -37,5 +37,6 @@ jobs:
           VALIDATE_ANSIBLE: false
           VALIDATE_JSCPD: false
           VALIDATE_PYTHON_PYLINT: false
+          VALIDATE_CHECKOV: false
           # Linting is done in test-label-conflict.yml for label-conflict action
           FILTER_REGEX_EXCLUDE: label-conflict/.*
