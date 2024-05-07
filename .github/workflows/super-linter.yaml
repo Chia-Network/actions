@@ -36,5 +36,6 @@ jobs:
           # Some things are incorrectly detected as ansible playbooks. Disable this linter, since this is just actions
           VALIDATE_ANSIBLE: false
           VALIDATE_JSCPD: false
+          VALIDATE_PYTHON_PYLINT: false
           # Linting is done in test-label-conflict.yml for label-conflict action
           FILTER_REGEX_EXCLUDE: label-conflict/.*
