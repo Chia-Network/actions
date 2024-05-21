@@ -6,5 +6,5 @@ Cleans the current workspace prior to running the checkout action, to ensure the
 - uses: Chia-Network/actions/clean-workspace@main
 
 - name: Checkout Code
-  uses: actions/checkout@v2
+  uses: actions/checkout@v4
 ```

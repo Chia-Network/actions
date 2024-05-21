@@ -8,5 +8,5 @@ The underlying checkout issue is resolved, but if you need to commit back to a r
   uses: Chia-Network/actions/git-mark-workspace-safe@main
 
 - name: Checkout Code
-  uses: actions/checkout@v3
+  uses: actions/checkout@v4
 ```

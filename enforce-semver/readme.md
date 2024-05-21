@@ -5,7 +5,7 @@ Ensures the current version/tag is compliant with `Major.minor.patch` formatting
 ```yaml
 
 - name: Checkout Code
-  uses: actions/checkout@v2
+  uses: actions/checkout@v4
   
 - uses: Chia-Network/actions/enforce-semver@main
 ```
