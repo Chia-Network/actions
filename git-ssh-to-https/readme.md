@@ -4,7 +4,7 @@ Sets up the global git config to replace any ssh clone URLs with HTTPS URLs. Thi
 
 ```yaml
 - name: Checkout Code
-  uses: actions/checkout@v2
+  uses: actions/checkout@v4
 
 - uses: Chia-Network/actions/git-ssh-to-https@main
 ```
