@@ -42,6 +42,19 @@ on:
         required: false
         type: boolean
         default: false
+      push:
+        required: false
+        type: boolean
+        default: true
+        description: "Whether or not to attempt to push the image to the registry"
+      artifacts-name:
+        required: false
+        type: string
+        description: "Whether artifacts should be downloaded before building the image"
+      artifacts-path:
+        required: false
+        type: string
+        description: "Path to place artifacts, if downloading"
     secrets:
       DOCKERHUB_USERNAME:
         required: false
@@ -109,12 +122,19 @@ jobs:
             type=semver,pattern={{major}}
             type=sha,format=long
 
+      - name: Download artifacts if set
+        if: ${{ inputs.artifacts-name != '' && inputs.artifacts-path != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifacts-name }}
+          path: ${{ inputs.artifacts-path }}
+
       - name: Build Docker Container
         uses: docker/build-push-action@v5
         with:
           context: ${{ inputs.docker-context }}
           file: ${{ inputs.dockerfile }}
           platforms: ${{ inputs.docker-platforms }}
-          push: ${{ (github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == github.repository && !startsWith(github.ref, 'refs/heads/dependabot/')) && 'true' || 'false' }}
+          push: ${{ inputs.push }}
           tags: ${{ steps.meta.outputs.tags }}
           build-args: ${{ inputs.build-args }}
