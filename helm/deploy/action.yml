@@ -13,6 +13,9 @@ inputs:
   helm_chart_repo:
     description: URL to the helm chart repo the helm chart should be loaded from
     required: false
+  helm_chart_version:
+    description: The version of the helm chart to use, defaults to latest if unspecified
+    required: false
   helm_values:
     description: "Values file to pass when running helm"
     required: true
@@ -40,7 +43,10 @@ runs:
         if [ -n "${{ inputs.helm_chart_repo }}" ]; then
           export REPO_PARAM="--repo ${{ inputs.helm_chart_repo }}"
         fi
+        if [ -n "${{ inputs.helm_chart_version }}" ]; then
+          export HELM_CHART_VERSION_PARAM="--version ${{ inputs.helm_chart_version }}"
+        fi
         if [ "${{ inputs.helm_wait }}" = "true" ]; then
           export WAIT_PARAM="--wait"
         fi
-        helm upgrade --install --create-namespace --namespace ${{ inputs.namespace }} ${REPO_PARAM} ${WAIT_PARAM} --timeout ${{ inputs.helm_timeout }} --values ${{ inputs.helm_values }} ${{ inputs.app_name }} ${{ inputs.helm_chart }}
+        helm upgrade --install --create-namespace --namespace ${{ inputs.namespace }} ${REPO_PARAM} ${WAIT_PARAM} --timeout ${{ inputs.helm_timeout }} --values ${{ inputs.helm_values }} ${{ inputs.app_name }} ${{ inputs.helm_chart }} ${HELM_CHART_VERSION_PARAM}
