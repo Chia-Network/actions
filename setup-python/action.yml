@@ -92,14 +92,18 @@ runs:
           echo "pyenv directory found at: $PYENV_ROOT"
         fi
         
-        export PATH="$HOME/.pyenv/bin:$PATH"
-        echo "PATH=$HOME/.pyenv/bin:$PATH" >> $GITHUB_ENV
+        export PATH="$PYENV_ROOT/bin:$PATH"
+        echo "PATH=$PYENV_ROOT/bin:$PATH" >> $GITHUB_ENV
         
         # Ensure pyenv is up to date
         if ! type pyenv &> /dev/null; then
-          type pyenv
-          echo "pyenv executable not found, dumping tree of: $PYENV_ROOT"
-          tree "$PYENV_ROOT"
+          type pyenv || true
+          # TODO: provide more detailed diagnostics
+          ls -l "$PYENV_ROOT" || true
+          ls -l "$PYENV_ROOT/bin" || true
+          # echo "pyenv executable not found, dumping tree of: $PYENV_ROOT"
+          # tree "$PYENV_ROOT"
+          exit 1
         fi
         pyenv update
         
