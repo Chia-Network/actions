@@ -97,6 +97,7 @@ runs:
         
         # Ensure pyenv is up to date
         if ! (pyenv -h &> /dev/null); then
+          echo "pyenv -h exited with non-zero status"
           type pyenv || true
           # TODO: provide more detailed diagnostics
           ls -l "$PYENV_ROOT" || true
