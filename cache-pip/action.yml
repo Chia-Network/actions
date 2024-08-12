@@ -23,7 +23,7 @@ runs:
       env:
         PRE_DELETE: ${{ inputs.pre-delete }}
       run: |
-        python "${GITHUB_ACTION_PATH}/cache_pip.py"
+        python "${GITHUB_ACTION_PATH}/cache_pip.py" "${{ inputs.mode }}"
 
     - name: Cache pip
       uses: actions/cache@v4
