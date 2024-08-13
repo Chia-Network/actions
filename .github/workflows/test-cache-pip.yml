@@ -185,7 +185,7 @@ jobs:
     - name: Run the action (with pre-delete)
       uses: ./repo/cache-pip
       with:
-        mode: matrix.mode.action
+        mode: ${{ matrix.mode.action }}
         pre-delete: "true"
 
     - name: Check pip cache directory
@@ -199,7 +199,7 @@ jobs:
     - name: Run the action (no pre-delete)
       uses: ./repo/cache-pip
       with:
-        mode: matrix.mode.action
+        mode: ${{ matrix.mode.action }}
         pre-delete: "false"
 
     - name: Check pip cache directory
@@ -213,7 +213,7 @@ jobs:
     - name: Run the action (with pre-delete)
       uses: ./repo/cache-pip
       with:
-        mode: matrix.mode.action
+        mode: ${{ matrix.mode.action }}
         pre-delete: "true"
 
     - name: Check no sentinel file
