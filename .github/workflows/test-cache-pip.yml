@@ -112,6 +112,7 @@ jobs:
             mode:
               name: Poetry
               matrix: poetry
+              action: poetry
               cli: poetry
           - os:
               name: Chia Network Ubuntu ARM Builder
