@@ -38,4 +38,4 @@ runs:
     - name: Report cache directory contents
       shell: bash
       run: |
-        ls -la "${PIP_CACHE_DIR}"
+        ls -la "${{ steps.create-directory.outputs.dir }}"
