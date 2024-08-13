@@ -87,9 +87,11 @@ jobs:
         mode:
           - name: setuptools
             matrix: setuptools
+            action: setuptools
             cli: setuptools
           - name: Poetry
             matrix: poetry
+            action: poetry
             cli: poetry
         include:
           - os:
@@ -129,6 +131,7 @@ jobs:
             mode:
               name: Poetry
               matrix: poetry
+              action: poetry
               cli: poetry
           - os:
               name: Chia Network CentOS Intel Builder
@@ -148,6 +151,7 @@ jobs:
             mode:
               name: Poetry
               matrix: poetry
+              action: poetry
               cli: poetry
         exclude:
           # Only partial entries are required here by GitHub Actions so generally I
@@ -181,6 +185,7 @@ jobs:
     - name: Run the action (with pre-delete)
       uses: ./repo/cache-pip
       with:
+        mode: matrix.mode.action
         pre-delete: "true"
 
     - name: Check pip cache directory
@@ -194,6 +199,7 @@ jobs:
     - name: Run the action (no pre-delete)
       uses: ./repo/cache-pip
       with:
+        mode: matrix.mode.action
         pre-delete: "false"
 
     - name: Check pip cache directory
@@ -207,6 +213,7 @@ jobs:
     - name: Run the action (with pre-delete)
       uses: ./repo/cache-pip
       with:
+        mode: matrix.mode.action
         pre-delete: "true"
 
     - name: Check no sentinel file
