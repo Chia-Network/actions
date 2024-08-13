@@ -26,14 +26,12 @@ def main(args: Sequence[str]) -> None:
         cache_path = pathlib.Path(completed_process.stdout.strip())
     elif mode == Mode.poetry:
         # TODO: implement a poetry command to report the cache directories
-        cache_path = os.environ["POETRY_CACHE_DIR"]
+        cache_path = pathlib.Path(os.environ["POETRY_CACHE_DIR"])
 
     assert (
         reference_path.is_absolute()
     ), f"reference path is not absolute: {reference_path!r}"
-    assert (
-        cache_path.is_absolute()
-    ), f"cache path is not absolute: {cache_path!r}"
+    assert cache_path.is_absolute(), f"cache path is not absolute: {cache_path!r}"
     assert cache_path.exists(), f"cache path does not exist: {cache_path!r}"
     assert (
         cache_path.is_dir()
