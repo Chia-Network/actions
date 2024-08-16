@@ -6,6 +6,13 @@ inputs:
     description: "Start by deleting the target directory"
     required: false
     default: "true"
+  mode:
+    description: "what type of package management is being used"
+    type: choice
+    default: "setuptools"
+    options:
+      - "setuptools"
+      - "poetry"
 
 runs:
   using: "composite"
@@ -16,7 +23,7 @@ runs:
       env:
         PRE_DELETE: ${{ inputs.pre-delete }}
       run: |
-        python "${GITHUB_ACTION_PATH}/cache_pip.py"
+        python "${GITHUB_ACTION_PATH}/cache_pip.py" "${{ inputs.mode }}"
 
     - name: Cache pip
       uses: actions/cache@v4
@@ -24,11 +31,11 @@ runs:
         SEGMENT_DOWNLOAD_TIMEOUT_MIN: 1
       with:
         path: ${{ steps.create-directory.outputs.dir }}
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
+        key: ${{ runner.os }}-${{ inputs.mode }}-${{ (inputs.mode == 'pip' && hashFiles('**/setup.py')) || (inputs.mode == 'poetry' && hashFiles('**/poetry.lock')) || 'unhandled_case' }}
         restore-keys: |
-          ${{ runner.os }}-pip-
+          ${{ runner.os }}-${{ inputs.mode }}-
 
     - name: Report cache directory contents
       shell: bash
       run: |
-        ls -la "${PIP_CACHE_DIR}"
+        ls -la "${{ steps.create-directory.outputs.dir }}"

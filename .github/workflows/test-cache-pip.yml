@@ -21,7 +21,7 @@ defaults:
 
 jobs:
   test:
-    name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.python.name }}
+    name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.python.name }} ${{ matrix.mode.name }}
     runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
     container: ${{ matrix.os.container[matrix.python.matrix] }}
     timeout-minutes: 5
@@ -84,6 +84,15 @@ jobs:
             matrix: arm
           - name: Intel
             matrix: intel
+        mode:
+          - name: setuptools
+            matrix: setuptools
+            action: setuptools
+            cli: setuptools
+          - name: Poetry
+            matrix: poetry
+            action: poetry
+            cli: poetry
         include:
           - os:
               name: Chia Network Ubuntu Intel Builder
@@ -100,6 +109,11 @@ jobs:
             arch:
               name: Intel
               matrix: intel
+            mode:
+              name: Poetry
+              matrix: poetry
+              action: poetry
+              cli: poetry
           - os:
               name: Chia Network Ubuntu ARM Builder
               matrix: docker-chia-network-ubuntu-arm-builder
@@ -115,6 +129,11 @@ jobs:
             arch:
               name: ARM
               matrix: arm
+            mode:
+              name: Poetry
+              matrix: poetry
+              action: poetry
+              cli: poetry
           - os:
               name: Chia Network CentOS Intel Builder
               matrix: docker-chia-network-rocky-intel-builder
@@ -130,6 +149,11 @@ jobs:
             arch:
               name: Intel
               matrix: intel
+            mode:
+              name: Poetry
+              matrix: poetry
+              action: poetry
+              cli: poetry
         exclude:
           # Only partial entries are required here by GitHub Actions so generally I
           # only specify the `matrix:` entry.  The super linter complains so for now
@@ -145,6 +169,9 @@ jobs:
               name: ARM
               matrix: arm
 
+    env:
+      CACHE_DIR_VAR: ${{ (matrix.mode.matrix == 'setuptools' && 'PIP_CACHE_DIR') || (matrix.mode.matrix == 'poetry' && 'POETRY_CACHE_DIR') }}
+
     steps:
     - uses: actions/checkout@v4
       with:
@@ -159,34 +186,37 @@ jobs:
     - name: Run the action (with pre-delete)
       uses: ./repo/cache-pip
       with:
+        mode: ${{ matrix.mode.action }}
         pre-delete: "true"
 
     - name: Check pip cache directory
       run: |
-        python repo/cache-pip/test_pip_cache_directory.py
+        python repo/cache-pip/test_pip_cache_directory.py "${{ matrix.mode.cli }}"
 
     - name: Delete the directory
       run: |
-        rm -rf "${PIP_CACHE_DIR}"
+        rm -rf "${${{ env.CACHE_DIR_VAR }}}"
 
     - name: Run the action (no pre-delete)
       uses: ./repo/cache-pip
       with:
+        mode: ${{ matrix.mode.action }}
         pre-delete: "false"
 
     - name: Check pip cache directory
       run: |
-        python repo/cache-pip/test_pip_cache_directory.py
+        python repo/cache-pip/test_pip_cache_directory.py "${{ matrix.mode.cli }}"
 
     - name: Touch sentinel file
       run: |
-        touch "${PIP_CACHE_DIR}"/cache_pip_sentinel_file
+        touch "${${{ env.CACHE_DIR_VAR }}}"/cache_pip_sentinel_file
 
     - name: Run the action (with pre-delete)
       uses: ./repo/cache-pip
       with:
+        mode: ${{ matrix.mode.action }}
         pre-delete: "true"
 
     - name: Check no sentinel file
       run: |
-        [ ! -e "${PIP_CACHE_DIR}"/cache_pip_sentinel_file ]
+        [ ! -e "${${{ env.CACHE_DIR_VAR }}}"/cache_pip_sentinel_file ]
