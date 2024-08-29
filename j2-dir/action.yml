@@ -1,0 +1,17 @@
+name: "Template J2 Files"
+description: "Expands all j2 templates in a directory"
+inputs:
+  directory:
+    description: "Directory to find j2 files within"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: J2 Files
+      shell: sh
+      run: |
+        for i in "${{ inputs.directory }}"/*.j2; do
+          [ -f "$i" ] || break
+          echo "J2-ing file ${i}"
+          j2 "$i" -o "$(echo "${i%.*}")"
+        done
