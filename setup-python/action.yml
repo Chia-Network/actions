@@ -84,12 +84,12 @@ runs:
       run: |
         export PYENV_ROOT="$HOME/.pyenv"
         echo "PYENV_ROOT=$HOME/.pyenv" >> $GITHUB_ENV
-        
-        if [ ! -d "$PYENV_ROOT" ]; then
+
+        # compensating for cleanup failures
+        if [ "${{ runner.os }}" = "macOS" ]; then
+          rm -rf "$PYENV_ROOT"
           echo "  ====  installing pyenv at: $PYENV_ROOT"
           curl https://pyenv.run | bash
-        else
-          echo "  ====  pyenv directory found at: $PYENV_ROOT"
         fi
         
         export PATH="$PYENV_ROOT/bin:$PATH"
