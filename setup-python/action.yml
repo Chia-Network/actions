@@ -82,7 +82,9 @@ runs:
       if: runner.arch == 'ARM64' || inputs.force-pyenv != 'false'
       shell: sh
       run: |
-        if [ -z ${PYENV_ROOT+x} ]; then
+        env | sort
+
+        if [ -z "${PYENV_ROOT+x}" ]; then
           export PYENV_ROOT="$HOME/.pyenv"
           echo "PYENV_ROOT=$HOME/.pyenv" >> $GITHUB_ENV
 
