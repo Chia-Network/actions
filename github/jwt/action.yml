@@ -21,8 +21,14 @@ runs:
       if: steps.check_token.outputs.skip == 'false'
       shell: sh
       run: |
-        ( command -v apk && apk add jq curl curl-dev ) || true
-        ( command -v apt-get && apt-get update && apt-get install -y jq curl ) || true
+        # If running as root, then dont use sudo
+        if [ "$(id -u)" -eq 0 ]; then
+            SUDO=""
+        else
+            SUDO=$(command -v sudo || echo "")
+        fi
+        ( command -v apk && ${SUDO} apk add jq curl curl-dev ) || true
+        ( command -v apt-get && ${SUDO} apt-get update && ${SUDO} apt-get install -y jq curl ) || true
 
     - name: Get JWT from GitHub
       if: steps.check_token.outputs.skip == 'false'
