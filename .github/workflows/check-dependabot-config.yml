@@ -20,9 +20,23 @@ jobs:
     timeout-minutes: 5
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - uses: Chia-Network/actions/git-mark-workspace-safe@main
 
-    - name: Check dependabot config generation is up to date
-      run: |
-        ./update-dependabot-config.sh
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.REPO_COMMIT }}
+
+      - uses: Chia-Network/actions/commit-sign/gpg@main
+        with:
+          gpg_private_key: ${{ secrets.CHIA_AUTOMATION_PRIVATE_GPG_KEY }}
+          passphrase: ${{ secrets.CHIA_AUTOMATION_PRIVATE_GPG_PASSPHRASE }}
+
+      - name: Check dependabot config generation is up to date
+        run: |
+          ./update-dependabot-config.sh
+
+      - name: Commit any changes back to the repo
+        if: always()
+        run: |
+          ( git commit -am "Updating dependabot configuration" && git push ) || true
