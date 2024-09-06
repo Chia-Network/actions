@@ -12,8 +12,15 @@ runs:
   steps:
     - name: Install dependencies
       run: |
-        ( command -v apk && apk add git gpg gpg-agent ) || true
-        ( command -v apt-get && apt-get update && apt-get install -y git gpg gpg-agent ) || true
+        # If running as root, then dont use sudo
+        if [ "$(id -u)" -eq 0 ]; then
+            SUDO=""
+        else
+            SUDO=$(command -v sudo || echo "")
+        fi
+
+        ( command -v apk && ${SUDO} apk add git gpg gpg-agent ) || true
+        ( command -v apt-get && ${SUDO} apt-get update && ${SUDO} apt-get install -y git gpg gpg-agent ) || true
       shell: sh
     - name: Call upstream import gpg action
       uses: crazy-max/ghaction-import-gpg@v6
