@@ -39,4 +39,4 @@ jobs:
       - name: Commit any changes back to the repo
         if: always()
         run: |
-          ( git checkout ${{ github.head_ref }} && git commit -am "Updating dependabot configuration" && git push origin ${{ github.head_ref }} ) || true
+          ( git fetch origin && git checkout ${{ github.head_ref }} && git commit -am "Updating dependabot configuration" && git push origin ${{ github.head_ref }} ) || true
