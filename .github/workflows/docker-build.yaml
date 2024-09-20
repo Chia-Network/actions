@@ -55,6 +55,11 @@ on:
         required: false
         type: string
         description: "Path to place artifacts, if downloading"
+      enable-cache:
+        required: false
+        type: string
+        default: "false"
+        description: Should the builds use docker cache
     secrets:
       DOCKERHUB_USERNAME:
         required: false
@@ -129,6 +134,13 @@ jobs:
           name: ${{ inputs.artifacts-name }}
           path: ${{ inputs.artifacts-path }}
 
+      - name: Cache
+        if: ${{ inputs.enable-cache == 'true' }}
+        uses: actions/cache@v4
+        with:
+          path: docker-cache
+          key: ${{ runner.os }}-docker-cache
+
       - name: Build Docker Container
         uses: docker/build-push-action@v6
         with:
@@ -138,3 +150,14 @@ jobs:
           push: ${{ inputs.push }}
           tags: ${{ steps.meta.outputs.tags }}
           build-args: ${{ inputs.build-args }}
+          cache-from: type=local,src=docker-cache
+          cache-to: type=local,dest=docker-cache-new
+
+      - # Fixes
+        # https://github.com/docker/build-push-action/issues/252
+        # https://github.com/moby/buildkit/issues/1896
+        name: Move cache
+        if: ${{ inputs.enable-cache == 'true' }}
+        run: |
+          rm -rf docker-cache
+          mv docker-cache-new docker-cache      
