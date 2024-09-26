@@ -1,5 +1,5 @@
-name: "Uptime Robot Pause"
-description: "Pauses the specified uptime robot monitor"
+name: "Uptime Robot Resume"
+description: "Resumes the specified uptime robot monitor"
 inputs:
   api-key:
     description: "API Key for Uptime Robot"
