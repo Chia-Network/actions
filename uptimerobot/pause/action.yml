@@ -1,0 +1,38 @@
+name: "Uptime Robot Pause"
+description: "Pauses the specified uptime robot monitor"
+inputs:
+  api-key:
+    description: "API Key for Uptime Robot"
+    required: true
+  monitor-id:
+    description: "Monitor ID to pause"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Ensure dependencies are present
+      shell: sh
+      run: |
+        # If running as root, then dont use sudo
+        if [ "$(id -u)" -eq 0 ]; then
+            SUDO=""
+        else
+            SUDO=$(command -v sudo || echo "")
+        fi
+        ( command -v apk && ${SUDO} apk add curl curl-dev ) || true
+        ( command -v apt-get && ${SUDO} apt-get update && ${SUDO} apt-get install -y curl ) || true
+
+    - name: Pause the monitor
+      shell: sh
+      run: |
+        temp_file=$(mktemp)
+        http_status=$(curl -s -o ${temp_file} -w "%{http_code}" -XPOST -H "Cache-Control: no-cache" -H "Content-Type: application/x-www-form-urlencoded" -d 'api_key=${{ inputs.api-key }}&format=json&id=${{ inputs.monitor-id }}&status=0' "https://api.uptimerobot.com/v2/editMonitor")
+        if [ $http_status -ge 200 ] && [ $http_status -le 299 ]; then
+          echo "request successful"
+          rm ${temp_file}
+        else
+          echo "Error: HTTP status code return ${http_status}"
+          echo "Message: $(cat ${temp_file})"
+          rm ${temp_file}
+          exit 1
+        fi
