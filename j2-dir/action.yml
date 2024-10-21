@@ -10,8 +10,7 @@ runs:
     - name: J2 Files
       shell: sh
       run: |
-        for i in "${{ inputs.directory }}"/*.j2; do
-          [ -f "$i" ] || break
+        find "${{ inputs.directory }}" -type f -name '*.j2' | while read i; do
           echo "J2-ing file ${i}"
           j2 "$i" -o "$(echo "${i%.*}")"
         done
