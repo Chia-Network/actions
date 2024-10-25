@@ -1,0 +1,133 @@
+name: "Build Docker Image"
+description: "Builds a Docker image"
+inputs:
+  docker-platforms:
+    description: "The OS/arch platforms to pass to docker buildx"
+    required: false
+    default: "linux/amd64,linux/arm64"
+  docker-context:
+    description: "The docker build context directory"
+    required: false
+    default: .
+  dockerfile:
+    description: "The path to a Dockerfile"
+    required: false
+    default: "./Dockerfile"
+  image_subpath:
+    description: "Set this to a string sub-path to publish your image under"
+    required: false
+  build-args:
+    description: "Sets some docker build args"
+    required: false
+    default: ""
+  additional-tag:
+    description: "Set this to another tag name you'd like to publish"
+    required: false
+    default: ""
+  alternate-latest-mode:
+    description: "This creates a :latest tag on the default branch if set to true"
+    required: false
+    default: "false"
+  push:
+    description: "Whether or not to attempt to push the image to the registry"
+    required: false
+    default: "true"
+  enable-cache:
+    description: "Should the builds use docker cache"
+    required: false
+    default: "false"
+  dockerhub_imagename:
+    description: ""
+    required: false
+    default: ""
+  docker-hub-username:
+    description: "An optional username to Docker Hub to authenticate as"
+    required: false
+  docker-hub-pat:
+    description: "An optional personal access token to Docker Hub to authenticate as"
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+
+    - name: Login to DockerHub
+      env:
+        dockerhub_username: ${{ inputs.docker-hub-username }}
+        dockerhub_pat: ${{ inputs.docker-hub-pat }}
+      if: ${{ env.dockerhub_username != '' && env.dockerhub_pat != '' }}
+      uses: docker/login-action@v3
+      with:
+        username: ${{ env.dockerhub_username }}
+        password: ${{ env.dockerhub_pat }}
+
+    - name: Set image name
+      id: image
+      shell: bash
+      run: |
+        export subpath="${{ inputs.image_subpath }}"
+        if [ "$subpath" == '' ]; then
+          echo "imagename=ghcr.io/${{ github.repository }}" >> "$GITHUB_OUTPUT"
+        else
+          echo "imagename=ghcr.io/${{ github.repository }}/${subpath}" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: |
+          ${{ steps.image.outputs.imagename }}
+          ${{ inputs.dockerhub_imagename }}
+        flavor: |
+          latest=auto
+          prefix=
+          suffix=
+        tags: |
+          type=raw,value=main,enable={{is_default_branch}}
+          type=raw,value=latest,enable=${{ inputs.alternate-latest-mode && endsWith(github.ref, github.event.repository.default_branch) }}
+          type=raw,value=${{ inputs.additional-tag }},enable=${{ inputs.additional-tag != '' }}
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          type=sha,format=long
+
+    - name: Cache
+      if: ${{ inputs.enable-cache == 'true' }}
+      uses: actions/cache@v4
+      with:
+        path: docker-cache
+        key: ${{ runner.os }}-docker-cache
+
+    - name: Build Docker Container
+      uses: docker/build-push-action@v6
+      with:
+        context: ${{ inputs.docker-context }}
+        file: ${{ inputs.dockerfile }}
+        platforms: ${{ inputs.docker-platforms }}
+        push: ${{ inputs.push }}
+        tags: ${{ steps.meta.outputs.tags }}
+        build-args: ${{ inputs.build-args }}
+        cache-from: type=local,src=docker-cache
+        cache-to: type=local,dest=docker-cache-new
+
+    # Fixes
+    # https://github.com/docker/build-push-action/issues/252
+    # https://github.com/moby/buildkit/issues/1896
+    - name: Move cache
+      if: ${{ inputs.enable-cache == 'true' }}
+      shell: bash
+      run: |
+        rm -rf docker-cache
+        mv docker-cache-new docker-cache      
