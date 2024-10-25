@@ -14,38 +14,32 @@ inputs:
     required: false
     default: "./Dockerfile"
   image_subpath:
-    description: "By "
+    description: "Set this to a string sub-path to publish your image under"
     required: false
-  dockerhub_imagename:
-    description: ""
-    required: false
-    default: ""
   build-args:
-    description: ""
+    description: "Sets some docker build args"
     required: false
     default: ""
   additional-tag:
-    description: ""
+    description: "Set this to another tag name you'd like to publish"
     required: false
     default: ""
   alternate-latest-mode:
-    description: ""
+    description: "This creates a :latest tag on the default branch if set to true"
     required: false
     default: "false"
   push:
     description: "Whether or not to attempt to push the image to the registry"
     required: false
     default: "true"
-  artifacts-name:
-    description: "Whether artifacts should be downloaded before building the image"
-    required: false
-  artifacts-path:
-    description: "Path to place artifacts, if downloading"
-    required: false
   enable-cache:
     description: "Should the builds use docker cache"
     required: false
     default: "false"
+  dockerhub_imagename:
+    description: ""
+    required: false
+    default: ""
   docker-hub-username:
     description: "An optional username to Docker Hub to authenticate as"
     required: false
@@ -108,13 +102,6 @@ runs:
           type=semver,pattern={{major}}.{{minor}}
           type=semver,pattern={{major}}
           type=sha,format=long
-
-    - name: Download artifacts if set
-      if: ${{ inputs.artifacts-name != '' && inputs.artifacts-path != '' }}
-      uses: actions/download-artifact@v4
-      with:
-        name: ${{ inputs.artifacts-name }}
-        path: ${{ inputs.artifacts-path }}
 
     - name: Cache
       if: ${{ inputs.enable-cache == 'true' }}
