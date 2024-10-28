@@ -19,7 +19,22 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Send message to Keybase
+    - name: Set environment variables from inputs
+      shell: sh
+      run: |
+        echo "STATUS=${{ inputs.status }}" >> $GITHUB_ENV
+        echo "TITLE=${{ inputs.title }}" >> $GITHUB_ENV
+        echo "DESCRIPTION=${{ inputs.description }}" >> $GITHUB_ENV
+        echo "WEBHOOK_ENDPOINT=${{ inputs.webhook_endpoint }}" >> $GITHUB_ENV
+        echo "BEARER_TOKEN=${{ inputs.bearer_token }}" >> $GITHUB_ENV
+      env:
+        STATUS: "default status"
+        TITLE: "default title"
+        DESCRIPTION: "default description"
+        WEBHOOK_ENDPOINT: "default endpoint"
+        BEARER_TOKEN: "default token"
+    
+    - name: Send alert to alertmanager-receiver
       shell: sh
       run: |
         PAYLOAD=$(
@@ -27,10 +42,10 @@ runs:
         {
           "alerts": [
             {
-              "status": "${{ inputs.status }}",
+              "status": "$STATUS",
               "annotations": {
-                "title": "${{ inputs.title }}",
-                "description": ""${{ inputs.description }}""
+                "title": "$TITLE",
+                "description": "$DESCRIPTION"
               }
             }
           ]
@@ -40,8 +55,8 @@ runs:
         
         # Send curl request with JSON payload and authentication
         HTTP_RESPONSE=$(curl -v -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" \
-          -H "Authorization: Bearer ${{ inputs.bearer_token }} \
-          -d "$PAYLOAD" "${{ inputs.webhook_endpoint }}")
+          -H "Authorization: Bearer $BEARER_TOKEN" \
+          -d "$PAYLOAD" "$WEBHOOK_ENDPOINT")
         
         # Check the HTTP response code
         if [ "$HTTP_RESPONSE" -eq 200 ]; then
