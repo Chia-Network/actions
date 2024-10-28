@@ -1,4 +1,4 @@
-name: Send alert to alertmanager-receiver
+name: Send request to alertmanager-receiver
 description: This will send a json message to the alert manager receiver, formatting it, and then sending to Keybase.
 inputs:
   status:
