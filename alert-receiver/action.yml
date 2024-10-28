@@ -1,0 +1,53 @@
+name: Send alert to alertmanager-receiver
+description: This will send a json message to the alert manager receiver, formatting it, and then sending to Keybase.
+inputs:
+  status:
+    description: 'Options are: "firing, resolves, warning, message'
+    required: true
+  title:
+    description: 'Title of the Alert'
+    required: true
+  description:
+    description: 'Description of the Alert'
+    required: true
+  webhook_endpoint:
+    description: 'Routes to endpoints. Use the alertmanager-receiver URL with the additional route. Options are: "ips-alets, ips-info, teambottesting, devrel, ent-wallet"'
+    required: true
+  bearer_token:
+    description: Token to be passed for authentication to the alertmanager-receiver application.
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Send message to Keybase
+      shell: sh
+      run: |
+        PAYLOAD=$(
+        cat <<EOF
+        {
+          "alerts": [
+            {
+              "status": "${{ inputs.status }}",
+              "annotations": {
+                "title": "${{ inputs.title }}",
+                "description": ""${{ inputs.description }}""
+              }
+            }
+          ]
+        }
+        EOF
+        )
+        
+        # Send curl request with JSON payload and authentication
+        HTTP_RESPONSE=$(curl -v -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" \
+          -H "Authorization: Bearer ${{ inputs.bearer_token }} \
+          -d "$PAYLOAD" "${{ inputs.webhook_endpoint }}")
+        
+        # Check the HTTP response code
+        if [ "$HTTP_RESPONSE" -eq 200 ]; then
+          echo "Webhook alert sent successfully."
+        elif [ "$HTTP_RESPONSE" -eq 401 ]; then
+          echo "Failed to send webhook alert. Unauthorized (401)."
+        else
+          echo "Failed to send webhook alert. HTTP Status: $HTTP_RESPONSE"
+        fi
