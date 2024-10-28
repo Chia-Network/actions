@@ -19,23 +19,14 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Set environment variables from inputs
-      shell: sh
-      run: |
-        echo "STATUS=${{ inputs.status }}" >> $GITHUB_ENV
-        echo "TITLE=${{ inputs.title }}" >> $GITHUB_ENV
-        echo "DESCRIPTION=${{ inputs.description }}" >> $GITHUB_ENV
-        echo "WEBHOOK_ENDPOINT=${{ inputs.webhook_endpoint }}" >> $GITHUB_ENV
-        echo "BEARER_TOKEN=${{ inputs.bearer_token }}" >> $GITHUB_ENV
-      env:
-        STATUS: "default status"
-        TITLE: "default title"
-        DESCRIPTION: "default description"
-        WEBHOOK_ENDPOINT: "default endpoint"
-        BEARER_TOKEN: "default token"
-    
     - name: Send alert to alertmanager-receiver
       shell: sh
+      env:
+        STATUS: ${{ inputs.status }}
+        TITLE: ${{ inputs.title }}
+        DESCRIPTION: ${{ inputs.description }}
+        WEBHOOK_ENDPOINT: ${{ inputs.webhook_endpoint }}
+        BEARER_TOKEN: ${{ inputs.bearer_token }}
       run: |
         PAYLOAD=$(
         cat <<EOF
