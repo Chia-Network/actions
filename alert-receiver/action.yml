@@ -2,7 +2,7 @@ name: Send alert to alertmanager-receiver
 description: This will send a json message to the alert manager receiver, formatting it, and then sending to Keybase.
 inputs:
   status:
-    description: 'Options are: "firing, resolves, warning, message'
+    description: 'Options are: "firing, resolved, warning, message'
     required: true
   title:
     description: 'Title of the Alert'
