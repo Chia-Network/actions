@@ -2,7 +2,7 @@ name: Send alert to alertmanager-receiver
 description: This will send a json message to the alert manager receiver, formatting it, and then sending to Keybase.
 inputs:
   status:
-    description: 'Options are: "firing, resolved, warning, message'
+    description: "Provide a status for the alert"
     required: true
   title:
     description: 'Title of the Alert'
@@ -11,7 +11,7 @@ inputs:
     description: 'Description of the Alert'
     required: true
   webhook_endpoint:
-    description: 'Routes to endpoints. Use the alertmanager-receiver URL with the additional route. Options are: "ips-alets, ips-info, teambottesting, devrel, ent-wallet"'
+    description: 'Routes to endpoints. Use the alertmanager-receiver URL with the additional route.'
     required: true
   bearer_token:
     description: Token to be passed for authentication to the alertmanager-receiver application.
