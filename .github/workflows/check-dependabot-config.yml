@@ -56,4 +56,4 @@ jobs:
         env:
           BRANCH: ${{ github.head_ref }}
         run: |
-          ( git fetch origin && git switch -c "$BRANCH" origin/"$BRANCH" && git commit -am "Updating dependabot configuration" && git push origin "$BRANCH" ) || true
+          ( git fetch origin && git switch -c "$BRANCH" "origin/$BRANCH" && git commit -am "Updating dependabot configuration" && git push origin "$BRANCH" ) || true
