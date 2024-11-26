@@ -23,7 +23,7 @@ defaults:
 jobs:
   test:
     name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.python.name }}
-    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
+    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix][matrix.environment.matrix] }}
     timeout-minutes: 5
     strategy:
       fail-fast: false
@@ -32,17 +32,23 @@ jobs:
           - name: macOS
             matrix: macos
             runs-on:
-              arm: [macOS, ARM64]
-              intel: [macos-12]
+              arm:
+                chia:  [macOS, ARM64]
+                github: [macos-latest]
+              intel:
+                github: [macos-12]
           - name: Ubuntu
             matrix: ubuntu
             runs-on:
-              arm: [Linux, ARM64]
-              intel: [ubuntu-latest]
+              arm:
+                chia: [Linux, ARM64]
+              intel:
+                github: [ubuntu-latest]
           - name: Windows
             matrix: windows
             runs-on:
-              intel: [windows-latest]
+              intel:
+                github: [windows-latest]
         python:
           - name: '3.8'
             action: '3.8'
@@ -85,6 +91,13 @@ jobs:
             matrix: arm
           - name: Intel
             matrix: intel
+        environment:
+          - name: GitHub
+            matrix: github
+            context: github-hosted
+          - name: Chia
+            matrix: chia
+            context: self-hosted
         exclude:
           # Only partial entries are required here by GitHub Actions so generally I
           # only specify the `matrix:` entry.  The super linter complains so for now
@@ -98,6 +111,16 @@ jobs:
             arch:
               name: ARM
               matrix: arm
+          - os:
+              matrix: windows
+            environment:
+              matrix: chia
+          - os:
+              matrix: linux
+            arch:
+              matrix: intel
+            environment:
+              matrix: chia
 
     steps:
     - uses: actions/checkout@v4
