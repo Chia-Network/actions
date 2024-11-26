@@ -21,7 +21,7 @@ runs:
         INPUT_DIRECTORIES: ${{ inputs.directories }}
       run: |
         unset PYTHON
-        for V in 312 3.12 311 3.11 310 3.10 39 3.9 38 3.8 37 3.7 3 ""; do
+        for V in 312 3.12 311 3.11 310 3.10 39 3.9 3 ""; do
           if command -v python$V >/dev/null; then
             PYTHON=python$V
             break
