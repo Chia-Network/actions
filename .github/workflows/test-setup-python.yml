@@ -32,7 +32,7 @@ jobs:
             matrix: macos
             runs-on:
               arm:
-                chia:  [macOS, ARM64]
+                chia: [macOS, ARM64]
                 github: [macos-latest]
               intel:
                 github: [macos-13]
