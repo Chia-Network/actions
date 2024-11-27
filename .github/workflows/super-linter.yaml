@@ -4,12 +4,12 @@ name: Lint Code Base
 on:
   push:
     branches:
-    - main
+      - main
     tags:
-    - '**'
+      - "**"
   pull_request:
     branches:
-    - '**'
+      - "**"
 
 concurrency:
   # SHA is added to the end if on `main` to let all main workflows run

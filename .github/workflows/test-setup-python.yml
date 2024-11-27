@@ -3,12 +3,12 @@ name: test-setup-python
 on:
   push:
     branches:
-    - main
+      - main
     tags:
-    - '**'
+      - "**"
   pull_request:
     branches:
-    - '**'
+      - "**"
 
 concurrency:
   # SHA is added to the end if on `main` to let all main workflows run
@@ -17,8 +17,7 @@ concurrency:
 
 defaults:
   run:
-    shell:
-      bash
+    shell: bash
 
 jobs:
   test:
@@ -44,42 +43,42 @@ jobs:
             runs-on:
               intel: [windows-latest]
         python:
-          - name: '3.8'
-            action: '3.8'
-            check: '3.8'
+          - name: "3.8"
+            action: "3.8"
+            check: "3.8"
             patch-specified: false
             allow-prerelease: false
-            matrix: 'py3.8'
-          - name: '3.9'
-            action: '3.9'
-            check: '3.9'
+            matrix: "py3.8"
+          - name: "3.9"
+            action: "3.9"
+            check: "3.9"
             patch-specified: false
             allow-prerelease: false
-            matrix: 'py3.9'
-          - name: '3.10'
-            action: '3.10'
-            check: '3.10'
+            matrix: "py3.9"
+          - name: "3.10"
+            action: "3.10"
+            check: "3.10"
             patch-specified: false
             allow-prerelease: false
-            matrix: 'py3.10'
-          - name: '3.10.8'
-            action: '3.10.8'
-            check: '3.10.8'
+            matrix: "py3.10"
+          - name: "3.10.8"
+            action: "3.10.8"
+            check: "3.10.8"
             patch-specified: true
             allow-prerelease: false
-            matrix: 'py3.10.8'
-          - name: '3.11'
-            action: '3.11'
-            check: '3.11'
+            matrix: "py3.10.8"
+          - name: "3.11"
+            action: "3.11"
+            check: "3.11"
             patch-specified: false
             allow-prerelease: false
-            matrix: 'py3.11'
-          - name: '3.12'
-            action: '3.12'
-            check: '3.12'
+            matrix: "py3.11"
+          - name: "3.12"
+            action: "3.12"
+            check: "3.12"
             patch-specified: false
             allow-prerelease: true
-            matrix: 'py3.12'
+            matrix: "py3.12"
         arch:
           - name: ARM
             matrix: arm
@@ -100,23 +99,23 @@ jobs:
               matrix: arm
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Run the action
-      uses: ./setup-python/
-      id: run-the-action
-      with:
-        python-version: ${{ matrix.python.action }}
-        allow-prerelease: ${{ matrix.python.allow-prerelease }}
+      - name: Run the action
+        uses: ./setup-python/
+        id: run-the-action
+        with:
+          python-version: ${{ matrix.python.action }}
+          allow-prerelease: ${{ matrix.python.allow-prerelease }}
 
-    - name: Check Python version
-      env:
-        PYTHON_CHECK: ${{ matrix.python.check }}
-      run: |
-        python ./setup-python/test_check_version.py
+      - name: Check Python version
+        env:
+          PYTHON_CHECK: ${{ matrix.python.check }}
+        run: |
+          python ./setup-python/test_check_version.py
 
-    - name: Make sure pre-release version adjustment made if appropriate
-      env:
-        RESULT: ${{ matrix.python.allow-prerelease && contains(steps.run-the-action.outputs.python-version-string, '.0-alpha') || ( steps.run-the-action.outputs.python-version-string == matrix.python.action ) }}
-      run: |
-        ${RESULT}
+      - name: Make sure pre-release version adjustment made if appropriate
+        env:
+          RESULT: ${{ matrix.python.allow-prerelease && contains(steps.run-the-action.outputs.python-version-string, '.0-alpha') || ( steps.run-the-action.outputs.python-version-string == matrix.python.action ) }}
+        run: |
+          ${RESULT}
