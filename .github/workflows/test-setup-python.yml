@@ -3,12 +3,12 @@ name: test-setup-python
 on:
   push:
     branches:
-    - main
+      - main
     tags:
-    - '**'
+      - "**"
   pull_request:
     branches:
-    - '**'
+      - "**"
 
 concurrency:
   # SHA is added to the end if on `main` to let all main workflows run
@@ -17,13 +17,12 @@ concurrency:
 
 defaults:
   run:
-    shell:
-      bash
+    shell: bash
 
 jobs:
   test:
-    name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.python.name }}
-    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
+    name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.environment.name }} ${{ matrix.python.name }}
+    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix][matrix.environment.matrix] }}
     timeout-minutes: 5
     strategy:
       fail-fast: false
@@ -32,91 +31,104 @@ jobs:
           - name: macOS
             matrix: macos
             runs-on:
-              arm: [macOS, ARM64]
-              intel: [macos-12]
+              arm:
+                chia: [macOS, ARM64]
+                github: [macos-latest]
+              intel:
+                github: [macos-13]
           - name: Ubuntu
             matrix: ubuntu
             runs-on:
-              arm: [Linux, ARM64]
-              intel: [ubuntu-latest]
+              arm:
+                chia: [Linux, ARM64]
+              intel:
+                github: [ubuntu-latest]
           - name: Windows
             matrix: windows
             runs-on:
-              intel: [windows-latest]
+              intel:
+                github: [windows-latest]
         python:
-          - name: '3.8'
-            action: '3.8'
-            check: '3.8'
+          - name: "3.9"
+            action: "3.9"
+            check: "3.9"
             patch-specified: false
             allow-prerelease: false
-            matrix: 'py3.8'
-          - name: '3.9'
-            action: '3.9'
-            check: '3.9'
+            matrix: "py3.9"
+          - name: "3.10"
+            action: "3.10"
+            check: "3.10"
             patch-specified: false
             allow-prerelease: false
-            matrix: 'py3.9'
-          - name: '3.10'
-            action: '3.10'
-            check: '3.10'
-            patch-specified: false
-            allow-prerelease: false
-            matrix: 'py3.10'
-          - name: '3.10.8'
-            action: '3.10.8'
-            check: '3.10.8'
+            matrix: "py3.10"
+          - name: "3.10.8"
+            action: "3.10.8"
+            check: "3.10.8"
             patch-specified: true
             allow-prerelease: false
-            matrix: 'py3.10.8'
-          - name: '3.11'
-            action: '3.11'
-            check: '3.11'
+            matrix: "py3.10.8"
+          - name: "3.11"
+            action: "3.11"
+            check: "3.11"
             patch-specified: false
             allow-prerelease: false
-            matrix: 'py3.11'
-          - name: '3.12'
-            action: '3.12'
-            check: '3.12'
+            matrix: "py3.11"
+          - name: "3.12"
+            action: "3.12"
+            check: "3.12"
             patch-specified: false
             allow-prerelease: true
-            matrix: 'py3.12'
+            matrix: "py3.12"
         arch:
           - name: ARM
             matrix: arm
           - name: Intel
             matrix: intel
+        environment:
+          - name: Chia
+            matrix: chia
+            context: self-hosted
+          - name: GitHub
+            matrix: github
+            context: github-hosted
         exclude:
-          # Only partial entries are required here by GitHub Actions so generally I
-          # only specify the `matrix:` entry.  The super linter complains so for now
-          # all entries are included to avoid that.  Reported at
-          # https://github.com/rhysd/actionlint/issues/249
           - os:
-              name: Windows
-              matrix: windows
-              runs-on:
-                intel: [windows-latest]
+              matrix: ubuntu
             arch:
-              name: ARM
               matrix: arm
+            environment:
+              matrix: github
+          - os:
+              matrix: windows
+            arch:
+              matrix: arm
+          - os:
+              matrix: windows
+            environment:
+              matrix: chia
+          - arch:
+              matrix: intel
+            environment:
+              matrix: chia
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Run the action
-      uses: ./setup-python/
-      id: run-the-action
-      with:
-        python-version: ${{ matrix.python.action }}
-        allow-prerelease: ${{ matrix.python.allow-prerelease }}
+      - name: Run the action
+        uses: ./setup-python/
+        id: run-the-action
+        with:
+          python-version: ${{ matrix.python.action }}
+          allow-prerelease: ${{ matrix.python.allow-prerelease }}
 
-    - name: Check Python version
-      env:
-        PYTHON_CHECK: ${{ matrix.python.check }}
-      run: |
-        python ./setup-python/test_check_version.py
+      - name: Check Python version
+        env:
+          PYTHON_CHECK: ${{ matrix.python.check }}
+        run: |
+          python ./setup-python/test_check_version.py
 
-    - name: Make sure pre-release version adjustment made if appropriate
-      env:
-        RESULT: ${{ matrix.python.allow-prerelease && contains(steps.run-the-action.outputs.python-version-string, '.0-alpha') || ( steps.run-the-action.outputs.python-version-string == matrix.python.action ) }}
-      run: |
-        ${RESULT}
+      - name: Make sure pre-release version adjustment made if appropriate
+        env:
+          RESULT: ${{ matrix.python.allow-prerelease && contains(steps.run-the-action.outputs.python-version-string, '.0-alpha') || ( steps.run-the-action.outputs.python-version-string == matrix.python.action ) }}
+        run: |
+          ${RESULT}

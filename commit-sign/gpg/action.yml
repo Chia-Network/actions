@@ -2,10 +2,10 @@ name: "Set up GPG Commit Signing"
 description: "Imports a GPG Key and sets up commit signing"
 inputs:
   gpg_private_key:
-    description: 'GPG private key exported as an ASCII armored version or its base64 encoding'
+    description: "GPG private key exported as an ASCII armored version or its base64 encoding"
     required: true
   passphrase:
-    description: 'Passphrase of the GPG private key'
+    description: "Passphrase of the GPG private key"
     required: false
   working-directory:
     description: "working directory for the commands"

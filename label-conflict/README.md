@@ -1,6 +1,7 @@
 # Action: Label merge-conflict
 
-This action tries to resolve issues found in [eps1lon/actions-label-merge-conflict](https://github.com/eps1lon/actions-label-merge-conflict)  
+This action tries to resolve issues found in [eps1lon/actions-label-merge-conflict](https://github.com/eps1lon/actions-label-merge-conflict)
+
 - It tries to check conflict status of PRs which share the same base(target) branch as the PR triggering the action.  
   For example, if you have 20 PRs which target to `main` branch, and you push commits to one of the 20 PRs,
   it tries to check conflict for all the 20 PRs between `main` and adds/removes conflict labels for those 19 irrelevant PRs.
@@ -8,7 +9,7 @@ This action tries to resolve issues found in [eps1lon/actions-label-merge-confli
   The problem is, that if conflict statuses of 3 PRs are "UNKNOWN",
   3 same GraphQL requests which ask for the same data for each targeted PRs will be submitted.  
   This very much consumes time and bandwidth if you have a large number of PRs.
-- In the above case, even if one of 3 GraphQL response has no "UNKNOWN" mergeable status data, 
+- In the above case, even if one of 3 GraphQL response has no "UNKNOWN" mergeable status data,
   it waits for remaining 2 GraphQL response, which should be canceled or ignored.
   In the worst case scenario, if it receives some of remaining GraphQL response which contain "UNKNOWN" data,
   it will wait and retry another GraphQL request to GitHub API server.
@@ -116,7 +117,8 @@ Comment to add when conflict is resolved. Supports Markdown
 
 **Default**: No comment is posted.
 
-##  Note for developers
+## Note for developers
+
 In order for public availability, I committed `dist/index.js` which is compiled from `src/*.ts` files.  
 To prevent manual rewrite of the dist js file, there is a CI job to check whether the committed dist js file is
 actually built from ts files.  

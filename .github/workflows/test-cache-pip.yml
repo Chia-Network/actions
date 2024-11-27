@@ -3,12 +3,12 @@ name: test-cache-pip
 on:
   push:
     branches:
-    - main
+      - main
     tags:
-    - '**'
+      - "**"
   pull_request:
     branches:
-    - '**'
+      - "**"
 
 concurrency:
   # SHA is added to the end if on `main` to let all main workflows run
@@ -21,8 +21,8 @@ defaults:
 
 jobs:
   test:
-    name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.python.name }} ${{ matrix.mode.name }}
-    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
+    name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.environment.name }} ${{ matrix.python.name }} ${{ matrix.mode.name }}
+    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix][matrix.environment.matrix] }}
     container: ${{ matrix.os.container[matrix.python.matrix] }}
     timeout-minutes: 5
     strategy:
@@ -33,57 +33,67 @@ jobs:
             matrix: macos
             native-python: false
             runs-on:
-              arm: [macOS, ARM64]
-              intel: [macos-12]
+              arm:
+                chia: [macOS, ARM64]
+                github: [macos-latest]
+              intel:
+                github: [macos-13]
           - name: Ubuntu
             matrix: ubuntu
             native-python: false
             runs-on:
-              arm: [Linux, ARM64]
-              intel: [ubuntu-latest]
+              arm:
+                chia: [Linux, ARM64]
+              intel:
+                github: [ubuntu-latest]
           - name: Docker Debian
             matrix: docker-debian
             native-python: true
             runs-on:
-              arm: [Linux, ARM64]
-              intel: [ubuntu-latest]
+              arm:
+                chia: [Linux, ARM64]
+              intel:
+                github: [ubuntu-latest]
             container:
-              'py3.8': docker://python:3.8-bullseye
-              'py3.9': docker://python:3.9-bullseye
-              'py3.10': docker://python:3.10-bullseye
-              'py3.11': docker://python:3.11-bullseye
-              'py3.12': docker://python:3.12-bullseye
+              "py3.9": docker://python:3.9-bullseye
+              "py3.10": docker://python:3.10-bullseye
+              "py3.11": docker://python:3.11-bullseye
+              "py3.12": docker://python:3.12-bullseye
           - name: Windows
             matrix: windows
             native-python: false
             runs-on:
-              intel: [windows-latest]
+              intel:
+                github: [windows-latest]
         python:
-          - name: '3.8'
-            action: '3.8'
-            check: '3.8'
-            matrix: 'py3.8'
-          - name: '3.9'
-            action: '3.9'
-            check: '3.9'
-            matrix: 'py3.9'
-          - name: '3.10'
-            action: '3.10'
-            check: '3.10'
-            matrix: 'py3.10'
-          - name: '3.11'
-            action: '3.11'
-            check: '3.11'
-            matrix: 'py3.11'
-          - name: '3.12'
-            action: '3.12'
-            check: '3.12'
-            matrix: 'py3.12'
+          - name: "3.9"
+            action: "3.9"
+            check: "3.9"
+            matrix: "py3.9"
+          - name: "3.10"
+            action: "3.10"
+            check: "3.10"
+            matrix: "py3.10"
+          - name: "3.11"
+            action: "3.11"
+            check: "3.11"
+            matrix: "py3.11"
+          - name: "3.12"
+            action: "3.12"
+            check: "3.12"
+            matrix: "py3.12"
         arch:
           - name: ARM
             matrix: arm
           - name: Intel
             matrix: intel
+        environment:
+          - name: Chia
+            matrix: chia
+            context: self-hosted
+          - name: GitHub
+            matrix: github
+            context: github-hosted
         mode:
           - name: setuptools
             matrix: setuptools
@@ -99,16 +109,21 @@ jobs:
               matrix: docker-chia-network-ubuntu-intel-builder
               native-python: true
               runs-on:
-                intel: [ubuntu-latest]
+                intel:
+                  github: [ubuntu-latest]
               container:
-                '3.10': chianetwork/ubuntu-20.04-builder:latest
+                "3.10": chianetwork/ubuntu-20.04-builder:latest
             python:
-              name: '3.10'
-              check: '3.10'
-              matrix: '3.10'
+              name: "3.10"
+              check: "3.10"
+              matrix: "3.10"
             arch:
               name: Intel
               matrix: intel
+            environment:
+              name: GitHub
+              matrix: github
+              context: github-hosted
             mode:
               name: Poetry
               matrix: poetry
@@ -119,16 +134,21 @@ jobs:
               matrix: docker-chia-network-ubuntu-arm-builder
               native-python: true
               runs-on:
-                arm: [Linux, ARM64]
+                arm:
+                  chia: [Linux, ARM64]
               container:
-                '3.10': chianetwork/ubuntu-20.04-builder:latest
+                "3.10": chianetwork/ubuntu-20.04-builder:latest
             python:
-              name: '3.10'
-              check: '3.10'
-              matrix: '3.10'
+              name: "3.10"
+              check: "3.10"
+              matrix: "3.10"
             arch:
               name: ARM
               matrix: arm
+            environment:
+              name: Chia
+              matrix: chia
+              context: self-hosted
             mode:
               name: Poetry
               matrix: poetry
@@ -139,84 +159,100 @@ jobs:
               matrix: docker-chia-network-rocky-intel-builder
               native-python: true
               runs-on:
-                intel: [ubuntu-latest]
+                intel:
+                  github: [ubuntu-latest]
               container:
-                '3.10': chianetwork/rocky8-builder:latest
+                "3.10": chianetwork/rocky8-builder:latest
             python:
-              name: '3.10'
-              check: '3.10'
-              matrix: '3.10'
+              name: "3.10"
+              check: "3.10"
+              matrix: "3.10"
             arch:
               name: Intel
               matrix: intel
+            environment:
+              name: GitHub
+              matrix: github
+              context: github-hosted
             mode:
               name: Poetry
               matrix: poetry
               action: poetry
               cli: poetry
         exclude:
-          # Only partial entries are required here by GitHub Actions so generally I
-          # only specify the `matrix:` entry.  The super linter complains so for now
-          # all entries are included to avoid that.  Reported at
-          # https://github.com/rhysd/actionlint/issues/249
           - os:
-              name: Windows
-              matrix: windows
-              native-python: false
-              runs-on:
-                intel: [windows-latest]
+              matrix: ubuntu
             arch:
-              name: ARM
               matrix: arm
+            environment:
+              matrix: github
+          - os:
+              matrix: docker-debian
+            arch:
+              matrix: arm
+            environment:
+              matrix: github
+          - os:
+              matrix: windows
+            arch:
+              matrix: arm
+          - os:
+              matrix: windows
+            environment:
+              matrix: chia
+          - arch:
+              matrix: intel
+            environment:
+              matrix: chia
 
     env:
       CACHE_DIR_VAR: ${{ (matrix.mode.matrix == 'setuptools' && 'PIP_CACHE_DIR') || (matrix.mode.matrix == 'poetry' && 'POETRY_CACHE_DIR') }}
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        path: repo
+      - uses: actions/checkout@v4
+        with:
+          path: repo
 
-    - name: Set up ${{ matrix.python.name }}
-      if: ${{ ! matrix.os.native-python }}
-      uses: ./repo/setup-python
-      with:
-        python-version: ${{ matrix.python.action }}
+      - name: Set up ${{ matrix.python.name }}
+        if: ${{ ! matrix.os.native-python }}
+        uses: ./repo/setup-python
+        with:
+          python-version: ${{ matrix.python.action }}
 
-    - name: Run the action (with pre-delete)
-      uses: ./repo/cache-pip
-      with:
-        mode: ${{ matrix.mode.action }}
-        pre-delete: "true"
+      - name: Run the action (with pre-delete)
+        uses: ./repo/cache-pip
+        with:
+          mode: ${{ matrix.mode.action }}
+          pre-delete: "true"
 
-    - name: Check pip cache directory
-      run: |
-        python repo/cache-pip/test_pip_cache_directory.py "${{ matrix.mode.cli }}"
+      - name: Check pip cache directory
+        run: |
+          python repo/cache-pip/test_pip_cache_directory.py "${{ matrix.mode.cli }}"
 
-    - name: Delete the directory
-      run: |
-        rm -rf "${${{ env.CACHE_DIR_VAR }}}"
+      - name: Delete the directory
+        run: |
+          rm -rf "${${{ env.CACHE_DIR_VAR }}}"
 
-    - name: Run the action (no pre-delete)
-      uses: ./repo/cache-pip
-      with:
-        mode: ${{ matrix.mode.action }}
-        pre-delete: "false"
+      - name: Run the action (no pre-delete)
+        uses: ./repo/cache-pip
+        with:
+          mode: ${{ matrix.mode.action }}
+          pre-delete: "false"
 
-    - name: Check pip cache directory
-      run: |
-        python repo/cache-pip/test_pip_cache_directory.py "${{ matrix.mode.cli }}"
+      - name: Check pip cache directory
+        run: |
+          python repo/cache-pip/test_pip_cache_directory.py "${{ matrix.mode.cli }}"
 
-    - name: Touch sentinel file
-      run: |
-        touch "${${{ env.CACHE_DIR_VAR }}}"/cache_pip_sentinel_file
+      - name: Touch sentinel file
+        run: |
+          touch "${${{ env.CACHE_DIR_VAR }}}"/cache_pip_sentinel_file
 
-    - name: Run the action (with pre-delete)
-      uses: ./repo/cache-pip
-      with:
-        mode: ${{ matrix.mode.action }}
-        pre-delete: "true"
+      - name: Run the action (with pre-delete)
+        uses: ./repo/cache-pip
+        with:
+          mode: ${{ matrix.mode.action }}
+          pre-delete: "true"
 
-    - name: Check no sentinel file
-      run: |
-        [ ! -e "${${{ env.CACHE_DIR_VAR }}}"/cache_pip_sentinel_file ]
+      - name: Check no sentinel file
+        run: |
+          [ ! -e "${${{ env.CACHE_DIR_VAR }}}"/cache_pip_sentinel_file ]

@@ -11,5 +11,4 @@ Sends JSON to the alertmanager receiver, which generates alerts in Keybase.
     description: Files are missing from folder upload
     webhook_endpoint: ips-alerts
     bearer_token: ${{ BEARER_TOKEN }}
-    
 ```
