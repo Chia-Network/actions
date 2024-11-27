@@ -22,7 +22,7 @@ defaults:
 jobs:
   test:
     name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.python.name }}
-    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
+    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix][matrix.environment.matrix] }}
     container: ${{ matrix.os.container[matrix.python.matrix] }}
     timeout-minutes: 10
     strategy:
@@ -33,20 +33,27 @@ jobs:
             matrix: macos
             native-python: false
             runs-on:
-              arm: [macOS, ARM64]
-              intel: [macos-13]
+              arm:
+                chia: [macOS, ARM64]
+                github: [macos-latest]
+              intel:
+                github: [macos-13]
           - name: Ubuntu
             matrix: ubuntu
             native-python: false
             runs-on:
-              arm: [Linux, ARM64]
-              intel: [ubuntu-latest]
+              arm:
+                chia: [Linux, ARM64]
+              intel:
+                github: [ubuntu-latest]
           - name: Docker Debian
             matrix: docker-debian
             native-python: true
             runs-on:
-              arm: [Linux, ARM64]
-              intel: [ubuntu-latest]
+              arm:
+                chia: [Linux, ARM64]
+              intel:
+                github: [ubuntu-latest]
             container:
               "py3.9": docker://python:3.9-bullseye
               "py3.10": docker://python:3.10-bullseye
@@ -56,7 +63,8 @@ jobs:
             matrix: windows
             native-python: false
             runs-on:
-              intel: [windows-latest]
+              intel:
+                github: [windows-latest]
         python:
           - name: "3.9"
             action: "3.9"
@@ -79,13 +87,21 @@ jobs:
             matrix: arm
           - name: Intel
             matrix: intel
+        environment:
+          - name: Chia
+            matrix: chia
+            context: self-hosted
+          - name: GitHub
+            matrix: github
+            context: github-hosted
         include:
           - os:
               name: Chia Network Ubuntu Intel Builder
               matrix: docker-chia-network-ubuntu-intel-builder
               native-python: true
               runs-on:
-                intel: [ubuntu-latest]
+                intel:
+                  github: [ubuntu-latest]
               container:
                 "3.10": chianetwork/ubuntu-20.04-builder:latest
             python:
@@ -95,12 +111,17 @@ jobs:
             arch:
               name: Intel
               matrix: intel
+            environment:
+              - name: GitHub
+                matrix: github
+                context: github-hosted
           - os:
               name: Chia Network Ubuntu ARM Builder
               matrix: docker-chia-network-ubuntu-arm-builder
               native-python: true
               runs-on:
-                arm: [Linux, ARM64]
+                arm:
+                  chia: [Linux, ARM64]
               container:
                 "3.10": chianetwork/ubuntu-20.04-builder:latest
             python:
@@ -110,12 +131,17 @@ jobs:
             arch:
               name: ARM
               matrix: arm
+            environment:
+              - name: Chia
+                matrix: chia
+                context: self-hosted
           - os:
               name: Chia Network CentOS Intel Builder
               matrix: docker-chia-network-rocky-intel-builder
               native-python: true
               runs-on:
-                intel: [ubuntu-latest]
+                intel:
+                  github: [ubuntu-latest]
               container:
                 "3.10": chianetwork/rocky8-builder:latest
             python:
@@ -125,11 +151,23 @@ jobs:
             arch:
               name: Intel
               matrix: intel
+            environment:
+              - name: GitHub
+                matrix: github
+                context: github-hosted
         exclude:
           - os:
               matrix: windows
             arch:
               matrix: arm
+          - os:
+              matrix: windows
+            environment:
+              matrix: chia
+          - arch:
+              matrix: intel
+            environment:
+              matrix: chia
 
     steps:
       - uses: Chia-Network/actions/clean-workspace@main
