@@ -21,8 +21,8 @@ defaults:
 
 jobs:
   test:
-    name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.python.name }}
-    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
+    name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.environment.name }} ${{ matrix.python.name }}
+    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix][matrix.environment.matrix] }}
     timeout-minutes: 5
     strategy:
       fail-fast: false
@@ -31,17 +31,23 @@ jobs:
           - name: macOS
             matrix: macos
             runs-on:
-              arm: [macOS, ARM64]
-              intel: [macos-13]
+              arm:
+                chia: [macOS, ARM64]
+                github: [macos-latest]
+              intel:
+                github: [macos-13]
           - name: Ubuntu
             matrix: ubuntu
             runs-on:
-              arm: [Linux, ARM64]
-              intel: [ubuntu-latest]
+              arm:
+                chia: [Linux, ARM64]
+              intel:
+                github: [ubuntu-latest]
           - name: Windows
             matrix: windows
             runs-on:
-              intel: [windows-latest]
+              intel:
+                github: [windows-latest]
         python:
           - name: "3.9"
             action: "3.9"
@@ -78,11 +84,32 @@ jobs:
             matrix: arm
           - name: Intel
             matrix: intel
+        environment:
+          - name: Chia
+            matrix: chia
+            context: self-hosted
+          - name: GitHub
+            matrix: github
+            context: github-hosted
         exclude:
+          - os:
+              matrix: ubuntu
+            arch:
+              matrix: arm
+            environment:
+              matrix: github
           - os:
               matrix: windows
             arch:
               matrix: arm
+          - os:
+              matrix: windows
+            environment:
+              matrix: chia
+          - arch:
+              matrix: intel
+            environment:
+              matrix: chia
 
     steps:
       - uses: actions/checkout@v4
