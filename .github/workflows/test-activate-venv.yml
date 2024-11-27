@@ -34,14 +34,14 @@ jobs:
                 github: [macos-latest]
               intel:
                 github: [macos-13]
-#          - name: Ubuntu
-#            matrix: ubuntu
-#            native-python: false
-#            runs-on:
-#              arm:
-#                chia: [Linux, ARM64]
-#              intel:
-#                github: [ubuntu-latest]
+          - name: Ubuntu
+            matrix: ubuntu
+            native-python: false
+            runs-on:
+              arm:
+                chia: [Linux, ARM64]
+              intel:
+                github: [ubuntu-latest]
 #          - name: Docker Debian
 #            matrix: docker-debian
 #            native-python: true
