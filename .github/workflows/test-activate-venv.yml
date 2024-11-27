@@ -101,6 +101,7 @@ jobs:
         include:
           - os:
               name: Chia Network Ubuntu Intel Builder
+              emoji: 🍊🐧
               matrix: docker-chia-network-ubuntu-intel-builder
               native-python: true
               runs-on:
@@ -114,13 +115,16 @@ jobs:
               matrix: "3.10"
             arch:
               name: Intel
+              emoji: 🌀
               matrix: intel
             environment:
               name: GitHub
+              emoji: 🐙
               matrix: github
               context: github-hosted
           - os:
               name: Chia Network Ubuntu ARM Builder
+              emoji: 🍊🐧
               matrix: docker-chia-network-ubuntu-arm-builder
               native-python: true
               runs-on:
@@ -134,13 +138,16 @@ jobs:
               matrix: "3.10"
             arch:
               name: ARM
+              emoji: 💪
               matrix: arm
             environment:
               name: Chia
+              emoji: 🍃
               matrix: chia
               context: self-hosted
           - os:
               name: Chia Network CentOS Intel Builder
+              emoji: 🧭🐧
               matrix: docker-chia-network-rocky-intel-builder
               native-python: true
               runs-on:
@@ -154,9 +161,11 @@ jobs:
               matrix: "3.10"
             arch:
               name: Intel
+              emoji: 🌀
               matrix: intel
             environment:
               name: GitHub
+              emoji: 🐙
               matrix: github
               context: github-hosted
         exclude:
