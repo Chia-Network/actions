@@ -99,12 +99,6 @@ jobs:
             environment:
               matrix: github
           - os:
-              matrix: docker-debian
-            arch:
-              matrix: arm
-            environment:
-              matrix: github
-          - os:
               matrix: windows
             arch:
               matrix: arm
