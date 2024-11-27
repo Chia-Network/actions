@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   test:
-    name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.python.name }}
+    name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.environment.name }} ${{ matrix.python.name }}
     runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix][matrix.environment.matrix] }}
     container: ${{ matrix.os.container[matrix.python.matrix] }}
     timeout-minutes: 5
