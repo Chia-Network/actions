@@ -48,7 +48,6 @@ jobs:
               arm: [Linux, ARM64]
               intel: [ubuntu-latest]
             container:
-              "py3.8": docker://python:3.8-bullseye
               "py3.9": docker://python:3.9-bullseye
               "py3.10": docker://python:3.10-bullseye
               "py3.11": docker://python:3.11-bullseye
@@ -59,10 +58,6 @@ jobs:
             runs-on:
               intel: [windows-latest]
         python:
-          - name: "3.8"
-            action: "3.8"
-            check: "3.8"
-            matrix: "py3.8"
           - name: "3.9"
             action: "3.9"
             check: "3.9"
@@ -131,18 +126,9 @@ jobs:
               name: Intel
               matrix: intel
         exclude:
-          # Only partial entries are required here by GitHub Actions so generally I
-          # only specify the `matrix:` entry.  The super linter complains so for now
-          # all entries are included to avoid that.  Reported at
-          # https://github.com/rhysd/actionlint/issues/249
           - os:
-              name: Windows
               matrix: windows
-              native-python: false
-              runs-on:
-                intel: [windows-latest]
             arch:
-              name: ARM
               matrix: arm
 
     steps:
