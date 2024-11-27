@@ -181,6 +181,12 @@ jobs:
               cli: poetry
         exclude:
           - os:
+              matrix: linux
+            arch:
+              matrix: arm
+            environment:
+              matrix: github
+          - os:
               matrix: windows
             arch:
               matrix: arm
