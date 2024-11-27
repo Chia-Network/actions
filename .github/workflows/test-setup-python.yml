@@ -91,12 +91,12 @@ jobs:
           - name: Intel
             matrix: intel
         environment:
-          - name: GitHub
-            matrix: github
-            context: github-hosted
           - name: Chia
             matrix: chia
             context: self-hosted
+          - name: GitHub
+            matrix: github
+            context: github-hosted
         exclude:
           # Only partial entries are required here by GitHub Actions so generally I
           # only specify the `matrix:` entry.  The super linter complains so for now
@@ -114,9 +114,7 @@ jobs:
               matrix: windows
             environment:
               matrix: chia
-          - os:
-              matrix: linux
-            arch:
+          - arch:
               matrix: intel
             environment:
               matrix: chia
