@@ -65,32 +65,18 @@ jobs:
           - name: "3.9"
             action: "3.9"
             check: "3.9"
-            patch-specified: false
-            allow-prerelease: false
             matrix: "py3.9"
           - name: "3.10"
             action: "3.10"
             check: "3.10"
-            patch-specified: false
-            allow-prerelease: false
             matrix: "py3.10"
-          - name: "3.10.8"
-            action: "3.10.8"
-            check: "3.10.8"
-            patch-specified: true
-            allow-prerelease: false
-            matrix: "py3.10.8"
           - name: "3.11"
             action: "3.11"
             check: "3.11"
-            patch-specified: false
-            allow-prerelease: false
             matrix: "py3.11"
           - name: "3.12"
             action: "3.12"
             check: "3.12"
-            patch-specified: false
-            allow-prerelease: true
             matrix: "py3.12"
         arch:
           - name: ARM
@@ -122,9 +108,9 @@ jobs:
               name: Intel
               matrix: intel
             environment:
-              - name: GitHub
-                matrix: github
-                context: github-hosted
+              name: GitHub
+              matrix: github
+              context: github-hosted
           - os:
               name: Chia Network Ubuntu ARM Builder
               matrix: docker-chia-network-ubuntu-arm-builder
@@ -142,9 +128,9 @@ jobs:
               name: ARM
               matrix: arm
             environment:
-              - name: Chia
-                matrix: chia
-                context: self-hosted
+              name: Chia
+              matrix: chia
+              context: self-hosted
           - os:
               name: Chia Network CentOS Intel Builder
               matrix: docker-chia-network-rocky-intel-builder
@@ -162,9 +148,9 @@ jobs:
               name: Intel
               matrix: intel
             environment:
-              - name: GitHub
-                matrix: github
-                context: github-hosted
+              name: GitHub
+              matrix: github
+              context: github-hosted
         exclude:
           - os:
               matrix: windows

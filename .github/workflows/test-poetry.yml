@@ -112,9 +112,9 @@ jobs:
               name: Intel
               matrix: intel
             environment:
-              - name: GitHub
-                matrix: github
-                context: github-hosted
+              name: GitHub
+              matrix: github
+              context: github-hosted
           - os:
               name: Chia Network Ubuntu ARM Builder
               matrix: docker-chia-network-ubuntu-arm-builder
@@ -132,9 +132,9 @@ jobs:
               name: ARM
               matrix: arm
             environment:
-              - name: Chia
-                matrix: chia
-                context: self-hosted
+              name: Chia
+              matrix: chia
+              context: self-hosted
           - os:
               name: Chia Network CentOS Intel Builder
               matrix: docker-chia-network-rocky-intel-builder
@@ -152,9 +152,9 @@ jobs:
               name: Intel
               matrix: intel
             environment:
-              - name: GitHub
-                matrix: github
-                context: github-hosted
+              name: GitHub
+              matrix: github
+              context: github-hosted
         exclude:
           - os:
               matrix: windows

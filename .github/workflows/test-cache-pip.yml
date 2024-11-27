@@ -121,9 +121,9 @@ jobs:
               name: Intel
               matrix: intel
             environment:
-              - name: GitHub
-                matrix: github
-                context: github-hosted
+              name: GitHub
+              matrix: github
+              context: github-hosted
             mode:
               name: Poetry
               matrix: poetry
@@ -146,9 +146,9 @@ jobs:
               name: ARM
               matrix: arm
             environment:
-              - name: Chia
-                matrix: chia
-                context: self-hosted
+              name: Chia
+              matrix: chia
+              context: self-hosted
             mode:
               name: Poetry
               matrix: poetry
@@ -171,9 +171,9 @@ jobs:
               name: Intel
               matrix: intel
             environment:
-              - name: GitHub
-                matrix: github
-                context: github-hosted
+              name: GitHub
+              matrix: github
+              context: github-hosted
             mode:
               name: Poetry
               matrix: poetry
