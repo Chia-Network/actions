@@ -109,7 +109,7 @@ jobs:
               matrix: docker-chia-network-ubuntu-intel-builder
               native-python: true
               runs-on:
-                intel: 
+                intel:
                   github: [ubuntu-latest]
               container:
                 "3.10": chianetwork/ubuntu-20.04-builder:latest
@@ -134,7 +134,7 @@ jobs:
               matrix: docker-chia-network-ubuntu-arm-builder
               native-python: true
               runs-on:
-                arm: 
+                arm:
                   chia: [Linux, ARM64]
               container:
                 "3.10": chianetwork/ubuntu-20.04-builder:latest
@@ -159,7 +159,7 @@ jobs:
               matrix: docker-chia-network-rocky-intel-builder
               native-python: true
               runs-on:
-                intel: 
+                intel:
                   github: [ubuntu-latest]
               container:
                 "3.10": chianetwork/rocky8-builder:latest
