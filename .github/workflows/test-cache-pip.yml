@@ -155,18 +155,9 @@ jobs:
               action: poetry
               cli: poetry
         exclude:
-          # Only partial entries are required here by GitHub Actions so generally I
-          # only specify the `matrix:` entry.  The super linter complains so for now
-          # all entries are included to avoid that.  Reported at
-          # https://github.com/rhysd/actionlint/issues/249
           - os:
-              name: Windows
               matrix: windows
-              native-python: false
-              runs-on:
-                intel: [windows-latest]
             arch:
-              name: ARM
               matrix: arm
 
     env:
