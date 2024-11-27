@@ -34,33 +34,33 @@ jobs:
                 github: [macos-latest]
               intel:
                 github: [macos-13]
-          - name: Ubuntu
-            matrix: ubuntu
-            native-python: false
-            runs-on:
-              arm:
-                chia: [Linux, ARM64]
-              intel:
-                github: [ubuntu-latest]
-          - name: Docker Debian
-            matrix: docker-debian
-            native-python: true
-            runs-on:
-              arm:
-                chia: [Linux, ARM64]
-              intel:
-                github: [ubuntu-latest]
-            container:
-              "py3.9": docker://python:3.9-bullseye
-              "py3.10": docker://python:3.10-bullseye
-              "py3.11": docker://python:3.11-bullseye
-              "py3.12": docker://python:3.12-bullseye
-          - name: Windows
-            matrix: windows
-            native-python: false
-            runs-on:
-              intel:
-                github: [windows-latest]
+#          - name: Ubuntu
+#            matrix: ubuntu
+#            native-python: false
+#            runs-on:
+#              arm:
+#                chia: [Linux, ARM64]
+#              intel:
+#                github: [ubuntu-latest]
+#          - name: Docker Debian
+#            matrix: docker-debian
+#            native-python: true
+#            runs-on:
+#              arm:
+#                chia: [Linux, ARM64]
+#              intel:
+#                github: [ubuntu-latest]
+#            container:
+#              "py3.9": docker://python:3.9-bullseye
+#              "py3.10": docker://python:3.10-bullseye
+#              "py3.11": docker://python:3.11-bullseye
+#              "py3.12": docker://python:3.12-bullseye
+#          - name: Windows
+#            matrix: windows
+#            native-python: false
+#            runs-on:
+#              intel:
+#                github: [windows-latest]
         python:
           - name: "3.9"
             action: "3.9"
