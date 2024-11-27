@@ -1,6 +1,6 @@
 # Commit Sign / GPG Action
 
-Wrapper around crazy-max/ghaction-import-gpg that imports a gpg key and sets up git commit signing
+Wrapper around crazy-max/ghaction-import-gpg that imports a gpg key and sets up Git commit signing
 
 ```yaml
 - uses: Chia-Network/actions/commit-sign/gpg@main

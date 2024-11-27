@@ -3,12 +3,12 @@ name: test-cache-pip
 on:
   push:
     branches:
-    - main
+      - main
     tags:
-    - '**'
+      - "**"
   pull_request:
     branches:
-    - '**'
+      - "**"
 
 concurrency:
   # SHA is added to the end if on `main` to let all main workflows run
@@ -48,37 +48,37 @@ jobs:
               arm: [Linux, ARM64]
               intel: [ubuntu-latest]
             container:
-              'py3.8': docker://python:3.8-bullseye
-              'py3.9': docker://python:3.9-bullseye
-              'py3.10': docker://python:3.10-bullseye
-              'py3.11': docker://python:3.11-bullseye
-              'py3.12': docker://python:3.12-bullseye
+              "py3.8": docker://python:3.8-bullseye
+              "py3.9": docker://python:3.9-bullseye
+              "py3.10": docker://python:3.10-bullseye
+              "py3.11": docker://python:3.11-bullseye
+              "py3.12": docker://python:3.12-bullseye
           - name: Windows
             matrix: windows
             native-python: false
             runs-on:
               intel: [windows-latest]
         python:
-          - name: '3.8'
-            action: '3.8'
-            check: '3.8'
-            matrix: 'py3.8'
-          - name: '3.9'
-            action: '3.9'
-            check: '3.9'
-            matrix: 'py3.9'
-          - name: '3.10'
-            action: '3.10'
-            check: '3.10'
-            matrix: 'py3.10'
-          - name: '3.11'
-            action: '3.11'
-            check: '3.11'
-            matrix: 'py3.11'
-          - name: '3.12'
-            action: '3.12'
-            check: '3.12'
-            matrix: 'py3.12'
+          - name: "3.8"
+            action: "3.8"
+            check: "3.8"
+            matrix: "py3.8"
+          - name: "3.9"
+            action: "3.9"
+            check: "3.9"
+            matrix: "py3.9"
+          - name: "3.10"
+            action: "3.10"
+            check: "3.10"
+            matrix: "py3.10"
+          - name: "3.11"
+            action: "3.11"
+            check: "3.11"
+            matrix: "py3.11"
+          - name: "3.12"
+            action: "3.12"
+            check: "3.12"
+            matrix: "py3.12"
         arch:
           - name: ARM
             matrix: arm
@@ -101,11 +101,11 @@ jobs:
               runs-on:
                 intel: [ubuntu-latest]
               container:
-                '3.10': chianetwork/ubuntu-20.04-builder:latest
+                "3.10": chianetwork/ubuntu-20.04-builder:latest
             python:
-              name: '3.10'
-              check: '3.10'
-              matrix: '3.10'
+              name: "3.10"
+              check: "3.10"
+              matrix: "3.10"
             arch:
               name: Intel
               matrix: intel
@@ -121,11 +121,11 @@ jobs:
               runs-on:
                 arm: [Linux, ARM64]
               container:
-                '3.10': chianetwork/ubuntu-20.04-builder:latest
+                "3.10": chianetwork/ubuntu-20.04-builder:latest
             python:
-              name: '3.10'
-              check: '3.10'
-              matrix: '3.10'
+              name: "3.10"
+              check: "3.10"
+              matrix: "3.10"
             arch:
               name: ARM
               matrix: arm
@@ -141,11 +141,11 @@ jobs:
               runs-on:
                 intel: [ubuntu-latest]
               container:
-                '3.10': chianetwork/rocky8-builder:latest
+                "3.10": chianetwork/rocky8-builder:latest
             python:
-              name: '3.10'
-              check: '3.10'
-              matrix: '3.10'
+              name: "3.10"
+              check: "3.10"
+              matrix: "3.10"
             arch:
               name: Intel
               matrix: intel
@@ -173,50 +173,50 @@ jobs:
       CACHE_DIR_VAR: ${{ (matrix.mode.matrix == 'setuptools' && 'PIP_CACHE_DIR') || (matrix.mode.matrix == 'poetry' && 'POETRY_CACHE_DIR') }}
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        path: repo
+      - uses: actions/checkout@v4
+        with:
+          path: repo
 
-    - name: Set up ${{ matrix.python.name }}
-      if: ${{ ! matrix.os.native-python }}
-      uses: ./repo/setup-python
-      with:
-        python-version: ${{ matrix.python.action }}
+      - name: Set up ${{ matrix.python.name }}
+        if: ${{ ! matrix.os.native-python }}
+        uses: ./repo/setup-python
+        with:
+          python-version: ${{ matrix.python.action }}
 
-    - name: Run the action (with pre-delete)
-      uses: ./repo/cache-pip
-      with:
-        mode: ${{ matrix.mode.action }}
-        pre-delete: "true"
+      - name: Run the action (with pre-delete)
+        uses: ./repo/cache-pip
+        with:
+          mode: ${{ matrix.mode.action }}
+          pre-delete: "true"
 
-    - name: Check pip cache directory
-      run: |
-        python repo/cache-pip/test_pip_cache_directory.py "${{ matrix.mode.cli }}"
+      - name: Check pip cache directory
+        run: |
+          python repo/cache-pip/test_pip_cache_directory.py "${{ matrix.mode.cli }}"
 
-    - name: Delete the directory
-      run: |
-        rm -rf "${${{ env.CACHE_DIR_VAR }}}"
+      - name: Delete the directory
+        run: |
+          rm -rf "${${{ env.CACHE_DIR_VAR }}}"
 
-    - name: Run the action (no pre-delete)
-      uses: ./repo/cache-pip
-      with:
-        mode: ${{ matrix.mode.action }}
-        pre-delete: "false"
+      - name: Run the action (no pre-delete)
+        uses: ./repo/cache-pip
+        with:
+          mode: ${{ matrix.mode.action }}
+          pre-delete: "false"
 
-    - name: Check pip cache directory
-      run: |
-        python repo/cache-pip/test_pip_cache_directory.py "${{ matrix.mode.cli }}"
+      - name: Check pip cache directory
+        run: |
+          python repo/cache-pip/test_pip_cache_directory.py "${{ matrix.mode.cli }}"
 
-    - name: Touch sentinel file
-      run: |
-        touch "${${{ env.CACHE_DIR_VAR }}}"/cache_pip_sentinel_file
+      - name: Touch sentinel file
+        run: |
+          touch "${${{ env.CACHE_DIR_VAR }}}"/cache_pip_sentinel_file
 
-    - name: Run the action (with pre-delete)
-      uses: ./repo/cache-pip
-      with:
-        mode: ${{ matrix.mode.action }}
-        pre-delete: "true"
+      - name: Run the action (with pre-delete)
+        uses: ./repo/cache-pip
+        with:
+          mode: ${{ matrix.mode.action }}
+          pre-delete: "true"
 
-    - name: Check no sentinel file
-      run: |
-        [ ! -e "${${{ env.CACHE_DIR_VAR }}}"/cache_pip_sentinel_file ]
+      - name: Check no sentinel file
+        run: |
+          [ ! -e "${${{ env.CACHE_DIR_VAR }}}"/cache_pip_sentinel_file ]

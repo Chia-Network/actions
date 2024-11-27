@@ -157,7 +157,7 @@ runs:
         echo "MEM_TOTAL=$MEM_TOTAL" >>"$env:GITHUB_ENV"
       shell: powershell
     - name: Catch Payload
-      if:  runner.debug == '1'
+      if: runner.debug == '1'
       shell: bash
       run: |
         jq '.' "$GITHUB_EVENT_PATH"
