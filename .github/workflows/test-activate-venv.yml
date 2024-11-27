@@ -55,12 +55,12 @@ jobs:
 #              "py3.10": docker://python:3.10-bullseye
 #              "py3.11": docker://python:3.11-bullseye
 #              "py3.12": docker://python:3.12-bullseye
-#          - name: Windows
-#            matrix: windows
-#            native-python: false
-#            runs-on:
-#              intel:
-#                github: [windows-latest]
+          - name: Windows
+            matrix: windows
+            native-python: false
+            runs-on:
+              intel:
+                github: [windows-latest]
         python:
           - name: "3.9"
             action: "3.9"
