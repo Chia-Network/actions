@@ -3,12 +3,12 @@ name: test-poetry
 on:
   push:
     branches:
-    - main
+      - main
     tags:
-    - '**'
+      - "**"
   pull_request:
     branches:
-    - '**'
+      - "**"
 
 concurrency:
   # SHA is added to the end if on `main` to let all main workflows run
@@ -48,32 +48,32 @@ jobs:
               arm: [Linux, ARM64]
               intel: [ubuntu-latest]
             container:
-              'py3.9': docker://python:3.9-bullseye
-              'py3.10': docker://python:3.10-bullseye
-              'py3.11': docker://python:3.11-bullseye
-              'py3.12': docker://python:3.12-bullseye
+              "py3.9": docker://python:3.9-bullseye
+              "py3.10": docker://python:3.10-bullseye
+              "py3.11": docker://python:3.11-bullseye
+              "py3.12": docker://python:3.12-bullseye
           - name: Windows
             matrix: windows
             native-python: false
             runs-on:
               intel: [windows-latest]
         python:
-          - name: '3.9'
-            action: '3.9'
-            check: '3.9'
-            matrix: 'py3.9'
-          - name: '3.10'
-            action: '3.10'
-            check: '3.10'
-            matrix: 'py3.10'
-          - name: '3.11'
-            action: '3.11'
-            check: '3.11'
-            matrix: 'py3.11'
-          - name: '3.12'
-            action: '3.12'
-            check: '3.12'
-            matrix: 'py3.12'
+          - name: "3.9"
+            action: "3.9"
+            check: "3.9"
+            matrix: "py3.9"
+          - name: "3.10"
+            action: "3.10"
+            check: "3.10"
+            matrix: "py3.10"
+          - name: "3.11"
+            action: "3.11"
+            check: "3.11"
+            matrix: "py3.11"
+          - name: "3.12"
+            action: "3.12"
+            check: "3.12"
+            matrix: "py3.12"
         arch:
           - name: ARM
             matrix: arm
@@ -87,11 +87,11 @@ jobs:
               runs-on:
                 intel: [ubuntu-latest]
               container:
-                '3.10': chianetwork/ubuntu-20.04-builder:latest
+                "3.10": chianetwork/ubuntu-20.04-builder:latest
             python:
-              name: '3.10'
-              check: '3.10'
-              matrix: '3.10'
+              name: "3.10"
+              check: "3.10"
+              matrix: "3.10"
             arch:
               name: Intel
               matrix: intel
@@ -102,11 +102,11 @@ jobs:
               runs-on:
                 arm: [Linux, ARM64]
               container:
-                '3.10': chianetwork/ubuntu-20.04-builder:latest
+                "3.10": chianetwork/ubuntu-20.04-builder:latest
             python:
-              name: '3.10'
-              check: '3.10'
-              matrix: '3.10'
+              name: "3.10"
+              check: "3.10"
+              matrix: "3.10"
             arch:
               name: ARM
               matrix: arm
@@ -117,11 +117,11 @@ jobs:
               runs-on:
                 intel: [ubuntu-latest]
               container:
-                '3.10': chianetwork/rocky8-builder:latest
+                "3.10": chianetwork/rocky8-builder:latest
             python:
-              name: '3.10'
-              check: '3.10'
-              matrix: '3.10'
+              name: "3.10"
+              check: "3.10"
+              matrix: "3.10"
             arch:
               name: Intel
               matrix: intel
@@ -141,68 +141,68 @@ jobs:
               matrix: arm
 
     steps:
-    - uses: Chia-Network/actions/clean-workspace@main
+      - uses: Chia-Network/actions/clean-workspace@main
 
-    - uses: actions/checkout@v4
-      with:
-        path: repo
+      - uses: actions/checkout@v4
+        with:
+          path: repo
 
-    - name: Set up ${{ matrix.python.name }}
-      if: ${{ ! matrix.os.native-python }}
-      uses: ./repo/setup-python
-      with:
-        python-version: ${{ matrix.python.action }}
+      - name: Set up ${{ matrix.python.name }}
+        if: ${{ ! matrix.os.native-python }}
+        uses: ./repo/setup-python
+        with:
+          python-version: ${{ matrix.python.action }}
 
-    - name: Run the action with the PATH Python
-      uses: ./repo/poetry
-      with:
-        poetry-command: --help
+      - name: Run the action with the PATH Python
+        uses: ./repo/poetry
+        with:
+          poetry-command: --help
 
-    - name: Create virtual environment for Poetry
-      uses: ./repo/create-venv
-      id: create-poetry-venv
+      - name: Create virtual environment for Poetry
+        uses: ./repo/create-venv
+        id: create-poetry-venv
 
-    - name: Run the action in a temp venv
-      uses: ./repo/poetry
-      with:
-        poetry-command: --help
-        python-executable: ${{ steps.create-poetry-venv.outputs.python_executable }}
+      - name: Run the action in a temp venv
+        uses: ./repo/poetry
+        with:
+          poetry-command: --help
+          python-executable: ${{ steps.create-poetry-venv.outputs.python_executable }}
 
-    - name: Create virtual environment for testing
-      uses: ./repo/create-venv
-      id: create-venv
+      - name: Create virtual environment for testing
+        uses: ./repo/create-venv
+        id: create-venv
 
-    - name: Activate virtual environment
-      uses: ./repo/activate-venv
-      with:
-        directories: ${{ steps.create-venv.outputs.activate-venv-directories }}
+      - name: Activate virtual environment
+        uses: ./repo/activate-venv
+        with:
+          directories: ${{ steps.create-venv.outputs.activate-venv-directories }}
 
-    - name: Create a test project
-      uses: ./repo/poetry
-      with:
-        poetry-command: init --no-interaction
-        python-executable: ${{ steps.create-poetry-venv.outputs.python_executable }}
+      - name: Create a test project
+        uses: ./repo/poetry
+        with:
+          poetry-command: init --no-interaction
+          python-executable: ${{ steps.create-poetry-venv.outputs.python_executable }}
 
-    - name: Add a dependency to test for
-      uses: ./repo/poetry
-      with:
-        poetry-command: add mypy
-        python-executable: ${{ steps.create-poetry-venv.outputs.python_executable }}
+      - name: Add a dependency to test for
+        uses: ./repo/poetry
+        with:
+          poetry-command: add mypy
+          python-executable: ${{ steps.create-poetry-venv.outputs.python_executable }}
 
-    - name: Check that Poetry is not in the activated env
-      run: |
-        if python -m poetry --help
-        then
-          false
-        fi
+      - name: Check that Poetry is not in the activated env
+        run: |
+          if python -m poetry --help
+          then
+            false
+          fi
 
-    - name: Dependency not installed in Poetry env
-      run: |
-        if ${{ steps.create-poetry-venv.outputs.python_executable }} -m mypy --help
-        then
-          false
-        fi
+      - name: Dependency not installed in Poetry env
+        run: |
+          if ${{ steps.create-poetry-venv.outputs.python_executable }} -m mypy --help
+          then
+            false
+          fi
 
-    - name: Dependency installed in activated env
-      run: |
-        python -m mypy --help
+      - name: Dependency installed in activated env
+        run: |
+          python -m mypy --help

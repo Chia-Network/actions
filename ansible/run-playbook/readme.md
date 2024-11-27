@@ -17,13 +17,13 @@ with:
 
 `ansible_dir` Path to the ansible directory that contains the playbook, roles, inventory file, etc
 
-`playbook_file` Path within the `ansible_dir` for the playbook yaml file
+`playbook_file` Path within the `ansible_dir` for the playbook YAML file
 
 `inventory_file` Path within the `ansible_dir` that contains the host inventory
 
 `remote_user` The user ansible should use when making connections to remote hosts
 
-`private_key_file` (Optional) The location of the private key file to use for ssh connections. If not provided, defaults to `~/.ssh/id_rsa`
+`private_key_file` (Optional) The location of the private key file to use for SSH connections. If not provided, defaults to `~/.ssh/id_rsa`
 
 `extra_vars_file` (Optional) The location within `ansible_dir` of a file that contains extra ansible variables. This file will be passed to ansible with `--extra-vars "@${{ inputs.extra_vars_file }}"`
 

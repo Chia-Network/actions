@@ -3,12 +3,12 @@ name: test-activate-venv
 on:
   push:
     branches:
-    - main
+      - main
     tags:
-    - '**'
+      - "**"
   pull_request:
     branches:
-    - '**'
+      - "**"
 
 concurrency:
   # SHA is added to the end if on `main` to let all main workflows run
@@ -44,32 +44,32 @@ jobs:
               arm: [Linux, ARM64]
               intel: [ubuntu-latest]
             container:
-              'py3.9': docker://python:3.9-bullseye
-              'py3.10': docker://python:3.10-bullseye
-              'py3.11': docker://python:3.11-bullseye
-              'py3.12': docker://python:3.12-bullseye
+              "py3.9": docker://python:3.9-bullseye
+              "py3.10": docker://python:3.10-bullseye
+              "py3.11": docker://python:3.11-bullseye
+              "py3.12": docker://python:3.12-bullseye
           - name: Windows
             matrix: windows
             native-python: false
             runs-on:
               intel: [windows-latest]
         python:
-          - name: '3.9'
-            action: '3.9'
-            check: '3.9'
-            matrix: 'py3.9'
-          - name: '3.10'
-            action: '3.10'
-            check: '3.10'
-            matrix: 'py3.10'
-          - name: '3.11'
-            action: '3.11'
-            check: '3.11'
-            matrix: 'py3.11'
-          - name: '3.12'
-            action: '3.12'
-            check: '3.12'
-            matrix: 'py3.12'
+          - name: "3.9"
+            action: "3.9"
+            check: "3.9"
+            matrix: "py3.9"
+          - name: "3.10"
+            action: "3.10"
+            check: "3.10"
+            matrix: "py3.10"
+          - name: "3.11"
+            action: "3.11"
+            check: "3.11"
+            matrix: "py3.11"
+          - name: "3.12"
+            action: "3.12"
+            check: "3.12"
+            matrix: "py3.12"
         arch:
           - name: ARM
             matrix: arm
@@ -83,11 +83,11 @@ jobs:
               runs-on:
                 intel: [ubuntu-latest]
               container:
-                '3.10': chianetwork/ubuntu-20.04-builder:latest
+                "3.10": chianetwork/ubuntu-20.04-builder:latest
             python:
-              name: '3.10'
-              check: '3.10'
-              matrix: '3.10'
+              name: "3.10"
+              check: "3.10"
+              matrix: "3.10"
             arch:
               name: Intel
               matrix: intel
@@ -98,11 +98,11 @@ jobs:
               runs-on:
                 arm: [Linux, ARM64]
               container:
-                '3.10': chianetwork/ubuntu-20.04-builder:latest
+                "3.10": chianetwork/ubuntu-20.04-builder:latest
             python:
-              name: '3.10'
-              check: '3.10'
-              matrix: '3.10'
+              name: "3.10"
+              check: "3.10"
+              matrix: "3.10"
             arch:
               name: ARM
               matrix: arm
@@ -113,11 +113,11 @@ jobs:
               runs-on:
                 intel: [ubuntu-latest]
               container:
-                '3.10': chianetwork/rocky8-builder:latest
+                "3.10": chianetwork/rocky8-builder:latest
             python:
-              name: '3.10'
-              check: '3.10'
-              matrix: '3.10'
+              name: "3.10"
+              check: "3.10"
+              matrix: "3.10"
             arch:
               name: Intel
               matrix: intel
@@ -137,24 +137,24 @@ jobs:
               matrix: arm
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up ${{ matrix.python.name }}
-      if: ${{ ! matrix.os.native-python }}
-      uses: ./setup-python
-      with:
-        python-version: ${{ matrix.python.action }}
+      - name: Set up ${{ matrix.python.name }}
+        if: ${{ ! matrix.os.native-python }}
+        uses: ./setup-python
+        with:
+          python-version: ${{ matrix.python.action }}
 
-    - name: Setup virtual environment
-      run: |
-        python -m venv venv
+      - name: Setup virtual environment
+        run: |
+          python -m venv venv
 
-    - name: Run the action
-      uses: ./activate-venv/
+      - name: Run the action
+        uses: ./activate-venv/
 
-    - name: Check environment is activated
-      env:
-        REFERENCE_PATH: ./venv/
-        EXPECTED_INSIDE: true
-      run: |
-        python activate-venv/test_check_activated.py
+      - name: Check environment is activated
+        env:
+          REFERENCE_PATH: ./venv/
+          EXPECTED_INSIDE: true
+        run: |
+          python activate-venv/test_check_activated.py
