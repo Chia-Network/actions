@@ -1,6 +1,6 @@
 # Tailscale Wrapper w/ SSH Support
 
-Wrapper around tailscale/github-action that works w/ containers and sets up SSH support
+Wrapper around `tailscale/github-action` that works w/ containers and sets up SSH support
 
 ```yaml
 - name: Tailscale

@@ -1,25 +1,25 @@
-name: 'Connect Tailscale'
-description: 'Wrapper around the official tailscale action to add support for containers and ssh connections'
+name: "Connect Tailscale"
+description: "Wrapper around the official tailscale action to add support for containers and ssh connections"
 inputs:
   oauth-client-id:
-    description: 'Your Tailscale OAuth Client ID.'
+    description: "Your Tailscale OAuth Client ID."
     required: true
   oauth-secret:
-    description: 'Your Tailscale OAuth Client Secret.'
+    description: "Your Tailscale OAuth Client Secret."
     required: true
   tags:
-    description: 'Comma separated list of Tags to be applied to nodes. The OAuth client must have permission to apply these tags.'
+    description: "Comma separated list of Tags to be applied to nodes. The OAuth client must have permission to apply these tags."
     required: true
   args:
-    description: 'Optional additional arguments to `tailscale up`'
+    description: "Optional additional arguments to `tailscale up`"
     required: false
-    default: ''
+    default: ""
   hostname:
-    description: 'Fixed hostname to use.'
+    description: "Fixed hostname to use."
     required: false
-    default: ''
+    default: ""
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Install deps
       shell: sh
@@ -53,4 +53,3 @@ runs:
       shell: sh
       run: |
         sed -i "s~root:/root~root:$HOME~g" /etc/passwd
-

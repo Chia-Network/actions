@@ -66,7 +66,6 @@ on:
       DOCKERHUB_PAT:
         required: false
 
-
 jobs:
   package:
     runs-on: ${{ inputs.runs-on }}
@@ -160,4 +159,4 @@ jobs:
         if: ${{ inputs.enable-cache == 'true' }}
         run: |
           rm -rf docker-cache
-          mv docker-cache-new docker-cache      
+          mv docker-cache-new docker-cache

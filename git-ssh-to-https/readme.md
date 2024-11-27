@@ -1,6 +1,6 @@
 # Git SSH to HTTPS
 
-Sets up the global git config to replace any ssh clone URLs with HTTPS URLs. This must be used after the checkout code action.
+Sets up the global Git config to replace any SSH clone URLs with HTTPS URLs. This must be used after the checkout code action.
 
 ```yaml
 - name: Checkout Code

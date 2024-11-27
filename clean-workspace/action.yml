@@ -9,7 +9,7 @@ runs:
         # without sudo installed
         sudo find . -name . -o -prune -exec rm -rf -- {} + || true
         find . -name . -o -prune -exec rm -rf -- {} + || true
-        
+
         sudo rm -rf $HOME/.npm || true
         rm -rf $HOME/.npm || true
       shell: sh

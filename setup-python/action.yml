@@ -1,17 +1,17 @@
 name: "Setup Python"
-description: 'Set up a specific version of Python and add the command-line tools to the PATH.'
+description: "Set up a specific version of Python and add the command-line tools to the PATH."
 # Inputs match the upstream setup-python action
 # Not all of them are necessarily supported for the M1 or ARM64 linux versions
 inputs:
   python-version:
     description: "Version range or exact version of a Python version to use, using SemVer's version range syntax."
     required: true
-    default: '3.x'
+    default: "3.x"
   cache:
-    description: 'Used to specify a package manager for caching in the default directory. Supported values: pip, pipenv, poetry.'
+    description: "Used to specify a package manager for caching in the default directory. Supported values: pip, pipenv, poetry."
     required: false
   architecture:
-    description: 'The target architecture (x86, x64) of the Python interpreter.'
+    description: "The target architecture (x86, x64) of the Python interpreter."
     required: false
   token:
     description: Used to pull python distributions from actions/python-versions. Since there's a default, this is typically not supplied by the user.
@@ -19,20 +19,20 @@ inputs:
     default: ${{ github.token }}
   cache-dependency-path:
     required: false
-    description: 'Used to specify the path to dependency files. Supports wildcards or a list of file names for caching multiple dependencies.'
+    description: "Used to specify the path to dependency files. Supports wildcards or a list of file names for caching multiple dependencies."
   force-pyenv:
     required: false
-    default: 'false'
+    default: "false"
     description: "Will force using pyenv instead of the upstream action if set to 'true'"
   allow-prerelease:
     required: false
-    default: 'false'
+    default: "false"
     description: "Adjusts the passed in Python version to allow for pre-releases based on a simple major.minor request."
 outputs:
   python-version:
     description: "The installed python version. Useful when given a version range as input."
   cache-hit:
-    description: 'A boolean value to indicate a cache entry was found'
+    description: "A boolean value to indicate a cache entry was found"
   python-version-string:
     description: "The python version string passed to upstream actions/setup-python"
     value: ${{ steps.select.outputs.version-string }}
@@ -84,17 +84,17 @@ runs:
       run: |
         export PYENV_ROOT="$HOME/.pyenv"
         echo "PYENV_ROOT=$HOME/.pyenv" >> $GITHUB_ENV
-        
+
         if [ ! -d "$PYENV_ROOT" ]; then
           echo "  ====  installing pyenv at: $PYENV_ROOT"
           curl https://pyenv.run | bash
         else
           echo "  ====  pyenv directory found at: $PYENV_ROOT"
         fi
-        
+
         export PATH="$PYENV_ROOT/bin:$PATH"
         echo "PATH=$PYENV_ROOT/bin:$PATH" >> $GITHUB_ENV
-        
+
         # Ensure pyenv is up to date
         if ! (pyenv -h > /dev/null 2> /dev/null); then
           echo "  ====  pyenv -h exited with non-zero status"
@@ -106,9 +106,9 @@ runs:
           exit 1
         fi
         pyenv update
-        
+
         FULL_PY_VERSION=$(pyenv install --list | grep "^  ${{ inputs.python-version }}" | grep -v 'dev' | tail -n 1)
         env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install --skip-existing $FULL_PY_VERSION
-        
+
         PY_PREFIX=$(pyenv prefix $FULL_PY_VERSION)
         echo "PATH=$PY_PREFIX/bin:$PATH" >> $GITHUB_ENV

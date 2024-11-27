@@ -2,16 +2,16 @@ name: "Keep workflow enabled"
 description: "Disables and re-enables the running workflow to avoid 60 day CI disables from GitHub for repo inactivity"
 inputs:
   repository:
-    description: 'The repository the workflow is in'
+    description: "The repository the workflow is in"
     default: ${{ github.repository }}
     required: true
   workflow:
-    description: 'A path to a workflow file in a repository, or the name string of a workflow'
+    description: "A path to a workflow file in a repository, or the name string of a workflow"
     default: ${{ github.workflow }}
     required: true
   access_token:
-    description: 'Your GitHub Access Token, defaults to: {{ github.token }}'
-    default: '${{ github.token }}'
+    description: "Your GitHub Access Token, defaults to: {{ github.token }}"
+    default: "${{ github.token }}"
     required: true
 runs:
   using: "composite"

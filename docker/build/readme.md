@@ -1,10 +1,10 @@
 # Docker build
 
 ```yaml
-  - uses: actions/checkout@v4
+- uses: actions/checkout@v4
 
-  # Some pre-work
+# Some pre-work
 
-  - name: Package
-    uses: Chia-Network/actions/docker/build@main
+- name: Package
+  uses: Chia-Network/actions/docker/build@main
 ```
