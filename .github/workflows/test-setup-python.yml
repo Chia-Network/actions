@@ -41,6 +41,8 @@ jobs:
             runs-on:
               arm:
                 chia: [Linux, ARM64]
+              benchmark:
+                chia: benchmark
               intel:
                 github: [ubuntu-latest]
           - name: Windows
@@ -84,6 +86,8 @@ jobs:
             matrix: arm
           - name: Intel
             matrix: intel
+          - name: Benchmark
+            matrix: benchmark
         environment:
           - name: Chia
             matrix: chia
@@ -110,6 +114,18 @@ jobs:
               matrix: intel
             environment:
               matrix: chia
+          - os:
+              matrix: windows
+            arch:
+              matrix: benchmark
+          - os:
+              matrix: macos
+            arch:
+              matrix: benchmark
+          - environment:
+              matrix: github
+            arch:
+              matrix: benchmark
 
     steps:
       - uses: actions/checkout@v4
