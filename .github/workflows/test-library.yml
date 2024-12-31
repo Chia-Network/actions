@@ -73,3 +73,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.library.outputs.root).matrix.complete.standard_installer_python }}
+    steps:
+      - name: Dump the matrix
+        run: |
+          echo "${{ matrix }}" | jq
