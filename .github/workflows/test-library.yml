@@ -46,19 +46,19 @@ jobs:
 
       - name: debug
         run: |
-          echo "${{ fromJSON(needs.library.outputs.root) }}" | yq
+          echo "${{ toJSON(fromJSON(needs.library.outputs.root)) }}" | yq
 
       - name: debug
         run: |
-          echo "${{ fromJSON(needs.library.outputs.root).matrix }}" | yq
+          echo "${{ toJSON(fromJSON(needs.library.outputs.root).matrix) }}" | yq
 
       - name: debug
         run: |
-          echo "${{ fromJSON(needs.library.outputs.root).matrix.complete }}" | yq
+          echo "${{ toJSON(fromJSON(needs.library.outputs.root).matrix.complete) }}" | yq
 
       - name: debug
         run: |
-          echo "${{ fromJSON(needs.library.outputs.root).matrix.complete.standard_installer_python }}" | yq
+          echo "${{ toJSON(fromJSON(needs.library.outputs.root).matrix.complete.standard_installer_python) }}" | yq
 
   test_matrix:
     name: Test a library matrix
