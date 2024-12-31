@@ -45,7 +45,7 @@ jobs:
           exit ${EXIT_CODE}
 
   test_matrix:
-    name: Test a library matrix
+    name: Test a library matrix -  ${{ matrix.os.emoji }}${{ matrix.arch.emoji }}
     runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
     needs: library
     timeout-minutes: 5
