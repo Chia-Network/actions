@@ -3,8 +3,8 @@ name: "📚 Library"
 on:
   workflow_call:
     inputs:
-      action:
-        default: ./Chia-Network/actions/library@main
+      url:
+        default: https://github.com/Chia-Network/actions/blob/main/library/library.yaml
         type: string
     outputs:
       root:
@@ -32,5 +32,9 @@ jobs:
       root: ${{ steps.library.outputs.root }}
 
     steps:
-      - uses: ${{ inputs.action }}
-        id: library
+#      - uses: ${{ inputs.action }}
+#        id: library
+
+      - name: Download and output library
+        run: |
+          ( echo -n "root=" && curl -sSL "${{ inputs.url }}" | yq -o=json -I=0 ) >> "${GITHUB_OUTPUT}"
