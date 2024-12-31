@@ -15,6 +15,5 @@ runs:
       shell: sh
       run: |
         cd "${GITHUB_ACTION_PATH}"
-        yq -o=json library.yaml > library.json
-        cat library.json
-        ( echo -n "root=" && cat library.json ) >> "${GITHUB_OUTPUT}"
+        yq -o=json library.yaml
+        ( echo -n "root=" && yq -o=json -I=0 library.yaml ) >> "${GITHUB_OUTPUT}"
