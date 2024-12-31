@@ -44,22 +44,6 @@ jobs:
         run: |
           exit ${EXIT_CODE}
 
-      - name: debug
-        run: |
-          echo "${{ toJSON(fromJSON(needs.library.outputs.root)) }}" | yq --prettyPrint
-
-      - name: debug
-        run: |
-          echo "${{ toJSON(fromJSON(needs.library.outputs.root).matrix) }}" | yq --prettyPrint
-
-      - name: debug
-        run: |
-          echo "${{ toJSON(fromJSON(needs.library.outputs.root).matrix.complete) }}" | yq --prettyPrint
-
-      - name: debug
-        run: |
-          echo "${{ toJSON(fromJSON(needs.library.outputs.root).matrix.complete.standard_installer_python) }}" | yq --prettyPrint
-
   test_matrix:
     name: Test a library matrix
     runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
@@ -71,4 +55,4 @@ jobs:
     steps:
       - name: Dump the matrix
         run: |
-          echo "${{ matrix }}" | jq
+          echo "${{ toJSON(matrix) }}" | yq --prettyPrint
