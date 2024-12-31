@@ -3,7 +3,7 @@
 ```yaml
 jobs:
   library:
-    uses: ./.github/workflows/reflow-library.yml
+    uses: Chia-Network/actions/.github/workflows/reflow-library.yml
 
   test:
     # <snip>
