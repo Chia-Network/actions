@@ -18,14 +18,22 @@ matrix:
         name: Linux
         emoji: *emoji_os_linux
         matrix: &linux linux
+        runs-on:
+          arm: [Linux, ARM64]
+          intel: [ubuntu-latest]
       macos: &matrix_elements_os_macos
         name: macOS
         emoji: *emoji_os_macos
         matrix: &macos macos
+        runs-on:
+          arm: [macos-latest]
+          intel: [macos-13]
       windows: &matrix_elements_os_windows
         name: Windows
         emoji: *emoji_os_windows
         matrix: &windows windows
+        runs-on:
+          intel: [windows-latest]
       all: &matrix_elements_os_all
         - <<: *matrix_elements_os_linux
         - <<: *matrix_elements_os_macos
