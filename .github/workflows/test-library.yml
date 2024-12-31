@@ -44,6 +44,12 @@ jobs:
         run: |
           exit ${EXIT_CODE}
 
+      - name: debug
+        env:
+          ROOT: ${{ fromJSON(needs.library.outputs.root).matrix.complete.standard_installer_python }}
+        run: |
+          echo "${ROOT}" | yq
+
   test_matrix:
     name: Test a library matrix
     runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
