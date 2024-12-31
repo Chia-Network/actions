@@ -46,6 +46,24 @@ jobs:
 
       - name: debug
         env:
+          ROOT: ${{ fromJSON(needs.library.outputs.root) }}
+        run: |
+          echo "${ROOT}" | yq
+
+      - name: debug
+        env:
+          ROOT: ${{ fromJSON(needs.library.outputs.root).matrix }}
+        run: |
+          echo "${ROOT}" | yq
+
+      - name: debug
+        env:
+          ROOT: ${{ fromJSON(needs.library.outputs.root).matrix.complete }}
+        run: |
+          echo "${ROOT}" | yq
+
+      - name: debug
+        env:
           ROOT: ${{ fromJSON(needs.library.outputs.root).matrix.complete.standard_installer_python }}
         run: |
           echo "${ROOT}" | yq
