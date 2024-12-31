@@ -28,6 +28,5 @@ jobs:
       root: ${{ steps.library.outputs.root }}
 
     steps:
-      # TODO: figure out how to write this for use in tests, ala GITHUB_ACTION_PATH but reflows
-      - uses: Chia-Network/actions/library@main
+      - uses: ./library
         id: library

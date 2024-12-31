@@ -20,14 +20,13 @@ defaults:
     shell: bash
 
 jobs:
-# TODO: figure out testing the reflow
-#  library:
-#    uses: ./.github/workflows/reflow-library.yml
+  library:
+    uses: ./.github/workflows/reflow-library.yml
 
   test:
     name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.environment.name }} ${{ matrix.python.name }}
     runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix][matrix.environment.matrix] }}
-#    needs: library
+    needs: library
     timeout-minutes: 5
     strategy:
       fail-fast: false
@@ -119,18 +118,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run the action
-        uses: ./library/
-        id: library
+#      - name: Run the action
+#        uses: ./library/
+#        id: library
 
       - name: Check a number
         env:
-          EXIT_CODE: ${{ (fromJSON(steps.library.outputs.root)._test.a-number == 1) && '0' || '1' }}
+          EXIT_CODE: ${{ (fromJSON(needs.library.outputs.root)._test.a-number == 1) && '0' || '1' }}
         run: |
           exit ${EXIT_CODE}
 
       - name: Check an alias
         env:
-          EXIT_CODE: ${{ (fromJSON(steps.library.outputs.root)._test.an-alias == 'red') && '0' || '1' }}
+          EXIT_CODE: ${{ (fromJSON(needs.library.outputs.root)._test.an-alias == 'red') && '0' || '1' }}
         run: |
           exit ${EXIT_CODE}
