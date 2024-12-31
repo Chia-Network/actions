@@ -27,30 +27,9 @@ jobs:
 
   test:
     name: Test library contents available
-    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix][matrix.environment.matrix] }}
+    runs-on: ubuntu-latest
     needs: library
     timeout-minutes: 5
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - name: Ubuntu
-            matrix: ubuntu
-            runs-on:
-              arm:
-                chia: [Linux, ARM64]
-              intel:
-                github: [ubuntu-latest]
-        python:
-          - name: "3.10.8"
-            action: "3.10.8"
-            check: "3.10.8"
-            patch-specified: true
-            allow-prerelease: false
-            matrix: "py3.10.8"
-        arch:
-          - name: Intel
-            matrix: intel
 
     steps:
       - name: Check a number
