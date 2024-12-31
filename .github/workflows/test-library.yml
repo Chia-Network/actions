@@ -125,7 +125,7 @@ jobs:
 
       - name: Check a number
         env:
-          EXIT_CODE: ${{ (fromJSON(steps.library.outputs.root)._test.number == 1) && 0 || 1}}
+          EXIT_CODE: ${{ (fromJSON(steps.library.outputs.root)._test.a-number == 1) && 0 || 1}}
         run: |
           exit ${EXIT_CODE}
 
