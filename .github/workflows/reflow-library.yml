@@ -38,4 +38,4 @@ jobs:
       - name: Download and output library
         id: library
         run: |
-          ( echo -n "root=" && curl -sSL "${{ inputs.url }}" | yq -o=json -I=0 ) >> "${GITHUB_OUTPUT}"
+          ( echo -n "root=" && curl -sSL "${{ inputs.url }}" | yq -o=json -I=0 ) | tee -a "${GITHUB_OUTPUT}"
