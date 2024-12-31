@@ -1,9 +1,14 @@
 # Retrieve the library for workflows
 
 ```yaml
-- uses: Chia-Network/actions/library@main
-  id: library
-  
-  ${{ steps.library.outputs.this.that }}
+jobs:
+  library:
+    uses: ./.github/workflows/reflow-library.yml
+
+  test:
+    # <snip>
+    steps:
+      - name: Echo a test value
+        run: |
+          echo ${{ fromJSON(needs.library.outputs.root)._test.an-anchor }}
 ```
-[action.yml](action.yml)

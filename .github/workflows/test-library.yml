@@ -118,12 +118,6 @@ jobs:
               matrix: chia
 
     steps:
-      - uses: actions/checkout@v4
-
-#      - name: Run the action
-#        uses: ./library/
-#        id: library
-
       - name: Check a number
         env:
           EXIT_CODE: ${{ (fromJSON(needs.library.outputs.root)._test.a-number == 1) && '0' || '1' }}

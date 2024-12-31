@@ -32,9 +32,6 @@ jobs:
       root: ${{ steps.library.outputs.root }}
 
     steps:
-#      - uses: ${{ inputs.action }}
-#        id: library
-
       - name: Download and output library
         id: library
         run: |
