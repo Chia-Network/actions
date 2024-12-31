@@ -89,9 +89,9 @@ matrix:
       python:
         - <<: *matrix_elements_python_installers
       arch: *matrix_elements_arch_arm_intel
-      excludes: *matrix_excludes
+      exclude: *matrix_excludes
     standard_all_python:
       os: *matrix_elements_os_all
       python: *matrix_elements_python_all
       arch: *matrix_elements_arch_arm_intel
-      excludes: *matrix_excludes
+      exclude: *matrix_excludes
