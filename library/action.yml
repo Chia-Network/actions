@@ -1,0 +1,19 @@
+name: "Get library"
+
+description: "Get the library contents"
+
+outputs:
+  root:
+    description: "The root of the library JSON"
+    value: ${{ steps.library.outputs.root }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set library output
+      id: library
+      shell: sh
+      run: |
+        set -o errexit -o pipefail
+        echo -n "root=" >> "${GITHUB_OUTPUT}"
+        yq -o=json "${GITHUB_ACTION_PATH}/library.json" | tee -a "${GITHUB_OUTPUT}"

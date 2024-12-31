@@ -1,0 +1,131 @@
+name: test-library
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+
+concurrency:
+  # SHA is added to the end if on `main` to let all main workflows run
+  group: ${{ github.ref }}-${{ github.workflow }}-${{ github.event_name }}-${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/') || startsWith(github.ref, 'refs/heads/long_lived/')) && github.sha || '' }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  library:
+    uses: ./.github/workflows/reflow-library.yml
+
+  test:
+    name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.environment.name }} ${{ matrix.python.name }}
+    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix][matrix.environment.matrix] }}
+    needs: library
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - name: macOS
+            matrix: macos
+            runs-on:
+              arm:
+                chia: [macOS, ARM64]
+                github: [macos-latest]
+              intel:
+                github: [macos-13]
+          - name: Ubuntu
+            matrix: ubuntu
+            runs-on:
+              arm:
+                chia: [Linux, ARM64]
+              intel:
+                github: [ubuntu-latest]
+          - name: Windows
+            matrix: windows
+            runs-on:
+              intel:
+                github: [windows-latest]
+        python:
+          - name: "3.9"
+            action: "3.9"
+            check: "3.9"
+            patch-specified: false
+            allow-prerelease: false
+            matrix: "py3.9"
+          - name: "3.10"
+            action: "3.10"
+            check: "3.10"
+            patch-specified: false
+            allow-prerelease: false
+            matrix: "py3.10"
+          - name: "3.10.8"
+            action: "3.10.8"
+            check: "3.10.8"
+            patch-specified: true
+            allow-prerelease: false
+            matrix: "py3.10.8"
+          - name: "3.11"
+            action: "3.11"
+            check: "3.11"
+            patch-specified: false
+            allow-prerelease: false
+            matrix: "py3.11"
+          - name: "3.12"
+            action: "3.12"
+            check: "3.12"
+            patch-specified: false
+            allow-prerelease: true
+            matrix: "py3.12"
+        arch:
+          - name: ARM
+            matrix: arm
+          - name: Intel
+            matrix: intel
+        environment:
+          - name: Chia
+            matrix: chia
+            context: self-hosted
+          - name: GitHub
+            matrix: github
+            context: github-hosted
+        exclude:
+          - os:
+              matrix: ubuntu
+            arch:
+              matrix: arm
+            environment:
+              matrix: github
+          - os:
+              matrix: windows
+            arch:
+              matrix: arm
+          - os:
+              matrix: windows
+            environment:
+              matrix: chia
+          - arch:
+              matrix: intel
+            environment:
+              matrix: chia
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check a number
+        env:
+          EXIT_CODE: ${{ (needs.library.outputs.root._test.number == 1) && 0 || 1}}
+        run: |
+          exit ${EXIT_CODE}
+
+      - name: Check an alias
+        env:
+          EXIT_CODE: ${{ (needs.library.outputs.root._test.an-alias == 'red') && 0 || 1}}
+        run: |
+          exit ${EXIT_CODE}

@@ -1,0 +1,32 @@
+name: "📚 Library"
+
+on:
+  workflow_call:
+    outputs:
+      root:
+        description: "The root of the library JSON"
+        value: ${{ jobs.library.outputs.root }}
+
+concurrency:
+    # SHA is added to the end if on `main` to let all main workflows run
+    group: ${{ github.ref }}-${{ github.workflow }}-${{ inputs.distribution-name }}-${{ github.event_name }}-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version || '' }}-${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/') || startsWith(github.ref, 'refs/heads/long_lived/')) && github.sha || '' }}
+    cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  library:
+    name: "📚 Library"
+    runs-on: ubuntu-latest
+    outputs:
+      root: ${{ steps.library.outputs.root }}
+
+    steps:
+      - uses: Chia-Network/actions/library@main
+        id: library

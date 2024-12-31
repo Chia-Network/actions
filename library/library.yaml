@@ -1,0 +1,4 @@
+_test:
+  a-number: 1
+  an-anchor: &_test_anchor 'red'
+  an-alias: *_test_anchor
