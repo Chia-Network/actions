@@ -46,7 +46,7 @@ jobs:
 
   test_matrix:
     name: Test a library matrix
-    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix][matrix.environment.matrix] }}
+    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
     needs: library
     timeout-minutes: 5
     strategy:
