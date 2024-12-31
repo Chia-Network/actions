@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       url:
-        default: https://raw.githubusercontent.com/Chia-Network/actions/blob/main/library/library.yaml
+        default: https://raw.githubusercontent.com/Chia-Network/actions/refs/heads/main/library/library.yaml
         type: string
     outputs:
       root:
