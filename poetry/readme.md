@@ -14,4 +14,5 @@ The `poetry-command` is optional and defaults to `install`. This allows any [poe
   with:
     poetry-command: "update"
     python-executable: ${{ steps.create-poetry-venv.outputs.python_executable }}
+    poetry-version: "1.8.5"
 ```
