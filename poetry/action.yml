@@ -38,11 +38,11 @@ runs:
       shell: bash
       run: |
         if [[ "${{ inputs.poetry-version }}" == "latest" ]]; then
-          poetry-version-string=""
+          poetry_version_string=""
         else
-          poetry-version-string="==${{ inputs.poetry-version }}"
+          poetry_version_string="==${{ inputs.poetry-version }}"
         fi
-        ${{ inputs.python-executable }} -m pip install -I poetry${poetry-version-string}
+        ${{ inputs.python-executable }} -m pip install -I poetry${poetry_version_string}
 
     - name: Run Poetry command (Linux)
       shell: bash
