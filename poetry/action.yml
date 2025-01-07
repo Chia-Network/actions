@@ -37,7 +37,7 @@ runs:
     - name: Install Poetry
       shell: bash
       run: |
-        if [[ "${poetry-version}" == "latest" ]]; then
+        if [[ "${{ inputs.poetry-version }}" == "latest" ]]; then
           poetry-version-string=""
         else
           poetry-version-string="==${{ inputs.poetry-version }}"
