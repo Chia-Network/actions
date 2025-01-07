@@ -9,6 +9,10 @@ inputs:
     description: "Poetry command to run. Does install by default."
     required: false
     default: "install"
+  poetry-version:
+    description: "Version of Poetry to install.  Defaults to latest."
+    required: false
+    default: "latest"
 runs:
   using: "composite"
   steps:
@@ -33,10 +37,12 @@ runs:
     - name: Install Poetry
       shell: bash
       run: |
-        if ! ${{ inputs.python-executable }} -m poetry --help &> /dev/null
-        then
-          ${{ inputs.python-executable }} -m pip install poetry
+        if [[ "${{ inputs.poetry-version }}" == "latest" ]]; then
+          poetry_version_string=""
+        else
+          poetry_version_string="==${{ inputs.poetry-version }}"
         fi
+        ${{ inputs.python-executable }} -m pip install -I poetry${poetry_version_string}
 
     - name: Run Poetry command (Linux)
       shell: bash
