@@ -79,6 +79,12 @@ jobs:
             patch-specified: false
             allow-prerelease: true
             matrix: "py3.12"
+          - name: "3.13"
+            action: "3.13"
+            check: "3.13"
+            patch-specified: false
+            allow-prerelease: true
+            matrix: "py3.13"
         arch:
           - name: ARM
             matrix: arm
