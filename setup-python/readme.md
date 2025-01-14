@@ -9,6 +9,6 @@ If you specify a patch version prereleases must not be allowed.
 ```yaml
 - uses: Chia-Network/actions/setup-python@main
   with:
-    python-version: "3.10"
+    python-version: "3.11"
     allow-prerelease: true
 ```
