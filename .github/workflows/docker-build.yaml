@@ -60,11 +60,6 @@ on:
         type: string
         default: "false"
         description: Should the builds use docker cache
-      enable-qemu-cache:
-        required: false
-        type: string
-        default: "true"
-        description: "Cache binfmt image to GitHub Actions cache backend"
     secrets:
       DOCKERHUB_USERNAME:
         required: false
@@ -77,11 +72,6 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          cache-image: ${{ inputs.enable-qemu-cache }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
