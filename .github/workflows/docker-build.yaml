@@ -6,7 +6,7 @@ on:
       runs-on:
         required: false
         type: string
-        default: "ubuntu-latest"
+        default: "ubuntu-22.04" # 22.04 until https://github.com/docker/setup-qemu-action/issues/198 is fixed
       timeout-minutes:
         required: false
         type: number
