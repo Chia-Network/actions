@@ -6,7 +6,7 @@ on:
       runs-on:
         required: false
         type: string
-        default: "ubuntu-22.04" # 22.04 until https://github.com/docker/setup-qemu-action/issues/198 is fixed
+        default: "ubuntu-latest"
       timeout-minutes:
         required: false
         type: number
@@ -81,6 +81,8 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
+          # tonistiigi/binfmt:qemu-v7.0.0-28 until https://github.com/docker/setup-qemu-action/issues/198 is fixed
+          image: tonistiigi/binfmt:qemu-v7.0.0-28
           cache-image: ${{ inputs.enable-qemu-cache }}
 
       - name: Set up Docker Buildx
