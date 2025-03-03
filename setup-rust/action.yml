@@ -20,7 +20,8 @@ runs:
         if ! command -v rustup; then
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
-          type cargo
+          type rustup
+          echo $PATH
         fi
 
     - name: require rust-toolchain.toml
