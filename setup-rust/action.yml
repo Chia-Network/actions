@@ -1,0 +1,39 @@
+name: "Setup Rust"
+
+description: "Set up the version of rust specified in the rust-toolchain.toml file which must be present."
+
+inputs:
+  path:
+    description: "The path to change to when executing."
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: install rustup if needed
+      shell: sh
+      run: |
+        if [ ! -z "${ inputs.path }" ]; then
+          cd "${ inputs.path }"
+        fi
+        if ! command -v rustup; then
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        fi
+
+    - name: require rust-toolchain.toml
+      shell: sh
+      run: |
+        if [ ! -z "${ inputs.path }" ]; then
+          cd "${ inputs.path }"
+        fi
+        rustup show active-toolchain | grep -qE '\(overridden by '
+
+    - name: install overridden rust version
+      shell: sh
+      run: |
+        if [ ! -z "${ inputs.path }" ]; then
+          cd "${ inputs.path }"
+        fi
+        rustup toolchain install
