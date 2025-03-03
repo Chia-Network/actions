@@ -81,8 +81,6 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          # tonistiigi/binfmt:qemu-v7.0.0-28 until https://github.com/docker/setup-qemu-action/issues/198 is fixed
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
           cache-image: ${{ inputs.enable-qemu-cache }}
 
       - name: Set up Docker Buildx
