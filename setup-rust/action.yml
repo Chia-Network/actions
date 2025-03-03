@@ -17,11 +17,11 @@ runs:
         if [ ! -z "${{ inputs.path }}" ]; then
           cd "${{ inputs.path }}"
         fi
-#        if ! command -v rustup; then
+        # if ! command -v rustup; then
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y
         echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
         echo $PATH
-#        fi
+        # fi
         type rustup
         rustup --version
 
