@@ -31,8 +31,8 @@ runs:
         if [ ! -z "${{ inputs.path }}" ]; then
           cd "${{ inputs.path }}"
         fi
-        rustup show
-        rustup show | grep -qE '\(overridden by '
+        rustup show || true
+        rustup show | grep -qE '(override|overridden)'
 
     - name: install overridden rust version
       shell: sh
