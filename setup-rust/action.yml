@@ -32,7 +32,7 @@ runs:
           cd "${{ inputs.path }}"
         fi
         rustup show || true
-        rustup show || true 2>&1 | grep -qE '(override|overridden)'
+        $(rustup show || true) 2>&1 | grep -qE '(override|overridden)'
 
     - name: install overridden rust version
       shell: sh
