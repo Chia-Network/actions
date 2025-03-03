@@ -14,8 +14,8 @@ runs:
     - name: install rustup if needed
       shell: sh
       run: |
-        if [ ! -z "${ inputs.path }" ]; then
-          cd "${ inputs.path }"
+        if [ ! -z "${{ inputs.path }}" ]; then
+          cd "${{ inputs.path }}"
         fi
         if ! command -v rustup; then
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y
@@ -25,15 +25,15 @@ runs:
     - name: require rust-toolchain.toml
       shell: sh
       run: |
-        if [ ! -z "${ inputs.path }" ]; then
-          cd "${ inputs.path }"
+        if [ ! -z "${{ inputs.path }}" ]; then
+          cd "${{ inputs.path }}"
         fi
         rustup show active-toolchain | grep -qE '\(overridden by '
 
     - name: install overridden rust version
       shell: sh
       run: |
-        if [ ! -z "${ inputs.path }" ]; then
-          cd "${ inputs.path }"
+        if [ ! -z "${{ inputs.path }}" ]; then
+          cd "${{ inputs.path }}"
         fi
         rustup toolchain install
