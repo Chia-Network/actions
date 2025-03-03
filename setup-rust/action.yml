@@ -20,8 +20,7 @@ runs:
         # if ! command -v rustup; then
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y
         export PATH="$HOME/.cargo/bin:$PATH"
-        echo $PATH >> "$GITHUB_ENV"
-        echo $PATH
+        echo "PATH=$PATH" | tee -a "$GITHUB_ENV"
         # fi
         type rustup
         rustup --version
