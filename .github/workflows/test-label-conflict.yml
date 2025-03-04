@@ -17,47 +17,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node 16
+      - name: Setup Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: 16
-
-      - name: Get yarn version
-        run: |
-          cd label-conflict
-          echo "yarn_version=$(yarn -v)" >> "$GITHUB_ENV"
-
-      - name: Get yarn(v1) cache directory path
-        if: startsWith(env.yarn_version, '1')
-        run: |
-          cd label-conflict
-          echo "cache_dir=$(yarn cache dir)" >> "$GITHUB_ENV"
-
-      - name: Get yarn(v2) cache directory path
-        if: startsWith(env.yarn_version, '2')
-        run: |
-          cd label-conflict
-          echo "cache_dir=$(yarn config get cacheFolder)"
+          node-version: 22
 
       - name: Cache Node.js modules
-        id: yarn-cache
+        id: npm-cache
         uses: actions/cache@v4
         with:
           path: ${{ env.cache_dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-
+            ${{ runner.os }}-npm-
 
       - name: Install dependencies
         run: |
           cd label-conflict
-          yarn --frozen-lockfile
+          npm ci
 
       - name: Check build file consistency
         run: |
           cd label-conflict
           mv dist/index.js dist/index.js.orig
-          yarn build
+          npm run build
           COMMITTED_DIST="$(sha256sum dist/index.js.orig | cut -d' ' -f1)"
           COMPILED_DIST="$(sha256sum dist/index.js | cut -d' ' -f1)"
           echo "Hash of committed dist/index.js: ${COMMITTED_DIST}"
@@ -67,4 +50,4 @@ jobs:
       - name: Lint
         run: |
           cd label-conflict
-          yarn lint
+          npm run lint
