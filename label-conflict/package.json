@@ -18,5 +18,10 @@
     "eslint": "8.22.0",
     "eslint-plugin-import": "^2.26.0",
     "typescript": "^5.8.2"
+  },
+  "overrides": {
+    "@octokit/request": "9.2.2",
+    "@octokit/request-error": "6.1.7",
+    "@octokit/plugin-paginate-rest": "11.4.3"
   }
 }
