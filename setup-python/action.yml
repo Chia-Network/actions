@@ -107,6 +107,9 @@ runs:
           exit 1
         fi
 
+        echo "  ====  running: git --version" || true
+        git --version
+
         echo "  ====  running: git remote" || true
         git -C "$PYENV_ROOT" remote --verbose
 
