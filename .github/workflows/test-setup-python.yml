@@ -23,7 +23,7 @@ jobs:
   test:
     name: ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.environment.name }} ${{ matrix.python.name }}
     runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix][matrix.environment.matrix] }}
-    container: ${{ matrix.os.container[matrix.arch.matrix] }}
+    container: ${{ matrix.os.container[matrix.environment.matrix] }}
     timeout-minutes: 5
     strategy:
       fail-fast: false
@@ -45,7 +45,7 @@ jobs:
               intel:
                 github: [ubuntu-latest]
             container:
-              intel: chianetwork/ubuntu-22.04-builder:latest
+              docker: chianetwork/ubuntu-22.04-builder:latest
           - name: Windows
             matrix: windows
             runs-on:
@@ -106,7 +106,11 @@ jobs:
           - environment:
               matrix: docker
             os:
-              container:
+              matrix: macos
+          - environment:
+              matrix: docker
+            os:
+              matrix: windows
           - os:
               matrix: ubuntu
             arch:
