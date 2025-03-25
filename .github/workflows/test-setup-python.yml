@@ -106,7 +106,6 @@ jobs:
             container:
               arm: chianetwork/ubuntu-22.04-builder:latest
               intel: chianetwork/ubuntu-22.04-builder:latest
-            force-pyenv: true
         exclude:
           - container:
               matrix: builder
@@ -144,7 +143,6 @@ jobs:
         with:
           python-version: ${{ matrix.python.action }}
           allow-prerelease: ${{ matrix.python.allow-prerelease }}
-          force-pyenv: ${{ matrix.container.force-pyenv }}
 
       - name: Check Python version
         env:
