@@ -106,6 +106,11 @@ runs:
           ls -l "$PYENV_ROOT/bin" || true
           exit 1
         fi
+
+        echo "  ====  running: git remote" || true
+        git -C "$PYENV_ROOT" remote --verbose
+
+        echo "  ====  running: pyenv update" || true
         pyenv update
 
         FULL_PY_VERSION=$(pyenv install --list | grep "^  ${{ inputs.python-version }}" | grep -v 'dev' | tail -n 1)
