@@ -70,7 +70,7 @@ runs:
     - name: Call upstream setup-python action
       uses: actions/setup-python@v5
       # Requires native m1 runner software, not x64 running via arch flags
-      if: runner.environment == 'github-hosted' && inputs.force-pyenv == 'false'
+      if: runner.environment == 'github-hosted' && inputs.force-pyenv == 'false' && !job.container
       id: upstream
       with:
         python-version: ${{ steps.select.outputs.version-string }}
