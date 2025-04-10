@@ -21,6 +21,9 @@ inputs:
   sm_code_signing_cert_sha1_hash:
     description: "fingerprint of the cert in the HSM to use for signing"
     required: true
+  sm_certkey_alias:
+    description: "alias of the keypair to sync from keylocker"
+    required: true
   sign:
     description: "Whether to actually sign the file or just install the tools. Defaults so installing + signing"
     required: false
@@ -59,7 +62,7 @@ runs:
         smksp_registrar.exe list
         smctl.exe keypair ls
         C:\Windows\System32\certutil.exe -csp "DigiCert Signing Manager KSP" -key -user
-        smksp_cert_sync.exe
+        smctl.exe windows certsync --keypair-alias=${{ inputs.sm_certkey_alias }}
 
     - name: Sign file
       if: ${{ inputs.sign == 'true' }}
