@@ -16,6 +16,7 @@ Windows Code signing with digicert HSM.
     sm_client_cert_file_b64: ${{ secrets.SM_CLIENT_CERT_FILE_B64 }}
     sm_client_cert_password: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
     sm_code_signing_cert_sha1_hash: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
+    sm_certkey_alias: ${{ secrets.SM_CERTKEY_ALIAS }}
     file: ${{ github.workspace }}/dist/my-file.exe
     sign: "true" # True is default, false will only install the tools but not sign
 ```
