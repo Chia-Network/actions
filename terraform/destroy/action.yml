@@ -10,6 +10,9 @@ inputs:
   terraform_dir:
     description: "Path to terraform directory"
     required: true
+  backend_config:
+    description: "Path to the backend_config"
+    required: false
 runs:
   using: "composite"
   steps:
@@ -30,7 +33,12 @@ runs:
 
     - name: Init
       working-directory: ${{ inputs.terraform_dir }}
-      run: terraform init
+      run: |
+        if [ -n "${{ inputs.backend_config }}" ]; then
+          terraform init -backend-config="${{ inputs.backend_config }}"
+        else
+          terraform init
+        fi
       shell: sh
 
       # We don't create the workspace - if it doesn't exist, just error and let this fail, since there is nothing to delete

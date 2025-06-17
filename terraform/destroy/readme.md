@@ -10,6 +10,7 @@ Runs terraform destroy
     workspace: mainnet-us-west-2
     varfile: vars/mainnet-us-west-2.tfvars
     terraform_dir: terraform
+    backend_config: backends/fmt.backend
 ```
 
 ### Parameters
@@ -19,3 +20,5 @@ Runs terraform destroy
 `varfile` The vars file to pass to terraform
 
 `terraform_dir` Path to the directory that contains the terraform configuration
+
+`backend_config` Path to the directory that contains the terraform backends. This is not required.
