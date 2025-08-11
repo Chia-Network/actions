@@ -1,0 +1,33 @@
+name: reflow-actionlint.yml
+
+on:
+  workflow_call:
+    inputs:
+      concurrency-name:
+        default: "actionlint"
+        required: false
+        type: string
+
+concurrency:
+  group: ${{ inputs.concurrency-name }}-${{ github.event_name == 'pull_request' && format('{0}-{1}', github.workflow_ref, github.event.pull_request.number) || github.run_id }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: actionlint
+        run: |
+          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          echo ==== shellcheck version
+          shellcheck --version
+          echo ==== actionlint version
+          ./actionlint --version
+          echo ==== running actionlint
+          ./actionlint -color -shellcheck shellcheck
