@@ -21,3 +21,5 @@ jobs:
 
   actionlint-local:
     uses: .github/workflows/reflow-actionlint.yml
+    with:
+        concurrency-name: local
