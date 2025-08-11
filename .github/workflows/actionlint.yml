@@ -17,4 +17,4 @@ permissions:
 
 jobs:
   actionlint:
-    uses: ./.github/workflows/reflow-actionlint.yml
+    uses: chia-network/actions/.github/workflows/reflow-actionlint.yml@reflow-actionlint
