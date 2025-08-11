@@ -20,6 +20,6 @@ jobs:
     uses: chia-network/actions/.github/workflows/reflow-actionlint.yml@reflow-actionlint
 
   actionlint-local:
-    uses: .github/workflows/reflow-actionlint.yml
+    uses: ./.github/workflows/reflow-actionlint.yml
     with:
         concurrency-name: local
