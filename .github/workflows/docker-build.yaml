@@ -159,14 +159,6 @@ jobs:
           cache-from: type=local,src=docker-cache
           cache-to: type=local,dest=docker-cache-new
 
-      - # Fixes
-        # https://github.com/docker/build-push-action/issues/252
-        # https://github.com/moby/buildkit/issues/1896
-        name: Move cache
-        if: ${{ inputs.enable-cache == 'true' }}
-        run: |
-          rm -rf docker-cache
-          mv docker-cache-new docker-cache
 
       - name: Report image sizes
         run: |
@@ -188,15 +180,18 @@ jobs:
             # Clean up platform string (remove spaces)
             platform=$(echo "$platform" | xargs)
             
-            # Create platform-specific tag
-            arch_tag="${IMAGE_NAME}:${platform//\//-}"
-            
-            # Try to get image size using buildx imagetools
             echo "Getting size for $platform..."
-            if command -v docker >/dev/null 2>&1; then
-              # Try to inspect the image if it exists locally
-              if docker image inspect "$arch_tag" >/dev/null 2>&1; then
-                size=$(docker image inspect "$arch_tag" --format='{{.Size}}')
+            if docker buildx build \
+              --platform "$platform" \
+              --load \
+              --tag "temp-${platform//\//-}" \
+              --cache-from type=local,src=docker-cache \
+              --file "${{ inputs.dockerfile }}" \
+              "${{ inputs.docker-context }}" >/dev/null 2>&1; then
+              
+              # Get image size
+              if docker image inspect "temp-${platform//\//-}" >/dev/null 2>&1; then
+                size=$(docker image inspect "temp-${platform//\//-}" --format='{{.Size}}')
                 size_mb=$((size / 1024 / 1024))
                 size_gb=$((size_mb / 1024))
                 
@@ -208,25 +203,27 @@ jobs:
                 
                 echo "| \`$platform\` | \`$size_display\` |" >> $GITHUB_STEP_SUMMARY
                 echo "✅ $platform: $size_display"
+                
+                # Clean up the temporary image
+                docker rmi "temp-${platform//\//-}" >/dev/null 2>&1 || true
               else
-                # Try to get manifest info if image was pushed
-                if [ "${{ inputs.push }}" == "true" ]; then
-                  echo "| \`$platform\` | 📤 Pushed to registry |" >> $GITHUB_STEP_SUMMARY
-                  echo "📤 $platform: Pushed to registry (size not available locally)"
-                else
-                  echo "| \`$platform\` | ⚠️  Not available locally |" >> $GITHUB_STEP_SUMMARY
-                  echo "⚠️  $platform: Image not available locally"
-                fi
+                echo "| \`$platform\` | ❌ Failed to inspect |" >> $GITHUB_STEP_SUMMARY
+                echo "❌ $platform: Failed to inspect image"
               fi
             else
-              echo "| \`$platform\` | ❌ Docker not available |" >> $GITHUB_STEP_SUMMARY
-              echo "❌ $platform: Docker not available for inspection"
+              echo "| \`$platform\` | ⚠️  Build failed |" >> $GITHUB_STEP_SUMMARY
+              echo "⚠️  $platform: Failed to build/load image"
             fi
           done
           
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ inputs.push }}" == "true" ]; then
-            echo "💡 *Images have been pushed to the registry. Check the registry UI for compressed sizes.*" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "💡 *Sizes shown are for uncompressed images. Registry sizes may be smaller due to compression.*" >> $GITHUB_STEP_SUMMARY
-          fi
+          echo "💡 *Sizes shown are for uncompressed images. Registry sizes may be smaller due to compression.*" >> $GITHUB_STEP_SUMMARY
+
+      - # Fixes
+        # https://github.com/docker/build-push-action/issues/252
+        # https://github.com/moby/buildkit/issues/1896
+        name: Move cache
+        if: ${{ inputs.enable-cache == 'true' }}
+        run: |
+          rm -rf docker-cache
+          mv docker-cache-new docker-cache
