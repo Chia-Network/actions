@@ -35,13 +35,16 @@ jobs:
                 chia: [macOS, ARM64]
                 github: [macos-latest]
               intel:
+                chia: [macOS-13, intel]
                 github: [macos-13]
           - name: Ubuntu
             matrix: ubuntu
             runs-on:
               arm:
                 chia: [Linux, ARM64]
+                github: [ubuntu-24.04-latest]
               intel:
+                chia: [Linux, ARM64]
                 github: [ubuntu-latest]
           - name: Windows
             matrix: windows
@@ -104,6 +107,12 @@ jobs:
               matrix: arm
           - os:
               matrix: windows
+            environment:
+              matrix: chia
+          - os:
+              matrix: ubuntu
+            arch:
+              matrix: intel
             environment:
               matrix: chia
 
