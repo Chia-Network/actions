@@ -37,7 +37,7 @@ jobs:
                 chia: [macOS, ARM64]
                 github: [macos-latest]
               intel:
-                chia: [macOS-13, intel]
+                chia: [macos-13-intel]
                 github: [macos-13]
           - name: Ubuntu
             matrix: ubuntu
