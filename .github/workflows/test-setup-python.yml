@@ -99,21 +99,11 @@ jobs:
             context: github-hosted
         exclude:
           - os:
-              matrix: ubuntu
-            arch:
-              matrix: arm
-            environment:
-              matrix: github
-          - os:
               matrix: windows
             arch:
               matrix: arm
           - os:
               matrix: windows
-            environment:
-              matrix: chia
-          - arch:
-              matrix: intel
             environment:
               matrix: chia
 
