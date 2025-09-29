@@ -41,10 +41,8 @@ jobs:
             matrix: ubuntu
             runs-on:
               arm:
-                chia: [Linux, ARM64]
                 github: [ubuntu-24.04-arm]
               intel:
-                chia: [Linux, ARM64]
                 github: [ubuntu-latest]
           - name: Windows
             matrix: windows
