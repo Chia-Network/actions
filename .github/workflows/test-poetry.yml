@@ -178,8 +178,6 @@ jobs:
               matrix: chia
           - os:
               matrix: ubuntu
-            arch:
-              matrix: intel
             environment:
               matrix: chia
 
