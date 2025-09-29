@@ -44,10 +44,8 @@ jobs:
             native-python: false
             runs-on:
               arm:
-                chia: [Linux, ARM64]
                 github: [ubuntu-24.04-arm]
               intel:
-                chia: [Linux, ARM64]
                 github: [ubuntu-latest]
           - name: Docker Debian
             matrix: docker-debian
