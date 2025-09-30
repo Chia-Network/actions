@@ -57,13 +57,13 @@ jobs:
               arm:
                 github: [ubuntu-24.04-arm]
               intel:
-                github: [ubuntu-latest]
+                github: [ubuntu-22.04]
           - name: Rocky
             matrix: rocky
             container: chianetwork/rocky8-builder:latest
             runs-on:
               intel:
-                github: [ubuntu-latest]
+                github: [ubuntu-22.04]
         python:
           - name: "3.9"
             action: "3.9"
