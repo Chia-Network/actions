@@ -126,6 +126,18 @@ jobs:
               matrix: ubuntu
             environment:
               matrix: chia
+          - os:
+              matrix: debian
+            environment:
+              matrix: chia
+          - os:
+              matrix: rocky
+            environment:
+              matrix: chia
+          - os:
+              matrix: rocky
+            arch:
+              matrix: arm
 
     steps:
       - uses: actions/checkout@v4
