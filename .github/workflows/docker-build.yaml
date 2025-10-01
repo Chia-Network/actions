@@ -165,8 +165,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Get the first tag from meta output (usually has the SHA)
-          FIRST_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n 1)
-          echo "**Image:** \`$FIRST_TAG\`" >> $GITHUB_STEP_SUMMARY
+          DOCKER_TAG="sha-${{ github.sha }}"
+          echo "**Image:** \`$DOCKER_TAG\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Wait a moment for registry propagation
@@ -184,7 +184,7 @@ jobs:
             echo "Getting size for $platform..."
             
             # Use imagetools to inspect the specific platform
-            if MANIFEST_INFO=$(docker buildx imagetools inspect "$FIRST_TAG" --format 'json' 2>/dev/null); then
+            if MANIFEST_INFO=$(docker buildx imagetools inspect "$DOCKER_TAG" --format 'json' 2>/dev/null); then
               # Parse the JSON to find our platform
               os=$(echo "$platform" | cut -d'/' -f1)
               arch=$(echo "$platform" | cut -d'/' -f2)
@@ -214,7 +214,7 @@ jobs:
                   fi
                   
                   # Get uncompressed size by inspecting the specific platform image
-                  if UNCOMPRESSED_SIZE=$(docker buildx imagetools inspect "$FIRST_TAG@$DIGEST" --format '{{.Config.Size}}' 2>/dev/null); then
+                  if UNCOMPRESSED_SIZE=$(docker buildx imagetools inspect "$DOCKER_TAG@$DIGEST" --format '{{.Config.Size}}' 2>/dev/null); then
                     if [ -n "$UNCOMPRESSED_SIZE" ] && [ "$UNCOMPRESSED_SIZE" != "0" ]; then
                       uncomp_mb=$((UNCOMPRESSED_SIZE / 1024 / 1024))
                       if [ $uncomp_mb -ge 1024 ]; then
