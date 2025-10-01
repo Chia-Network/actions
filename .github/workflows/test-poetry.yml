@@ -37,13 +37,14 @@ jobs:
                 chia: [macOS, ARM64]
                 github: [macos-latest]
               intel:
+                chia: [macos-13-intel]
                 github: [macos-13]
           - name: Ubuntu
             matrix: ubuntu
             native-python: false
             runs-on:
               arm:
-                chia: [Linux, ARM64]
+                github: [ubuntu-24.04-arm]
               intel:
                 github: [ubuntu-latest]
           - name: Docker Debian
@@ -51,7 +52,7 @@ jobs:
             native-python: true
             runs-on:
               arm:
-                chia: [Linux, ARM64]
+                github: [ubuntu-24.04-arm]
               intel:
                 github: [ubuntu-latest]
             container:
@@ -162,17 +163,9 @@ jobs:
               context: github-hosted
         exclude:
           - os:
-              matrix: ubuntu
-            arch:
-              matrix: arm
-            environment:
-              matrix: github
-          - os:
               matrix: docker-debian
-            arch:
-              matrix: arm
             environment:
-              matrix: github
+              matrix: chia
           - os:
               matrix: windows
             arch:
@@ -181,8 +174,8 @@ jobs:
               matrix: windows
             environment:
               matrix: chia
-          - arch:
-              matrix: intel
+          - os:
+              matrix: ubuntu
             environment:
               matrix: chia
 
