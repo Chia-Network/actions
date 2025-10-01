@@ -146,7 +146,6 @@ jobs:
         uses: ./setup-python/
         id: run-the-action
         with:
-          force-pyenv: ${{ matrix.os.container != '' }}
           python-version: ${{ matrix.python.action }}
           allow-prerelease: ${{ matrix.python.allow-prerelease }}
 
