@@ -149,7 +149,6 @@ jobs:
 
       - name: Build Docker Container
         uses: docker/build-push-action@v6
-        id: build
         with:
           context: ${{ inputs.docker-context }}
           file: ${{ inputs.dockerfile }}
@@ -159,67 +158,95 @@ jobs:
           build-args: ${{ inputs.build-args }}
           cache-from: type=local,src=docker-cache
           cache-to: type=local,dest=docker-cache-new
-          outputs: type=image,push=${{ inputs.push }},annotation-index.org.opencontainers.image.description=Multi-platform image
 
       - name: Report image sizes
         run: |
           echo "## 📦 Docker Image Sizes" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          IMAGE_NAME="${{ steps.image.outputs.imagename }}"
-          echo "Image: \`$IMAGE_NAME\`" >> $GITHUB_STEP_SUMMARY
+          # Get the first tag from meta output (usually has the SHA)
+          FIRST_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n 1)
+          echo "**Image:** \`$FIRST_TAG\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Parse the build metadata JSON
-          METADATA='${{ steps.build.outputs.metadata }}'
-          
-          echo "| Architecture | Size |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Architecture | Compressed Size | Uncompressed Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------------|-----------------|-------------------|" >> $GITHUB_STEP_SUMMARY
 
-          # Extract size info for each platform from the metadata
+          # Parse platforms
           IFS=',' read -ra PLATFORMS <<< "${{ inputs.docker-platforms }}"
-          
+
           for platform in "${PLATFORMS[@]}"; do
             platform=$(echo "$platform" | xargs)
+            echo "Getting size for $platform..."
             
-            # Parse the JSON metadata to get containerimage.descriptor
-            # The metadata contains size information for each platform
-            if command -v jq >/dev/null 2>&1; then
-              # Extract platform-specific data
+            # Use imagetools to inspect the specific platform
+            if MANIFEST_INFO=$(docker buildx imagetools inspect "$FIRST_TAG" --format 'json' 2>/dev/null); then
+              # Parse the JSON to find our platform
               os=$(echo "$platform" | cut -d'/' -f1)
               arch=$(echo "$platform" | cut -d'/' -f2)
               
-              # Get the digest and size for this platform
-              size_bytes=$(echo "$METADATA" | jq -r --arg os "$os" --arg arch "$arch" '
-                .["containerimage.descriptor"] // {} | 
-                if type == "object" then . else {} end
-              ' 2>/dev/null || echo "")
+              # Extract sizes for this specific platform
+              PLATFORM_INFO=$(echo "$MANIFEST_INFO" | jq -r --arg os "$os" --arg arch "$arch" '
+                .manifests[]? | 
+                select(.platform.os == $os and .platform.architecture == $arch) |
+                {
+                  size: .size,
+                  digest: .digest
+                }
+              ' 2>/dev/null)
               
-              # If metadata doesn't have per-platform breakdown, show aggregate
-              if [ -z "$size_bytes" ] || [ "$size_bytes" = "null" ] || [ "$size_bytes" = "{}" ]; then
-                echo "| \`$platform\` | ℹ️  Built successfully |" >> $GITHUB_STEP_SUMMARY
-              else
-                size_mb=$((size_bytes / 1024 / 1024))
-                size_gb=$((size_mb / 1024))
-
-                if [ $size_gb -gt 0 ]; then
-                  size_display="${size_gb}.$(( (size_mb % 1024) * 100 / 1024 ))GB"
+              if [ -n "$PLATFORM_INFO" ] && [ "$PLATFORM_INFO" != "null" ]; then
+                COMPRESSED_SIZE=$(echo "$PLATFORM_INFO" | jq -r '.size // 0')
+                DIGEST=$(echo "$PLATFORM_INFO" | jq -r '.digest // ""')
+                
+                if [ "$COMPRESSED_SIZE" != "0" ] && [ "$COMPRESSED_SIZE" != "null" ]; then
+                  # Convert compressed size to human readable
+                  comp_mb=$((COMPRESSED_SIZE / 1024 / 1024))
+                  if [ $comp_mb -ge 1024 ]; then
+                    comp_gb=$((comp_mb / 1024))
+                    comp_display="${comp_gb}.$(( (comp_mb % 1024) * 10 / 1024 ))GB"
+                  else
+                    comp_display="${comp_mb}MB"
+                  fi
+                  
+                  # Get uncompressed size by inspecting the specific platform image
+                  if UNCOMPRESSED_SIZE=$(docker buildx imagetools inspect "$FIRST_TAG@$DIGEST" --format '{{.Config.Size}}' 2>/dev/null); then
+                    if [ -n "$UNCOMPRESSED_SIZE" ] && [ "$UNCOMPRESSED_SIZE" != "0" ]; then
+                      uncomp_mb=$((UNCOMPRESSED_SIZE / 1024 / 1024))
+                      if [ $uncomp_mb -ge 1024 ]; then
+                        uncomp_gb=$((uncomp_mb / 1024))
+                        uncomp_display="${uncomp_gb}.$(( (uncomp_mb % 1024) * 10 / 1024 ))GB"
+                      else
+                        uncomp_display="${uncomp_mb}MB"
+                      fi
+                    else
+                      uncomp_display="N/A"
+                    fi
+                  else
+                    uncomp_display="N/A"
+                  fi
+                  
+                  echo "| \`$platform\` | \`$comp_display\` | \`$uncomp_display\` |" >> $GITHUB_STEP_SUMMARY
+                  echo "✅ $platform: $comp_display (compressed), $uncomp_display (uncompressed)"
                 else
-                  size_display="${size_mb}MB"
+                  echo "| \`$platform\` | ⚠️  Size unavailable | ⚠️  Size unavailable |" >> $GITHUB_STEP_SUMMARY
+                  echo "⚠️  $platform: Could not determine size"
                 fi
-
-                echo "| \`$platform\` | \`$size_display\` |" >> $GITHUB_STEP_SUMMARY
+              else
+                echo "| \`$platform\` | ❌ Platform not found | ❌ Platform not found |" >> $GITHUB_STEP_SUMMARY
+                echo "❌ $platform: Platform not found in manifest"
               fi
             else
-              echo "| \`$platform\` | ✅ Built |" >> $GITHUB_STEP_SUMMARY
+              echo "| \`$platform\` | ❌ Failed to inspect | ❌ Failed to inspect |" >> $GITHUB_STEP_SUMMARY
+              echo "❌ $platform: Failed to inspect image"
             fi
           done
 
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📋 **Build Metadata:**" >> $GITHUB_STEP_SUMMARY
-          echo '```json' >> $GITHUB_STEP_SUMMARY
-          echo "$METADATA" | jq '.' 2>/dev/null || echo "$METADATA" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "💡 **Notes:**" >> $GITHUB_STEP_SUMMARY
+          echo "- **Compressed Size:** Size when stored in registry (with layer compression)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Uncompressed Size:** Actual disk usage when image is pulled and extracted" >> $GITHUB_STEP_SUMMARY
+          echo "- Focus on uncompressed size for optimizing disk usage efficiency" >> $GITHUB_STEP_SUMMARY
 
       - # Fixes
         # https://github.com/docker/build-push-action/issues/252
