@@ -169,6 +169,10 @@ jobs:
           echo "**Image:** \`$FIRST_TAG\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
+          # Wait a moment for registry propagation
+          echo "Waiting for registry propagation..."
+          sleep 10
+
           echo "| Architecture | Compressed Size | Uncompressed Size |" >> $GITHUB_STEP_SUMMARY
           echo "|--------------|-----------------|-------------------|" >> $GITHUB_STEP_SUMMARY
 
