@@ -65,6 +65,11 @@ on:
         type: string
         default: "true"
         description: "Cache binfmt image to GitHub Actions cache backend"
+      report-image-size:
+        required: false
+        type: boolean
+        default: false
+        description: "Setting this to true opts you into reporting the image size of built images, per-platform. This can greatly increase job times."
     secrets:
       DOCKERHUB_USERNAME:
         required: false
@@ -160,6 +165,7 @@ jobs:
           cache-to: type=local,dest=docker-cache-new
 
       - name: Report image sizes
+        if: ${{ inputs.report-image-size == 'true' }}
         run: |
           echo "## 📦 Docker Image Sizes" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
