@@ -51,6 +51,11 @@ inputs:
   docker-hub-pat:
     description: "An optional personal access token to Docker Hub to authenticate as"
     required: false
+  report-image-size:
+    required: false
+    type: boolean
+    default: false
+    description: "Setting this to true opts you into reporting the image size of built images, per-platform. This can greatly increase job times."
 runs:
   using: "composite"
   steps:
@@ -130,6 +135,7 @@ runs:
         cache-to: type=local,dest=docker-cache-new
 
     - name: Report image sizes
+      if: ${{ inputs.report-image-size == 'true' }}
       shell: bash
       run: |
         echo "## 📦 Docker Image Sizes" >> $GITHUB_STEP_SUMMARY
