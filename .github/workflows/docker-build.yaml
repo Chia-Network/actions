@@ -164,8 +164,7 @@ jobs:
           echo "## 📦 Docker Image Sizes" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Get the first tag from meta output (usually has the SHA)
-          DOCKER_TAG="${{ steps.image.outputs.imagename }}:sha-${{ github.sha }}"
+          DOCKER_TAG=$(echo "${{ steps.image.outputs.imagename }}:sha-${{ github.sha }}" | tr '[:upper:]' '[:lower:]')
           echo "**Image:** \`$DOCKER_TAG\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
@@ -184,7 +183,7 @@ jobs:
             echo "Getting size for $platform..."
             
             # Use imagetools to inspect the specific platform
-            if MANIFEST_INFO=$(docker buildx imagetools inspect "$DOCKER_TAG" --format 'json' 2>/dev/null); then
+            if MANIFEST_INFO=$(docker buildx imagetools inspect "$DOCKER_TAG" --raw); then
               # Parse the JSON to find our platform
               os=$(echo "$platform" | cut -d'/' -f1)
               arch=$(echo "$platform" | cut -d'/' -f2)
