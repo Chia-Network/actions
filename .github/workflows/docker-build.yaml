@@ -178,78 +178,103 @@ jobs:
           # Parse platforms
           IFS=',' read -ra PLATFORMS <<< "${{ inputs.docker-platforms }}"
 
-          for platform in "${PLATFORMS[@]}"; do
-            platform=$(echo "$platform" | xargs)
-            echo "Getting size for $platform..."
+          # First get the main manifest
+          if MAIN_MANIFEST=$(docker buildx imagetools inspect "$DOCKER_TAG" --raw 2>/dev/null); then
+            echo "✅ Retrieved main manifest"
             
-            # Use imagetools to inspect the specific platform
-            if MANIFEST_INFO=$(docker buildx imagetools inspect "$DOCKER_TAG" --raw); then
-              # Parse the JSON to find our platform
+            for platform in "${PLATFORMS[@]}"; do
+              platform=$(echo "$platform" | xargs)
+              echo "Getting size for $platform..."
+              
+              # Parse platform
               os=$(echo "$platform" | cut -d'/' -f1)
               arch=$(echo "$platform" | cut -d'/' -f2)
               
-              # Extract sizes for this specific platform
-              PLATFORM_INFO=$(echo "$MANIFEST_INFO" | jq -r --arg os "$os" --arg arch "$arch" '
+              # Find the digest for this platform (exclude attestation manifests)
+              PLATFORM_DIGEST=$(echo "$MAIN_MANIFEST" | jq -r --arg os "$os" --arg arch "$arch" '
                 .manifests[]? | 
                 select(.platform.os == $os and .platform.architecture == $arch) |
-                {
-                  size: .size,
-                  digest: .digest
-                }
-              ' 2>/dev/null)
+                select(.annotations["vnd.docker.reference.type"] != "attestation-manifest") |
+                .digest
+              ' 2>/dev/null | head -n 1)
               
-              if [ -n "$PLATFORM_INFO" ] && [ "$PLATFORM_INFO" != "null" ]; then
-                COMPRESSED_SIZE=$(echo "$PLATFORM_INFO" | jq -r '.size // 0')
-                DIGEST=$(echo "$PLATFORM_INFO" | jq -r '.digest // ""')
+              if [ -n "$PLATFORM_DIGEST" ] && [ "$PLATFORM_DIGEST" != "null" ]; then
+                echo "Found digest for $platform: $PLATFORM_DIGEST"
                 
-                if [ "$COMPRESSED_SIZE" != "0" ] && [ "$COMPRESSED_SIZE" != "null" ]; then
-                  # Convert compressed size to human readable
-                  comp_mb=$((COMPRESSED_SIZE / 1024 / 1024))
-                  if [ $comp_mb -ge 1024 ]; then
-                    comp_gb=$((comp_mb / 1024))
-                    comp_display="${comp_gb}.$(( (comp_mb % 1024) * 10 / 1024 ))GB"
-                  else
-                    comp_display="${comp_mb}MB"
+                # Now inspect the specific platform manifest to get actual image info
+                if PLATFORM_MANIFEST=$(docker buildx imagetools inspect "$DOCKER_TAG@$PLATFORM_DIGEST" --raw 2>/dev/null); then
+                  echo "✅ Retrieved platform manifest for $platform"
+                  
+                  # Get compressed size (sum of all layer sizes)
+                  COMPRESSED_SIZE=$(echo "$PLATFORM_MANIFEST" | jq -r '
+                    [.layers[]?.size // 0] | add
+                  ' 2>/dev/null)
+                  
+                  # Get config size (this is closer to uncompressed, but still not exact)
+                  CONFIG_SIZE=$(echo "$PLATFORM_MANIFEST" | jq -r '.config.size // 0' 2>/dev/null)
+                  
+                  # Try to get actual uncompressed size from config
+                  if CONFIG_DIGEST=$(echo "$PLATFORM_MANIFEST" | jq -r '.config.digest // ""' 2>/dev/null); then
+                    if [ -n "$CONFIG_DIGEST" ]; then
+                      # This would require fetching the config blob, which is complex
+                      # For now, let's use a rough estimate
+                      UNCOMPRESSED_SIZE="$COMPRESSED_SIZE"
+                    fi
                   fi
                   
-                  # Get uncompressed size by inspecting the specific platform image
-                  if UNCOMPRESSED_SIZE=$(docker buildx imagetools inspect "$DOCKER_TAG@$DIGEST" --format '{{.Config.Size}}' 2>/dev/null); then
-                    if [ -n "$UNCOMPRESSED_SIZE" ] && [ "$UNCOMPRESSED_SIZE" != "0" ]; then
-                      uncomp_mb=$((UNCOMPRESSED_SIZE / 1024 / 1024))
-                      if [ $uncomp_mb -ge 1024 ]; then
-                        uncomp_gb=$((uncomp_mb / 1024))
-                        uncomp_display="${uncomp_gb}.$(( (uncomp_mb % 1024) * 10 / 1024 ))GB"
-                      else
-                        uncomp_display="${uncomp_mb}MB"
-                      fi
+                  # Format compressed size
+                  if [ "$COMPRESSED_SIZE" != "0" ] && [ "$COMPRESSED_SIZE" != "null" ] && [ -n "$COMPRESSED_SIZE" ]; then
+                    comp_mb=$((COMPRESSED_SIZE / 1024 / 1024))
+                    if [ $comp_mb -ge 1024 ]; then
+                      comp_gb=$((comp_mb / 1024))
+                      comp_display="${comp_gb}.$(( (comp_mb % 1024) * 10 / 1024 ))GB"
                     else
-                      uncomp_display="N/A"
+                      comp_display="${comp_mb}MB"
+                    fi
+                  else
+                    comp_display="N/A"
+                  fi
+                  
+                  # For uncompressed, we'll show the compressed size as an approximation
+                  # Getting true uncompressed size requires downloading and analyzing the config blob
+                  if [ "$comp_display" != "N/A" ]; then
+                    # Rough estimate: uncompressed is typically 2-3x compressed
+                    uncomp_mb=$((comp_mb * 2))
+                    if [ $uncomp_mb -ge 1024 ]; then
+                      uncomp_gb=$((uncomp_mb / 1024))
+                      uncomp_display="~${uncomp_gb}.$(( (uncomp_mb % 1024) * 10 / 1024 ))GB"
+                    else
+                      uncomp_display="~${uncomp_mb}MB"
                     fi
                   else
                     uncomp_display="N/A"
                   fi
                   
                   echo "| \`$platform\` | \`$comp_display\` | \`$uncomp_display\` |" >> $GITHUB_STEP_SUMMARY
-                  echo "✅ $platform: $comp_display (compressed), $uncomp_display (uncompressed)"
+                  echo "✅ $platform: $comp_display (compressed), $uncomp_display (estimated uncompressed)"
+                  
                 else
-                  echo "| \`$platform\` | ⚠️  Size unavailable | ⚠️  Size unavailable |" >> $GITHUB_STEP_SUMMARY
-                  echo "⚠️  $platform: Could not determine size"
+                  echo "| \`$platform\` | ❌ Platform manifest failed | ❌ Platform manifest failed |" >> $GITHUB_STEP_SUMMARY
+                  echo "❌ $platform: Failed to get platform manifest"
                 fi
               else
                 echo "| \`$platform\` | ❌ Platform not found | ❌ Platform not found |" >> $GITHUB_STEP_SUMMARY
-                echo "❌ $platform: Platform not found in manifest"
+                echo "❌ $platform: Platform digest not found in main manifest"
               fi
-            else
-              echo "| \`$platform\` | ❌ Failed to inspect | ❌ Failed to inspect |" >> $GITHUB_STEP_SUMMARY
-              echo "❌ $platform: Failed to inspect image"
-            fi
-          done
+            done
+          else
+            echo "❌ Failed to retrieve main manifest"
+            for platform in "${PLATFORMS[@]}"; do
+              platform=$(echo "$platform" | xargs)
+              echo "| \`$platform\` | ❌ Main manifest failed | ❌ Main manifest failed |" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "💡 **Notes:**" >> $GITHUB_STEP_SUMMARY
-          echo "- **Compressed Size:** Size when stored in registry (with layer compression)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Uncompressed Size:** Actual disk usage when image is pulled and extracted" >> $GITHUB_STEP_SUMMARY
-          echo "- Focus on uncompressed size for optimizing disk usage efficiency" >> $GITHUB_STEP_SUMMARY
+          echo "- **Compressed Size:** Total size of compressed layers stored in registry" >> $GITHUB_STEP_SUMMARY
+          echo "- **Uncompressed Size:** Estimated disk usage when extracted (~2x compressed)" >> $GITHUB_STEP_SUMMARY
+          echo "- Focus on compressed size for registry storage and uncompressed for runtime efficiency" >> $GITHUB_STEP_SUMMARY
 
       - # Fixes
         # https://github.com/docker/build-push-action/issues/252
