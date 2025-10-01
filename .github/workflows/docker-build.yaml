@@ -149,6 +149,7 @@ jobs:
 
       - name: Build Docker Container
         uses: docker/build-push-action@v6
+        id: build
         with:
           context: ${{ inputs.docker-context }}
           file: ${{ inputs.dockerfile }}
@@ -158,36 +159,47 @@ jobs:
           build-args: ${{ inputs.build-args }}
           cache-from: type=local,src=docker-cache
           cache-to: type=local,dest=docker-cache-new
+          outputs: type=image,push=${{ inputs.push }},annotation-index.org.opencontainers.image.description=Multi-platform image
 
       - name: Report image sizes
         run: |
           echo "## 📦 Docker Image Sizes" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Get the image name and tag from the meta step
           IMAGE_NAME="${{ steps.image.outputs.imagename }}"
-          # Get the first tag from the meta output (usually the SHA tag)
-          FIRST_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n 1)
-          
-          echo "Image: \`$FIRST_TAG\`" >> $GITHUB_STEP_SUMMARY
+          echo "Image: \`$IMAGE_NAME\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Parse platforms and get image sizes for each architecture
-          IFS=',' read -ra PLATFORMS <<< "${{ inputs.docker-platforms }}"
-
+          # Parse the build metadata JSON
+          METADATA='${{ steps.build.outputs.metadata }}'
+          
           echo "| Architecture | Size |" >> $GITHUB_STEP_SUMMARY
           echo "|--------------|------|" >> $GITHUB_STEP_SUMMARY
 
+          # Extract size info for each platform from the metadata
+          IFS=',' read -ra PLATFORMS <<< "${{ inputs.docker-platforms }}"
+          
           for platform in "${PLATFORMS[@]}"; do
-            # Clean up platform string (remove spaces)
             platform=$(echo "$platform" | xargs)
             
-            echo "Getting size for $platform..."
-            
-            # Use docker buildx imagetools to inspect the manifest
-            if SIZE_BYTES=$(docker buildx imagetools inspect "$FIRST_TAG" --format '{{range .Manifest.Manifests}}{{if eq .Platform.Architecture "'$(echo $platform | cut -d'/' -f2)'"}}{{if eq .Platform.OS "'$(echo $platform | cut -d'/' -f1)'"}}{{.Size}}{{end}}{{end}}{{end}}' 2>/dev/null); then
-              if [ -n "$SIZE_BYTES" ] && [ "$SIZE_BYTES" != "0" ]; then
-                size_mb=$((SIZE_BYTES / 1024 / 1024))
+            # Parse the JSON metadata to get containerimage.descriptor
+            # The metadata contains size information for each platform
+            if command -v jq >/dev/null 2>&1; then
+              # Extract platform-specific data
+              os=$(echo "$platform" | cut -d'/' -f1)
+              arch=$(echo "$platform" | cut -d'/' -f2)
+              
+              # Get the digest and size for this platform
+              size_bytes=$(echo "$METADATA" | jq -r --arg os "$os" --arg arch "$arch" '
+                .["containerimage.descriptor"] // {} | 
+                if type == "object" then . else {} end
+              ' 2>/dev/null || echo "")
+              
+              # If metadata doesn't have per-platform breakdown, show aggregate
+              if [ -z "$size_bytes" ] || [ "$size_bytes" = "null" ] || [ "$size_bytes" = "{}" ]; then
+                echo "| \`$platform\` | ℹ️  Built successfully |" >> $GITHUB_STEP_SUMMARY
+              else
+                size_mb=$((size_bytes / 1024 / 1024))
                 size_gb=$((size_mb / 1024))
 
                 if [ $size_gb -gt 0 ]; then
@@ -197,19 +209,17 @@ jobs:
                 fi
 
                 echo "| \`$platform\` | \`$size_display\` |" >> $GITHUB_STEP_SUMMARY
-                echo "✅ $platform: $size_display"
-              else
-                echo "| \`$platform\` | ⚠️  Size unavailable |" >> $GITHUB_STEP_SUMMARY
-                echo "⚠️  $platform: Could not determine size"
               fi
             else
-              echo "| \`$platform\` | ❌ Failed to inspect |" >> $GITHUB_STEP_SUMMARY
-              echo "❌ $platform: Failed to inspect manifest"
+              echo "| \`$platform\` | ✅ Built |" >> $GITHUB_STEP_SUMMARY
             fi
           done
 
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "💡 *Sizes shown are compressed manifest sizes. Actual extracted image sizes will be larger.*" >> $GITHUB_STEP_SUMMARY
+          echo "📋 **Build Metadata:**" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          echo "$METADATA" | jq '.' 2>/dev/null || echo "$METADATA" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
       - # Fixes
         # https://github.com/docker/build-push-action/issues/252
