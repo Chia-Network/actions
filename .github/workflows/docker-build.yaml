@@ -165,7 +165,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Get the first tag from meta output (usually has the SHA)
-          DOCKER_TAG="sha-${{ github.sha }}"
+          DOCKER_TAG="${{ steps.image.outputs.imagename }}:sha-${{ github.sha }}"
           echo "**Image:** \`$DOCKER_TAG\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
