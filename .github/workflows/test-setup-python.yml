@@ -57,7 +57,7 @@ jobs:
               arm:
                 github: [ubuntu-24.04-arm]
               intel:
-                github: [ubuntu-22.04]
+                github: [ubuntu-latest]
           - name: Rocky
             matrix: rocky
             container: chianetwork/rocky8-builder:latest
