@@ -94,7 +94,7 @@ runs:
 
     - name: Setup Python on ARM64 (pyenv)
       if: steps.upstream.conclusion == 'skipped'
-      shell: sh
+      shell: bash
       run: |
         export PYENV_ROOT="$HOME/.pyenv"
         echo "PYENV_ROOT=$HOME/.pyenv" >> $GITHUB_ENV
