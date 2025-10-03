@@ -99,14 +99,13 @@ runs:
       run: |
         echo "SCRIPT: PATH is $PATH"
         if grep -qa 'docker\|containerd\|kubepods' /proc/1/cgroup || [ -f /.dockerenv ] || [ -f /run/.containerenv ]; then
-          echo "Detected container environment."
-          echo "in_container=true" >> "$GITHUB_OUTPUT"
+          ROOT_OR_HOME="/root"
         else
-          echo "Not running in container."
-          echo "in_container=false" >> "$GITHUB_OUTPUT"
+          ROOT_OR_HOME="$HOME"
         fi
-        export PYENV_ROOT="$HOME/.pyenv"
-        echo "PYENV_ROOT=$HOME/.pyenv" >> $GITHUB_ENV
+        echo $ROOT_OR_HOME
+        export PYENV_ROOT="$ROOT_OR_HOME/.pyenv"
+        echo "PYENV_ROOT=$ROOT_OR_HOME/.pyenv" >> $GITHUB_ENV
 
         if [ ! -d "$PYENV_ROOT" ]; then
           echo "  ====  installing pyenv at: $PYENV_ROOT"
