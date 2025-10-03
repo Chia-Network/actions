@@ -107,7 +107,7 @@ runs:
         export PYENV_ROOT="$ROOT_OR_HOME/.pyenv"
         echo "PYENV_ROOT=$ROOT_OR_HOME/.pyenv" >> $GITHUB_ENV
 
-        if [ ! -d "$PYENV_ROOT" ] || [ "$ROOT_OR_HOME" = "/root" ]; then
+        if [ ! -d "$PYENV_ROOT" ]; then
           echo "  ====  installing pyenv at: $PYENV_ROOT"
           curl https://pyenv.run | bash
         else
@@ -127,7 +127,7 @@ runs:
           ls -l "$PYENV_ROOT/bin" || true
           exit 1
         fi
-        pyenv update
+        cd "$(pyenv root)" && git pull
 
         FULL_PY_VERSION=$(pyenv install --list | grep "^  ${{ inputs.python-version }}" | grep -v 'dev' | grep -v 't$' | tail -n 1)
         env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install --skip-existing $FULL_PY_VERSION
