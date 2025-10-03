@@ -135,3 +135,4 @@ runs:
 
         PY_PREFIX=$(pyenv prefix $FULL_PY_VERSION)
         echo "PATH=$PY_PREFIX/bin:$PATH" >> $GITHUB_ENV
+        echo "SCRIPT: PATH is $PATH"
