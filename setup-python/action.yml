@@ -103,7 +103,6 @@ runs:
         else
           ROOT_OR_HOME="$HOME"
         fi
-        echo $ROOT_OR_HOME
         export PYENV_ROOT="$ROOT_OR_HOME/.pyenv"
         echo "PYENV_ROOT=$ROOT_OR_HOME/.pyenv" >> $GITHUB_ENV
 
@@ -114,8 +113,10 @@ runs:
           echo "  ====  pyenv directory found at: $PYENV_ROOT"
         fi
 
-        export PATH="$PYENV_ROOT/bin:$PATH"
-        echo "PATH=$PYENV_ROOT/bin:$PATH" >> $GITHUB_ENV
+        if grep -qa 'docker\|containerd\|kubepods' /proc/1/cgroup || [ -f /.dockerenv ] || [ -f /run/.containerenv ]; then
+          export PATH="$PYENV_ROOT/bin:$PATH"
+          echo "PATH=$PYENV_ROOT/bin:$PATH" >> $GITHUB_ENV
+        fi
 
         # Ensure pyenv is up to date
         if ! (pyenv -h > /dev/null 2> /dev/null); then
@@ -131,7 +132,6 @@ runs:
 
         FULL_PY_VERSION=$(pyenv install --list | grep "^  ${{ inputs.python-version }}" | grep -v 'dev' | grep -v 't$' | tail -n 1)
         env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install --skip-existing $FULL_PY_VERSION
-        ls "$(pyenv root)/versions/3.12.11/bin"
 
         PY_PREFIX=$(pyenv prefix $FULL_PY_VERSION)
         echo "PATH=$PY_PREFIX/bin:$PATH" >> $GITHUB_ENV
