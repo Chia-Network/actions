@@ -114,6 +114,8 @@ runs:
         fi
 
         if grep -qa 'docker\|containerd\|kubepods' /proc/1/cgroup || [ -f /.dockerenv ] || [ -f /run/.containerenv ]; then
+          echo ''
+        else
           export PATH="$PYENV_ROOT/bin:$PATH"
           echo "PATH=$PYENV_ROOT/bin:$PATH" >> $GITHUB_ENV
         fi
