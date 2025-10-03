@@ -107,7 +107,7 @@ runs:
         export PYENV_ROOT="$ROOT_OR_HOME/.pyenv"
         echo "PYENV_ROOT=$ROOT_OR_HOME/.pyenv" >> $GITHUB_ENV
 
-        if [ ! -d "$PYENV_ROOT" ]; then
+        if [ ! -d "$PYENV_ROOT" ] || [ "$ROOT_OR_HOME" = "/root" ]; then
           echo "  ====  installing pyenv at: $PYENV_ROOT"
           curl https://pyenv.run | bash
         else
