@@ -155,13 +155,10 @@ jobs:
         run: |
           python ./setup-python/test_check_version.py
 
-      - name: Check for existence of shim
-        shell: bash
-        if: ${{ matrix.os.matrix != 'windows' }}
-        env:
-          PYTHON_SHIM: ${{ matrix.python.matrix }}
-        run: |
-          sh ./setup-python/test_check_version.sh
+      - name: Run the shim check
+        uses: ./.github/actions/check-python-version
+        with:
+          python-shim: ${{ matrix.python.matrix }}
 
       - name: Make sure pre-release version adjustment made if appropriate
         env:

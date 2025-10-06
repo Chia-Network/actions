@@ -1,0 +1,18 @@
+name: "Run the python version command"
+
+description: ""
+
+inputs:
+  python-shim:
+    description: "The shim to use to check the python version."
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check for existence of shim
+      shell: bash
+      env:
+        PYTHON_SHIM: ${{ inputs.python-shim }}
+      run: |
+        sh ./setup-python/test_check_version.sh
