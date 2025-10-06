@@ -132,5 +132,6 @@ runs:
         env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install --skip-existing $FULL_PY_VERSION
 
         PY_PREFIX=$(pyenv prefix $FULL_PY_VERSION)
+        export PATH="$PY_PREFIX/bin:$PATH"
         echo "PATH=$PY_PREFIX/bin:$PATH" >> $GITHUB_ENV
         echo "SCRIPT: PATH is $PATH"
