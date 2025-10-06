@@ -95,7 +95,7 @@ runs:
 
     - name: Setup Python on ARM64 (pyenv)
       if: steps.upstream.conclusion == 'skipped'
-      shell: bash
+      shell: sh
       run: |
         if (${{ steps.detect-container.outputs.in_container }} == 'true'); then
           ROOT_OR_HOME="/root"
@@ -125,7 +125,7 @@ runs:
           ls -l "$PYENV_ROOT/bin" || true
           exit 1
         fi
-        cd "$(pyenv root)" && git pull
+        pyenv update
 
         FULL_PY_VERSION=$(pyenv install --list | grep "^  ${{ inputs.python-version }}" | grep -v 'dev' | grep -v 't$' | tail -n 1)
         env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install --skip-existing $FULL_PY_VERSION
