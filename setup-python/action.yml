@@ -116,6 +116,8 @@ runs:
         export PATH="$PYENV_ROOT/bin:$PATH"
         echo "PATH=$PYENV_ROOT/bin:$PATH" >> $GITHUB_ENV
 
+        ls -l "$PYENV_ROOT/shims"
+
         # Ensure pyenv is up to date
         if ! (pyenv -h > /dev/null 2> /dev/null); then
           echo "  ====  pyenv -h exited with non-zero status"
