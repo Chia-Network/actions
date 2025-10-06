@@ -155,6 +155,11 @@ jobs:
         run: |
           python ./setup-python/test_check_version.py
 
+      - name: Setup Node per .nvmrc in GUI
+        uses: actions/setup-node@v5
+        with:
+          node-version: latest
+
       - name: Run the shim check
         uses: ./.github/actions/check-python-version
         with:
