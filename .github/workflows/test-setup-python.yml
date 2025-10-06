@@ -156,6 +156,7 @@ jobs:
           python ./setup-python/test_check_version.py
 
       - name: Check for existence of shim
+        shell: bash
         if: ${{ matrix.os.matrix != 'windows' }}
         run: |
           ${{ matrix.python.matrix }} --version
