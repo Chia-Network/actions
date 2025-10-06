@@ -113,12 +113,8 @@ runs:
           echo "  ====  pyenv directory found at: $PYENV_ROOT"
         fi
 
-        if grep -qa 'docker\|containerd\|kubepods' /proc/1/cgroup || [ -f /.dockerenv ] || [ -f /run/.containerenv ]; then
-          echo ''
-        else
-          export PATH="$PYENV_ROOT/bin:$PATH"
-          echo "PATH=$PYENV_ROOT/bin:$PATH" >> $GITHUB_ENV
-        fi
+        export PATH="$PYENV_ROOT/bin:$PATH"
+        echo "PATH=$PYENV_ROOT/bin:$PATH" >> $GITHUB_ENV
 
         # Ensure pyenv is up to date
         if ! (pyenv -h > /dev/null 2> /dev/null); then
