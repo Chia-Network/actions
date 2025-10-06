@@ -127,10 +127,10 @@ runs:
           exit 1
         fi
         cd "$(pyenv root)" && git pull
-        pyenv global ${{ inputs.python-version }}
 
         FULL_PY_VERSION=$(pyenv install --list | grep "^  ${{ inputs.python-version }}" | grep -v 'dev' | grep -v 't$' | tail -n 1)
         env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install --skip-existing $FULL_PY_VERSION
+        pyenv global ${{ inputs.python-version }}
 
         PY_PREFIX=$(pyenv prefix $FULL_PY_VERSION)
         export PATH="$PY_PREFIX/bin:$PATH"
