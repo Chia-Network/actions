@@ -97,13 +97,8 @@ runs:
       if: steps.upstream.conclusion == 'skipped'
       shell: sh
       run: |
-        if (${{ steps.detect-container.outputs.in_container }} == 'true'); then
-          ROOT_OR_HOME="/root"
-        else
-          ROOT_OR_HOME="$HOME"
-        fi
-        export PYENV_ROOT="$ROOT_OR_HOME/.pyenv"
-        echo "PYENV_ROOT=$ROOT_OR_HOME/.pyenv" >> $GITHUB_ENV
+        export PYENV_ROOT="$HOME/.pyenv"
+        echo "PYENV_ROOT=$HOME/.pyenv" >> $GITHUB_ENV
 
         if [ ! -d "$PYENV_ROOT" ]; then
           echo "  ====  installing pyenv at: $PYENV_ROOT"
@@ -129,7 +124,6 @@ runs:
 
         FULL_PY_VERSION=$(pyenv install --list | grep "^  ${{ inputs.python-version }}" | grep -v 'dev' | grep -v 't$' | tail -n 1)
         env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install --skip-existing $FULL_PY_VERSION
-        pyenv global ${{ inputs.python-version }}
 
         PY_PREFIX=$(pyenv prefix $FULL_PY_VERSION)
         echo "PATH=$PY_PREFIX/bin:$PATH" >> $GITHUB_ENV
