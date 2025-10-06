@@ -97,8 +97,7 @@ runs:
       if: steps.upstream.conclusion == 'skipped'
       shell: bash
       run: |
-        echo "SCRIPT: PATH is $PATH"
-        if grep -qa 'docker\|containerd\|kubepods' /proc/1/cgroup || [ -f /.dockerenv ] || [ -f /run/.containerenv ]; then
+        if (${{ steps.detect-container.outputs.in_container }} == 'true'); then
           ROOT_OR_HOME="/root"
         else
           ROOT_OR_HOME="$HOME"
@@ -133,6 +132,4 @@ runs:
         pyenv global ${{ inputs.python-version }}
 
         PY_PREFIX=$(pyenv prefix $FULL_PY_VERSION)
-        export PATH="$PY_PREFIX/bin:$PATH"
         echo "PATH=$PY_PREFIX/bin:$PATH" >> $GITHUB_ENV
-        echo "SCRIPT: PATH is $PATH"
