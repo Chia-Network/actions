@@ -70,37 +70,37 @@ jobs:
             check: "3.9"
             patch-specified: false
             allow-prerelease: false
-            matrix: "py3.9"
+            matrix: "python3.9"
           - name: "3.10"
             action: "3.10"
             check: "3.10"
             patch-specified: false
             allow-prerelease: false
-            matrix: "py3.10"
+            matrix: "python3.10"
           - name: "3.10.8"
             action: "3.10.8"
             check: "3.10.8"
             patch-specified: true
             allow-prerelease: false
-            matrix: "py3.10.8"
+            matrix: "python3.10"
           - name: "3.11"
             action: "3.11"
             check: "3.11"
             patch-specified: false
             allow-prerelease: false
-            matrix: "py3.11"
+            matrix: "python3.11"
           - name: "3.12"
             action: "3.12"
             check: "3.12"
             patch-specified: false
             allow-prerelease: true
-            matrix: "py3.12"
+            matrix: "python3.12"
           - name: "3.13"
             action: "3.13"
             check: "3.13"
             patch-specified: false
             allow-prerelease: true
-            matrix: "py3.13"
+            matrix: "python3.13"
         arch:
           - name: ARM
             matrix: arm
@@ -154,6 +154,10 @@ jobs:
           PYTHON_CHECK: ${{ matrix.python.check }}
         run: |
           python ./setup-python/test_check_version.py
+
+      - name: Check for existence of shim
+        run: |
+          ${{ matrix.python.matrix }} --version
 
       - name: Make sure pre-release version adjustment made if appropriate
         env:
