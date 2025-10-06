@@ -125,7 +125,7 @@ runs:
           ls -l "$PYENV_ROOT/bin" || true
           exit 1
         fi
-        pyenv update
+        cd "$(pyenv root)" && git pull
 
         FULL_PY_VERSION=$(pyenv install --list | grep "^  ${{ inputs.python-version }}" | grep -v 'dev' | grep -v 't$' | tail -n 1)
         env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install --skip-existing $FULL_PY_VERSION
