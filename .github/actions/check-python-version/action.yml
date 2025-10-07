@@ -15,4 +15,4 @@ runs:
       env:
         PYTHON_SHIM: ${{ inputs.python-shim }}
       run: |
-        sh ./setup-python/test_check_version.sh
+        $PYTHON_SHIM --version

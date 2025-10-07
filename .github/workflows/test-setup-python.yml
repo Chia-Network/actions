@@ -160,11 +160,12 @@ jobs:
           mkdir -p "$HOME/empty-bin"
           echo "$HOME/empty-bin" >> $GITHUB_PATH
 
-      - name: Run the shim check
-        if: ${{ matrix.os.matrix != 'windows' }}
-        uses: ./.github/actions/check-python-version
-        with:
-          python-shim: ${{ matrix.python.matrix }}
+      - name: Check for existence of shim
+        shell: bash
+        env:
+          PYTHON_SHIM: ${{ inputs.python-shim }}
+        run: |
+          $PYTHON_SHIM --version
 
       - name: Make sure pre-release version adjustment made if appropriate
         env:
