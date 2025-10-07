@@ -149,16 +149,16 @@ jobs:
           python-version: ${{ matrix.python.action }}
           allow-prerelease: ${{ matrix.python.allow-prerelease }}
 
+      - name: Add to GITHUB_PATH
+        run: |
+          mkdir -p "$HOME/empty-bin"
+          echo "$HOME/empty-bin" >> $GITHUB_PATH
+
       - name: Check Python version
         env:
           PYTHON_CHECK: ${{ matrix.python.check }}
         run: |
           python ./setup-python/test_check_version.py
-
-      - name: Add to GITHUB_PATH
-        run: |
-          mkdir -p "$HOME/empty-bin"
-          echo "$HOME/empty-bin" >> $GITHUB_PATH
 
       - name: Check for existence of shim
         if: ${{ matrix.os.matrix != 'windows' }}
