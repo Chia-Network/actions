@@ -161,6 +161,7 @@ jobs:
           echo "$HOME/empty-bin" >> $GITHUB_PATH
 
       - name: Check for existence of shim
+        if: ${{ matrix.os.matrix != 'windows' }}
         shell: bash
         env:
           PYTHON_SHIM: ${{ matrix.python.matrix }}
