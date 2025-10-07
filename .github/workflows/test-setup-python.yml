@@ -163,7 +163,7 @@ jobs:
       - name: Check for existence of shim
         shell: bash
         env:
-          PYTHON_SHIM: ${{ inputs.python-shim }}
+          PYTHON_SHIM: ${{ matrix.python.matrix }}
         run: |
           $PYTHON_SHIM --version
 
