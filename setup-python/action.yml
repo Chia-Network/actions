@@ -129,5 +129,7 @@ runs:
 
         pyenv global ${{ inputs.python-version }}
         PY_PREFIX=$(pyenv prefix $FULL_PY_VERSION)
+        echo "Path is $PATH"
+        echo "Github Path is $GITHUB_PATH"
         echo "PYENV_ROOT=$HOME/.pyenv" >> $GITHUB_PATH
         echo "PATH=$PY_PREFIX/bin:$PATH" >> $GITHUB_ENV
