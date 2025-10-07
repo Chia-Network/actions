@@ -108,6 +108,7 @@ runs:
         fi
 
         export PATH="$PYENV_ROOT/bin:$PATH"
+        echo "$PYENV_ROOT/bin" >> $GITHUB_PATH
         echo "PATH=$PYENV_ROOT/bin:$PATH" >> $GITHUB_ENV
 
         # Ensure pyenv is up to date
@@ -126,4 +127,5 @@ runs:
         env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install --skip-existing $FULL_PY_VERSION
 
         PY_PREFIX=$(pyenv prefix $FULL_PY_VERSION)
+        echo "$PY_PREFIX/bin" >> $GITHUB_PATH
         echo "PATH=$PY_PREFIX/bin:$PATH" >> $GITHUB_ENV
