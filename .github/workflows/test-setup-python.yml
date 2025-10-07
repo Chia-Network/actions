@@ -155,10 +155,14 @@ jobs:
         run: |
           python ./setup-python/test_check_version.py
 
-      - name: Setup Node per .nvmrc in GUI
-        uses: actions/setup-node@v5
-        with:
-          node-version: latest
+      # - name: Setup Node per .nvmrc in GUI
+      #   uses: actions/setup-node@v5
+      #   with:
+      #     node-version: latest
+      - name: Add to GITHUB_PATH
+        run: |
+          mkdir -p "$HOME/empty-bin"
+          echo "$HOME/empty-bin" >> $GITHUB_PATH
 
       - name: Run the shim check
         if: ${{ matrix.os.matrix != 'windows' }}
