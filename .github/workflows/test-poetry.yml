@@ -61,7 +61,7 @@ jobs:
               "py3.11": docker://python:3.11-bullseye
               "py3.12": docker://python:3.12-bullseye
               "py3.13": docker://python:3.13-bullseye
-              "py3.14": docker://python:3.14-bullseye
+              "py3.14": docker://python:3.14-bookworm # no 3.14 bullseye container
           - name: Windows
             matrix: windows
             native-python: false
