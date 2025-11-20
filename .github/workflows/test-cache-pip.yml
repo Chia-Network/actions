@@ -219,7 +219,7 @@ jobs:
       CACHE_DIR_VAR: ${{ (matrix.mode.matrix == 'setuptools' && 'PIP_CACHE_DIR') || (matrix.mode.matrix == 'poetry' && 'POETRY_CACHE_DIR') }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           path: repo
 
