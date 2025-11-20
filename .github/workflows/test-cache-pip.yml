@@ -37,7 +37,7 @@ jobs:
                 chia: [macOS, ARM64]
                 github: [macos-latest]
               intel:
-                github: [macos-13]
+                github: [macos-15-intel]
           - name: Ubuntu
             matrix: ubuntu
             native-python: false
