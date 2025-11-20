@@ -140,7 +140,7 @@ jobs:
 
       - name: Download artifacts if set
         if: ${{ inputs.artifacts-name != '' && inputs.artifacts-path != '' }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: ${{ inputs.artifacts-name }}
           path: ${{ inputs.artifacts-path }}
