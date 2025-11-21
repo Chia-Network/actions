@@ -1,0 +1,97 @@
+_test:
+  a-number: 1
+  an-anchor: &_test_anchor 'red'
+  an-alias: *_test_anchor
+emoji:
+  os:
+    - linux: &emoji_os_linux 🐧
+    - macos: &emoji_os_macos 🍎
+    - windows: &emoji_os_windows 🪟
+  arch:
+      - arm: &emoji_arch_arm 💪
+      - intel: &emoji_arch_intel 🌀
+      - risc: &emoji_arch_risc ✳️
+matrix:
+  elements:
+    os:
+      linux: &matrix_elements_os_linux
+        name: Linux
+        emoji: *emoji_os_linux
+        matrix: &linux linux
+        runs-on:
+          arm: [Linux, ARM64]
+          intel: [ubuntu-latest]
+      macos: &matrix_elements_os_macos
+        name: macOS
+        emoji: *emoji_os_macos
+        matrix: &macos macos
+        runs-on:
+          arm: [macos-latest]
+          intel: [macos-13]
+      windows: &matrix_elements_os_windows
+        name: Windows
+        emoji: *emoji_os_windows
+        matrix: &windows windows
+        runs-on:
+          intel: [windows-latest]
+      all: &matrix_elements_os_all
+        - <<: *matrix_elements_os_linux
+        - <<: *matrix_elements_os_macos
+        - <<: *matrix_elements_os_windows
+    python:
+      '3.9': &matrix_elements_python_3_9
+        major-dot-minor: '3.9'
+        cibw-build: 'cp39-*'
+      '3.10': &matrix_elements_python_3_10
+        major-dot-minor: '3_10'
+        cibw-build: 'cp310-*'
+      '3.11': &matrix_elements_python_3_11
+        major-dot-minor: '3_11'
+        cibw-build: 'cp311-*'
+      '3.12': &matrix_elements_python_3_12
+        major-dot-minor: '3_12'
+        cibw-build: 'cp312-*'
+      installer: &matrix_elements_python_installers
+        <<: *matrix_elements_python_3_10
+      all: &matrix_elements_python_all
+        - <<: *matrix_elements_python_3_9
+        - <<: *matrix_elements_python_3_10
+        - <<: *matrix_elements_python_3_11
+        - <<: *matrix_elements_python_3_12
+    arch:
+      arm: &matrix_elements_arch_arm
+        name: ARM
+        emoji: *emoji_arch_arm
+        matrix: &arm arm
+      intel: &matrix_elements_arch_intel
+        name: Intel
+        emoji: *emoji_arch_intel
+        matrix: &intel intel
+      risc: &matrix_elements_arch_risc
+        name: RISC
+        emoji: *emoji_arch_risc
+        matrix: &risc risc
+      arm_intel: &matrix_elements_arch_arm_intel
+        - <<: *matrix_elements_arch_arm
+        - <<: *matrix_elements_arch_intel
+      all: &matrix_elements_arch_all
+        - <<: *matrix_elements_arch_arm
+        - <<: *matrix_elements_arch_intel
+        - <<: *matrix_elements_arch_risc
+  excludes: &matrix_excludes
+    - os:
+        matrix: *windows
+      arch:
+        matrix: *arm
+  complete:
+    standard_installer_python:
+      os: *matrix_elements_os_all
+      python:
+        - <<: *matrix_elements_python_installers
+      arch: *matrix_elements_arch_arm_intel
+      exclude: *matrix_excludes
+    standard_all_python:
+      os: *matrix_elements_os_all
+      python: *matrix_elements_python_all
+      arch: *matrix_elements_arch_arm_intel
+      exclude: *matrix_excludes
