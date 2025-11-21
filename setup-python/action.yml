@@ -82,7 +82,7 @@ runs:
         fi
 
     - name: Call upstream setup-python action
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       # Requires native m1 runner software, not x64 running via arch flags
       if: runner.environment == 'github-hosted' && inputs.force-pyenv == 'false' && steps.detect-container.outputs.in_container == 'false'
       id: upstream
