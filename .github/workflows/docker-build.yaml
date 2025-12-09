@@ -67,8 +67,8 @@ on:
         description: "Cache binfmt image to GitHub Actions cache backend"
       report-image-size:
         required: false
-        type: boolean
-        default: false
+        type: string
+        default: "false"
         description: "Setting this to true opts you into reporting the image size of built images, per-platform. This can greatly increase job times."
     secrets:
       DOCKERHUB_USERNAME:
