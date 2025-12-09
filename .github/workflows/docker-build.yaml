@@ -81,7 +81,7 @@ jobs:
     runs-on: ${{ inputs.runs-on }}
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -110,6 +110,7 @@ jobs:
 
       - name: Set image name
         id: image
+        shell: bash
         run: |
           export subpath="${{ inputs.image_subpath }}"
           if [ "$subpath" == '' ]; then
@@ -145,13 +146,6 @@ jobs:
           name: ${{ inputs.artifacts-name }}
           path: ${{ inputs.artifacts-path }}
 
-      - name: Cache
-        if: ${{ inputs.enable-cache == 'true' }}
-        uses: actions/cache@v4
-        with:
-          path: docker-cache
-          key: ${{ runner.os }}-docker-cache
-
       - name: Build Docker Container
         uses: docker/build-push-action@v6
         with:
@@ -161,11 +155,12 @@ jobs:
           push: ${{ inputs.push }}
           tags: ${{ steps.meta.outputs.tags }}
           build-args: ${{ inputs.build-args }}
-          cache-from: type=local,src=docker-cache
-          cache-to: type=local,dest=docker-cache-new
+          cache-from: ${{ inputs.enable-cache == 'true' && format('type=registry,ref={0}:cache', steps.image.outputs.imagename) || '' }}
+          cache-to: ${{ inputs.enable-cache == 'true' && format('type=registry,ref={0}:cache,mode=max,compression=zstd', steps.image.outputs.imagename) || '' }}
 
       - name: Report image sizes
         if: ${{ inputs.report-image-size == 'true' }}
+        shell: bash
         run: |
           echo "## 📦 Docker Image Sizes" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -223,12 +218,3 @@ jobs:
 
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "💡 *Sizes shown are for uncompressed images. Registry sizes may be smaller due to compression.*" >> $GITHUB_STEP_SUMMARY
-
-      - # Fixes
-        # https://github.com/docker/build-push-action/issues/252
-        # https://github.com/moby/buildkit/issues/1896
-        name: Move cache
-        if: ${{ inputs.enable-cache == 'true' }}
-        run: |
-          rm -rf docker-cache
-          mv docker-cache-new docker-cache
