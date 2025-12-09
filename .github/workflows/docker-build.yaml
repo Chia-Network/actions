@@ -228,18 +228,18 @@ jobs:
               
               echo "DEBUG: Found digest: '$DIGEST' for platform $platform"
               
-              # Get size for this platform
+              # Get size for this platform using compressed layer sizes from manifest
               if [ -n "$DIGEST" ] && [ "$DIGEST" != "null" ]; then
                 echo "DEBUG: Found digest: $DIGEST for platform $platform"
                 
-                # Inspect the manifest using the digest
-                MANIFEST_JSON=$(docker manifest inspect "${IMAGE_NAME}@${DIGEST}" 2>&1)
+                # Use buildx imagetools inspect which works with local buildx cache
+                MANIFEST_JSON=$(docker buildx imagetools inspect "${IMAGE_NAME}@${DIGEST}" --raw 2>&1)
                 if [ $? -eq 0 ] && [ -n "$MANIFEST_JSON" ]; then
-                  # Sum up all layer sizes plus config size
+                  # Sum up all layer sizes plus config size (compressed sizes)
                   size=$(echo "$MANIFEST_JSON" | jq -r '[.layers[]?.size // 0, .config.size // 0] | add' 2>/dev/null || echo "")
-                  echo "DEBUG: Calculated size from manifest: '$size'"
+                  echo "DEBUG: Calculated compressed size from manifest: '$size'"
                 else
-                  echo "DEBUG: Failed to inspect manifest"
+                  echo "DEBUG: Failed to inspect manifest: ${MANIFEST_JSON:0:200}"
                   size=""
                 fi
               else
@@ -267,4 +267,4 @@ jobs:
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "💡 *Sizes shown are for uncompressed images. Registry sizes may be smaller due to compression.*" >> $GITHUB_STEP_SUMMARY
+          echo "💡 *Sizes shown are compressed layer sizes from the manifest. Actual disk usage (virtual size) may be larger when images are loaded.*" >> $GITHUB_STEP_SUMMARY
