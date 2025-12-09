@@ -170,28 +170,55 @@ jobs:
           echo "Image: \`$IMAGE_NAME\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Parse platforms and get image sizes for each architecture
+          # Construct image reference using SHA tag (format: sha-<commit-sha>)
+          IMAGE_REF="${IMAGE_NAME}:sha-${{ github.sha }}"
+
+          # Try to install jq if not present
+          if ! command -v jq >/dev/null 2>&1; then
+            echo "jq not found, attempting to install..."
+            ( command -v apk && apk add jq ) || true
+            ( command -v apt-get && apt-get update && apt-get install -y jq ) || true
+          fi
+
+          # Check if jq is available after installation attempts
+          if ! command -v jq >/dev/null 2>&1; then
+            echo "⚠️  jq is not available and could not be installed. Skipping image size reporting." >> $GITHUB_STEP_SUMMARY
+            echo "⚠️  jq is not available and could not be installed. Skipping image size reporting."
+            exit 0
+          fi
+
+          # Parse platforms
           IFS=',' read -ra PLATFORMS <<< "${{ inputs.docker-platforms }}"
 
           echo "| Architecture | Size |" >> $GITHUB_STEP_SUMMARY
           echo "|--------------|------|" >> $GITHUB_STEP_SUMMARY
 
-          for platform in "${PLATFORMS[@]}"; do
-            # Clean up platform string (remove spaces)
-            platform=$(echo "$platform" | xargs)
+          # Inspect the local multi-arch image manifest
+          # This gets all architectures without rebuilding
+          INSPECT_OUTPUT=$(docker manifest inspect "$IMAGE_REF" 2>/dev/null || echo "")
 
-            echo "Getting size for $platform..."
-            if docker buildx build \
-              --platform "$platform" \
-              --load \
-              --tag "temp-${platform//\//-}" \
-              --cache-from type=local,src=docker-cache \
-              --file "${{ inputs.dockerfile }}" \
-              "${{ inputs.docker-context }}" >/dev/null 2>&1; then
+          if [ -z "$INSPECT_OUTPUT" ]; then
+            echo "| *All* | ⚠️  Failed to inspect image manifest |" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️  Failed to inspect image manifest: $IMAGE_REF"
+          else
+            # Parse each platform and extract size from inspect output
+            for platform in "${PLATFORMS[@]}"; do
+              # Clean up platform string (remove spaces)
+              platform=$(echo "$platform" | xargs)
+              
+              # Extract OS and Arch from platform (e.g., "linux/amd64" -> os="linux", arch="amd64")
+              IFS='/' read -ra PLATFORM_PARTS <<< "$platform"
+              PLATFORM_OS="${PLATFORM_PARTS[0]}"
+              PLATFORM_ARCH="${PLATFORM_PARTS[1]}"
 
-              # Get image size
-              if docker image inspect "temp-${platform//\//-}" >/dev/null 2>&1; then
-                size=$(docker image inspect "temp-${platform//\//-}" --format='{{.Size}}')
+              echo "Getting size for $platform..."
+
+              # Use jq to find the manifest matching this platform and get its size
+              size=$(echo "$INSPECT_OUTPUT" | jq -r --arg os "$PLATFORM_OS" --arg arch "$PLATFORM_ARCH" '
+                .manifests[] | select(.platform.os == $os and .platform.arch == $arch) | .size // empty
+              ' 2>/dev/null || echo "")
+
+              if [ -n "$size" ] && [ "$size" != "null" ] && [ "$size" != "0" ]; then
                 size_mb=$((size / 1024 / 1024))
                 size_gb=$((size_mb / 1024))
 
@@ -203,18 +230,12 @@ jobs:
 
                 echo "| \`$platform\` | \`$size_display\` |" >> $GITHUB_STEP_SUMMARY
                 echo "✅ $platform: $size_display"
-
-                # Clean up the temporary image
-                docker rmi "temp-${platform//\//-}" >/dev/null 2>&1 || true
               else
-                echo "| \`$platform\` | ❌ Failed to inspect |" >> $GITHUB_STEP_SUMMARY
-                echo "❌ $platform: Failed to inspect image"
+                echo "| \`$platform\` | ⚠️  Size unavailable |" >> $GITHUB_STEP_SUMMARY
+                echo "⚠️  $platform: Could not extract size from manifest"
               fi
-            else
-              echo "| \`$platform\` | ⚠️  Build failed |" >> $GITHUB_STEP_SUMMARY
-              echo "⚠️  $platform: Failed to build/load image"
-            fi
-          done
+            done
+          fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "💡 *Sizes shown are for uncompressed images. Registry sizes may be smaller due to compression.*" >> $GITHUB_STEP_SUMMARY
