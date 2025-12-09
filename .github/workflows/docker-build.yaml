@@ -228,10 +228,28 @@ jobs:
                 .manifests[] | select(.platform.os == $os and .platform.architecture == $arch) | .digest // empty
               ' 2>/dev/null || echo "")
               
+              echo "DEBUG: Found digest: '$DIGEST' for platform $platform" >> $GITHUB_STEP_SUMMARY
+              
               # Use docker image inspect to get the Size field directly
               if [ -n "$DIGEST" ] && [ "$DIGEST" != "null" ]; then
-                size=$(docker image inspect "${IMAGE_NAME}@${DIGEST}" --format='{{.Size}}' 2>/dev/null || echo "")
-                echo "DEBUG: Extracted size value: '$size' (from digest $DIGEST)" >> $GITHUB_STEP_SUMMARY
+                IMAGE_REF_WITH_DIGEST="${IMAGE_NAME}@${DIGEST}"
+                echo "DEBUG: Attempting to inspect: $IMAGE_REF_WITH_DIGEST" >> $GITHUB_STEP_SUMMARY
+                
+                # Try to inspect and capture both stdout and stderr
+                INSPECT_RESULT=$(docker image inspect "$IMAGE_REF_WITH_DIGEST" --format='{{.Size}}' 2>&1)
+                INSPECT_EXIT_CODE=$?
+                
+                echo "DEBUG: docker image inspect exit code: $INSPECT_EXIT_CODE" >> $GITHUB_STEP_SUMMARY
+                echo "DEBUG: docker image inspect output: '$INSPECT_RESULT'" >> $GITHUB_STEP_SUMMARY
+                
+                if [ $INSPECT_EXIT_CODE -eq 0 ] && [ -n "$INSPECT_RESULT" ]; then
+                  size="$INSPECT_RESULT"
+                else
+                  # Try full inspect to see what we get
+                  FULL_INSPECT=$(docker image inspect "$IMAGE_REF_WITH_DIGEST" 2>&1)
+                  echo "DEBUG: Full inspect output (first 500 chars): ${FULL_INSPECT:0:500}" >> $GITHUB_STEP_SUMMARY
+                  size=""
+                fi
               else
                 size=""
                 echo "DEBUG: Could not find digest for platform" >> $GITHUB_STEP_SUMMARY
