@@ -223,12 +223,19 @@ jobs:
               echo "Getting size for $platform..."
               echo "DEBUG: Looking for platform os=$PLATFORM_OS arch=$PLATFORM_ARCH" >> $GITHUB_STEP_SUMMARY
 
-              # Use jq to find the manifest matching this platform and get its size
-              size=$(echo "$INSPECT_OUTPUT" | jq -r --arg os "$PLATFORM_OS" --arg arch "$PLATFORM_ARCH" '
-                .manifests[] | select(.platform.os == $os and .platform.architecture == $arch) | .size // empty
+              # Get the digest for this platform
+              DIGEST=$(echo "$INSPECT_OUTPUT" | jq -r --arg os "$PLATFORM_OS" --arg arch "$PLATFORM_ARCH" '
+                .manifests[] | select(.platform.os == $os and .platform.architecture == $arch) | .digest // empty
               ' 2>/dev/null || echo "")
               
-              echo "DEBUG: Extracted size value: '$size'" >> $GITHUB_STEP_SUMMARY
+              # Use docker image inspect to get the Size field directly
+              if [ -n "$DIGEST" ] && [ "$DIGEST" != "null" ]; then
+                size=$(docker image inspect "${IMAGE_NAME}@${DIGEST}" --format='{{.Size}}' 2>/dev/null || echo "")
+                echo "DEBUG: Extracted size value: '$size' (from digest $DIGEST)" >> $GITHUB_STEP_SUMMARY
+              else
+                size=""
+                echo "DEBUG: Could not find digest for platform" >> $GITHUB_STEP_SUMMARY
+              fi
 
               if [ -n "$size" ] && [ "$size" != "null" ] && [ "$size" != "0" ]; then
                 size_mb=$((size / 1024 / 1024))
