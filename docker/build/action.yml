@@ -88,12 +88,18 @@ runs:
       id: image
       shell: bash
       run: |
-        export subpath="${{ inputs.image_subpath }}"
-        if [ "$subpath" == '' ]; then
-          echo "imagename=ghcr.io/${{ github.repository }}" >> "$GITHUB_OUTPUT"
+        subpath="${{ inputs.image_subpath }}"
+
+        if [[ -z "$subpath" ]]; then
+          imagename="ghcr.io/${{ github.repository }}"
         else
-          echo "imagename=ghcr.io/${{ github.repository }}/${subpath}" >> "$GITHUB_OUTPUT"
+          imagename="ghcr.io/${{ github.repository }}/${subpath}"
         fi
+
+        # Force lowercase
+        imagename="$(echo "$imagename" | tr '[:upper:]' '[:lower:]')"
+
+        echo "imagename=$imagename" >> "$GITHUB_OUTPUT"
 
     - name: Docker meta
       id: meta
