@@ -228,24 +228,18 @@ jobs:
               
               echo "DEBUG: Found digest: '$DIGEST' for platform $platform"
               
-              # Use docker image inspect to get the Size field directly
+              # Get size for this platform
               if [ -n "$DIGEST" ] && [ "$DIGEST" != "null" ]; then
-                IMAGE_REF_WITH_DIGEST="${IMAGE_NAME}@${DIGEST}"
-                echo "DEBUG: Attempting to inspect: $IMAGE_REF_WITH_DIGEST"
+                echo "DEBUG: Found digest: $DIGEST for platform $platform"
                 
-                # Try to inspect and capture both stdout and stderr
-                INSPECT_RESULT=$(docker image inspect "$IMAGE_REF_WITH_DIGEST" --format='{{.Size}}' 2>&1)
-                INSPECT_EXIT_CODE=$?
-                
-                echo "DEBUG: docker image inspect exit code: $INSPECT_EXIT_CODE"
-                echo "DEBUG: docker image inspect output: '$INSPECT_RESULT'"
-                
-                if [ $INSPECT_EXIT_CODE -eq 0 ] && [ -n "$INSPECT_RESULT" ]; then
-                  size="$INSPECT_RESULT"
+                # Inspect the manifest using the digest
+                MANIFEST_JSON=$(docker manifest inspect "${IMAGE_NAME}@${DIGEST}" 2>&1)
+                if [ $? -eq 0 ] && [ -n "$MANIFEST_JSON" ]; then
+                  # Sum up all layer sizes plus config size
+                  size=$(echo "$MANIFEST_JSON" | jq -r '[.layers[]?.size // 0, .config.size // 0] | add' 2>/dev/null || echo "")
+                  echo "DEBUG: Calculated size from manifest: '$size'"
                 else
-                  # Try full inspect to see what we get
-                  FULL_INSPECT=$(docker image inspect "$IMAGE_REF_WITH_DIGEST" 2>&1)
-                  echo "DEBUG: Full inspect output (first 500 chars): ${FULL_INSPECT:0:500}"
+                  echo "DEBUG: Failed to inspect manifest"
                   size=""
                 fi
               else
