@@ -208,7 +208,7 @@ jobs:
             echo '```' >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "=== DEBUG: Available platforms in manifest ===" >> $GITHUB_STEP_SUMMARY
-            echo "$INSPECT_OUTPUT" | jq -r '.manifests[]? | "\(.platform.os)/\(.platform.arch) - size: \(.size // "N/A")"' >> $GITHUB_STEP_SUMMARY 2>&1 || echo "Could not parse platforms" >> $GITHUB_STEP_SUMMARY
+            echo "$INSPECT_OUTPUT" | jq -r '.manifests[]? | "\(.platform.os)/\(.platform.architecture) - size: \(.size // "N/A")"' >> $GITHUB_STEP_SUMMARY 2>&1 || echo "Could not parse platforms" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             # Parse each platform and extract size from inspect output
             for platform in "${PLATFORMS[@]}"; do
@@ -225,7 +225,7 @@ jobs:
 
               # Use jq to find the manifest matching this platform and get its size
               size=$(echo "$INSPECT_OUTPUT" | jq -r --arg os "$PLATFORM_OS" --arg arch "$PLATFORM_ARCH" '
-                .manifests[] | select(.platform.os == $os and .platform.arch == $arch) | .size // empty
+                .manifests[] | select(.platform.os == $os and .platform.architecture == $arch) | .size // empty
               ' 2>/dev/null || echo "")
               
               echo "DEBUG: Extracted size value: '$size'" >> $GITHUB_STEP_SUMMARY
