@@ -1,0 +1,299 @@
+name: "Build Multiarch Docker Image with Remote AWS ARM Builder"
+description: "Builds a Docker image for linux/amd64 and linux/arm64 with a remote aws arm builder, to avoid QEMU slowness"
+inputs:
+  aws_account_id:
+    description: "The AWS account ID to launch the remote instance in. Required for the assume role action"
+    required: true
+  aws_role:
+    description: "The role to assume to create the remote arm builder. Required for the assume role action"
+    required: true
+  aws_region:
+    description: "The region to launch the remote arm builder in. Required for the assume role action"
+    required: true
+  aws_vpc_id:
+    description: "The VPC to launch the instance into"
+    required: true
+  aws_subnet_id:
+    description: "The subnet to launch the instance into"
+    required: true
+  aws_ami_pattern:
+    description: "The Pattern to use to match the AMI to launch. Will launch the newest version matching this pattern"
+    required: true
+    default: "Chia_Buildx_Remote-arm64-*"
+  aws_instance_type:
+    description: "The type of instance to launch"
+    required: true
+    default: "t4g.large"
+  aws_keypair_name:
+    description: "The SSH Keypair to associate with the instance"
+    required: true
+  aws_volume_size:
+    description: "The size of the volume in the buidler instance"
+    required: true
+    default: "30"
+  docker-platforms:
+    description: "The OS/arch platforms to pass to docker buildx"
+    required: false
+    default: "linux/amd64,linux/arm64"
+  docker-context:
+    description: "The docker build context directory"
+    required: false
+    default: .
+  dockerfile:
+    description: "The path to a Dockerfile"
+    required: false
+    default: "./Dockerfile"
+  image_subpath:
+    description: "Set this to a string sub-path to publish your image under"
+    required: false
+  build-args:
+    description: "Sets some docker build args"
+    required: false
+    default: ""
+  additional-tag:
+    description: "Set this to another tag name you'd like to publish"
+    required: false
+    default: ""
+  alternate-latest-mode:
+    description: "This creates a :latest tag on the default branch if set to true"
+    required: false
+    default: "false"
+  push:
+    description: "Whether or not to attempt to push the image to the registry"
+    required: false
+    default: "true"
+  enable-cache:
+    description: "Should the builds use docker cache"
+    required: false
+    default: "false"
+runs:
+  using: "composite"
+  steps:
+    - name: Get the runner's public IP for the security group
+      id: runner_ip
+      shell: bash
+      run: |
+        RUNNER_IP=$(curl -s -4 https://ip.cmm.io)
+        echo "Public IP Address is ${RUNNER_IP}"
+        echo "RUNNER_IP=$RUNNER_IP" >> $GITHUB_OUTPUT
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v5
+      with:
+        role-to-assume: arn:aws:iam::${{ inputs.aws_account_id }}:role/${{ inputs.aws_role }}
+        aws-region: ${{ inputs.aws_region }}
+
+    - name: Create Ephemeral SG
+      id: create_sg
+      run: |
+        SG_NAME="buildkit-$(openssl rand -hex 8)"
+        echo "SG_NAME=$SG_NAME" >> $GITHUB_OUTPUT
+
+        SG_ID=$(aws ec2 create-security-group \
+          --group-name "$SG_NAME" \
+          --description "BuildKit ephemeral SG" \
+          --vpc-id "${{ inputs.aws_vpc_id}}" \
+          --query 'GroupId' \
+          --output text)
+        echo "SG_ID=$SG_ID" >> $GITHUB_OUTPUT
+
+        # Tag SG with the GitHub workflow run ID
+        aws ec2 create-tags \
+          --resources "$SG_ID" \
+          --tags \
+          Key=WorkflowRunID,Value="${{ github.run_id }}" \
+          Key=Name,Value="$SG_NAME" \
+          Key=Owner,Value="GitHubActions" \
+          Key=Role,Value="EphemeralBuildKit"
+
+        # Allow SG ingress from this runner
+        aws ec2 authorize-security-group-ingress \
+          --group-id "$SG_ID" \
+          --protocol tcp \
+          --port 1234 \
+          --cidr "${{ steps.runner_ip.outputs.RUNNER_IP }}/32"
+
+    - name: Launch Buildx AMI
+      id: launch_ami
+      run: |
+        AMI_ID=$(aws ec2 describe-images \
+          --owners self \
+          --filters "Name=name,Values=${{ inputs.aws_ami_pattern }}" \
+          --query "sort_by(Images, &CreationDate)[-1].ImageId" \
+          --output text)
+        echo "Latest AMI ID: $AMI_ID"
+
+        INSTANCE_ID=$(aws ec2 run-instances \
+          --image-id "${AMI_ID}" \
+          --instance-type ${{ inputs.aws_instance_type }} \
+          --security-group-ids "${{ steps.create_sg.outputs.SG_ID }}" \
+          --subnet-id "${{ inputs.aws_subnet_id }}" \
+          --associate-public-ip-address \
+          --key-name "${{ inputs.aws_keypair_name }}" \
+          --block-device-mappings "[{\"DeviceName\":\"/dev/xvda\",\"Ebs\":{\"VolumeSize\":${{ inputs.aws_volume_size }},\"VolumeType\":\"gp3\"}}]" \
+          --tag-specifications "ResourceType=instance,Tags=[ \
+            {Key=Name,Value=BuildKit-Runner}, \
+            {Key=Owner,Value=GitHubActions}, \
+            {Key=WorkflowRunID,Value=${{ github.run_id }}} \
+          ]" \
+          --query "Instances[0].InstanceId" \
+          --output text)
+        echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_OUTPUT
+
+        # Wait only until the instance is running (NOT status checks)
+        aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
+
+        # Poll until public IP is assigned
+        echo "Waiting for public IP..."
+        for i in {1..30}; do
+          PUBLIC_IP=$(aws ec2 describe-instances \
+            --instance-ids "$INSTANCE_ID" \
+            --query "Reservations[0].Instances[0].PublicIpAddress" \
+            --output text)
+
+          if [[ "$PUBLIC_IP" != "None" && -n "$PUBLIC_IP" ]]; then
+            echo "PUBLIC_IP=$PUBLIC_IP" >> $GITHUB_OUTPUT
+            echo "Public IP: $PUBLIC_IP"
+            break
+          fi
+
+          sleep 2
+        done
+
+        if [[ -z "$PUBLIC_IP" || "$PUBLIC_IP" == "None" ]]; then
+          echo "Timed out waiting for public IP"
+          exit 1
+        fi
+
+        # Wait for BuildKit port 1234 to be reachable
+        echo "Waiting for BuildKit (port 1234)..."
+        for i in {1..60}; do
+          if nc -z "$PUBLIC_IP" 1234; then
+            echo "BuildKit is reachable on $PUBLIC_IP:1234"
+          break
+            fi
+          sleep 2
+        done
+
+        if ! nc -z "$PUBLIC_IP" 1234; then
+          echo "Timed out waiting for BuildKit to become available"
+          exit 1
+        fi
+
+    - name: Start local BuildKit daemon
+      run: |
+        sudo docker run -d \
+          --privileged \
+          --name buildkitd \
+          -p 1234:1234 \
+          moby/buildkit:latest \
+          --addr tcp://0.0.0.0:1234
+
+    - name: Add local builder
+      run: |
+        docker buildx create \
+          --use \
+          --name builder \
+          --driver remote \
+          --platform linux/amd64 \
+          tcp://127.0.0.1:1234
+
+    - name: Add the remote builder
+      run: |
+        docker buildx create \
+          --append \
+          --name builder \
+          --driver remote \
+          --platform linux/arm64 \
+          tcp://${{ steps.launch_ami.outputs.PUBLIC_IP }}:1234
+
+    - name: Inspect builder
+      run: docker buildx inspect --bootstrap
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+
+    - name: Set image name
+      id: image
+      shell: bash
+      run: |
+        subpath="${{ inputs.image_subpath }}"
+
+        if [[ -z "$subpath" ]]; then
+          imagename="ghcr.io/${{ github.repository }}"
+        else
+          imagename="ghcr.io/${{ github.repository }}/${subpath}"
+        fi
+
+        # Force lowercase
+        imagename="$(echo "$imagename" | tr '[:upper:]' '[:lower:]')"
+
+        echo "imagename=$imagename" >> "$GITHUB_OUTPUT"
+
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: |
+          ${{ steps.image.outputs.imagename }}
+        flavor: |
+          latest=auto
+          prefix=
+          suffix=
+        tags: |
+          type=raw,value=main,enable={{is_default_branch}}
+          type=raw,value=latest,enable=${{ inputs.alternate-latest-mode && endsWith(github.ref, github.event.repository.default_branch) }}
+          type=raw,value=${{ inputs.additional-tag }},enable=${{ inputs.additional-tag != '' }}
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          type=sha,format=long
+
+    - name: Build Docker Container
+      uses: docker/build-push-action@v6
+      with:
+        context: ${{ inputs.docker-context }}
+        file: ${{ inputs.dockerfile }}
+        platforms: ${{ inputs.docker-platforms }}
+        push: ${{ inputs.push }}
+        tags: ${{ steps.meta.outputs.tags }}
+        build-args: ${{ inputs.build-args }}
+        cache-from: ${{ inputs.enable-cache == 'true' && format('type=registry,ref={0}:cache', steps.image.outputs.imagename) || '' }}
+        cache-to: ${{ inputs.enable-cache == 'true' && format('type=registry,ref={0}:cache,mode=max,compression=zstd', steps.image.outputs.imagename) || '' }}
+
+    - name: Terminate BuildKit instance
+      if: always()
+      run: |
+        INSTANCE_ID="${{ steps.launch_ami.outputs.INSTANCE_ID }}"
+
+        if [ -z "$INSTANCE_ID" ] || [ "$INSTANCE_ID" = "None" ]; then
+          echo "No instance ID found, skipping termination"
+          exit 0
+        fi
+
+        echo "Terminating instance $INSTANCE_ID"
+        aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
+
+        echo "Waiting for instance to be terminated..."
+        aws ec2 wait instance-terminated --instance-ids "$INSTANCE_ID"
+
+        echo "Instance $INSTANCE_ID successfully terminated"
+
+    - name: Delete BuildKit security group
+      if: always()
+      run: |
+        SG_ID="${{ steps.create_sg.outputs.SG_ID }}"
+
+        if [ -z "$SG_ID" ] || [ "$SG_ID" = "None" ]; then
+          echo "No security group ID found, skipping deletion"
+          exit 0
+        fi
+
+        echo "Deleting security group $SG_ID"
+        aws ec2 delete-security-group --group-id "$SG_ID"
+
+        echo "Security group $SG_ID deleted"
