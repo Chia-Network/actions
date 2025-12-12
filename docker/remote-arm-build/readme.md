@@ -31,5 +31,3 @@ jobs:
 This requires an AWS account with an ARM64 AMI present in the account that this action can launch. The AMI must start
 buildkitd on boot and it must be configured to accept remote connections on port 1234. A security group will be created
 that only allows inbound connections from the public IP of the runner that is running the job.
-
-
