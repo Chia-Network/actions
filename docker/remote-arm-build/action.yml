@@ -65,7 +65,7 @@ inputs:
   enable-cache:
     description: "Should the builds use docker cache"
     required: false
-    default: "false"
+    default: "true"
 runs:
   using: "composite"
   steps:
@@ -85,6 +85,7 @@ runs:
 
     - name: Create Ephemeral SG
       id: create_sg
+      shell: bash
       run: |
         SG_NAME="buildkit-$(openssl rand -hex 8)"
         echo "SG_NAME=$SG_NAME" >> $GITHUB_OUTPUT
@@ -115,6 +116,7 @@ runs:
 
     - name: Launch Buildx AMI
       id: launch_ami
+      shell: bash
       run: |
         AMI_ID=$(aws ec2 describe-images \
           --owners self \
@@ -181,6 +183,7 @@ runs:
         fi
 
     - name: Start local BuildKit daemon
+      shell: bash
       run: |
         sudo docker run -d \
           --privileged \
@@ -190,6 +193,7 @@ runs:
           --addr tcp://0.0.0.0:1234
 
     - name: Add local builder
+      shell: bash
       run: |
         docker buildx create \
           --use \
@@ -199,6 +203,7 @@ runs:
           tcp://127.0.0.1:1234
 
     - name: Add the remote builder
+      shell: bash
       run: |
         docker buildx create \
           --append \
@@ -208,6 +213,7 @@ runs:
           tcp://${{ steps.launch_ami.outputs.PUBLIC_IP }}:1234
 
     - name: Inspect builder
+      shell: bash
       run: docker buildx inspect --bootstrap
 
     - name: Login to GitHub Container Registry
@@ -267,6 +273,7 @@ runs:
 
     - name: Terminate BuildKit instance
       if: always()
+      shell: bash
       run: |
         INSTANCE_ID="${{ steps.launch_ami.outputs.INSTANCE_ID }}"
 
@@ -285,6 +292,7 @@ runs:
 
     - name: Delete BuildKit security group
       if: always()
+      shell: bash
       run: |
         SG_ID="${{ steps.create_sg.outputs.SG_ID }}"
 

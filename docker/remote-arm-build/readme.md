@@ -1,10 +1,19 @@
 # Docker build
 
 ```yaml
-- uses: actions/checkout@v6
+permissions:
+  id-token: write
+  contents: read
+  packages: write
 
-# Some pre-work
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
 
-- name: Package
-  uses: Chia-Network/actions/docker/remote-arm-build@main
+      # Some pre-work
+
+      - name: Package
+        uses: Chia-Network/actions/docker/remote-arm-build@main
 ```
