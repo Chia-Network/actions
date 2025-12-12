@@ -23,7 +23,7 @@ jobs:
           aws_region: us-west-2
           aws_vpc_id: vpc-abcd1234
           aws_subnet_id: subnet-abcd1234
-          aws_keypair_name: SSHKeyPairInEC2
+          aws_keypair_name: SSHKeyPairInEC2 # gitleaks:allow
 ```
 
 ## Prerequisites
