@@ -109,11 +109,11 @@ jobs:
                 intel:
                   github: [ubuntu-latest]
               container:
-                "3.10": chianetwork/ubuntu-20.04-builder:latest
+                "3.11": chianetwork/ubuntu-20.04-builder:latest
             python:
-              name: "3.10"
-              check: "3.10"
-              matrix: "3.10"
+              name: "3.11"
+              check: "3.11"
+              matrix: "3.11"
             arch:
               name: Intel
               matrix: intel
@@ -129,11 +129,11 @@ jobs:
                 arm:
                   chia: [Linux, ARM64]
               container:
-                "3.10": chianetwork/ubuntu-20.04-builder:latest
+                "3.11": chianetwork/ubuntu-20.04-builder:latest
             python:
-              name: "3.10"
-              check: "3.10"
-              matrix: "3.10"
+              name: "3.11"
+              check: "3.11"
+              matrix: "3.11"
             arch:
               name: ARM
               matrix: arm
@@ -149,11 +149,11 @@ jobs:
                 intel:
                   github: [ubuntu-latest]
               container:
-                "3.10": chianetwork/rocky8-builder:latest
+                "3.11": chianetwork/rocky8-builder:latest
             python:
-              name: "3.10"
-              check: "3.10"
-              matrix: "3.10"
+              name: "3.11"
+              check: "3.11"
+              matrix: "3.11"
             arch:
               name: Intel
               matrix: intel
