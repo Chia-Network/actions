@@ -1,0 +1,12 @@
+name: "Make Free Space"
+description: "Deletes some things from GitHub hosted runners that we don't usually use, to free up a significant amount of space"
+runs:
+  using: "composite"
+  steps:
+    # This frees up about 10.5 GB worth of space
+    - name: Remove some unused preinstalled dependencies
+      shell: bash
+      run: |
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/.ghcup
