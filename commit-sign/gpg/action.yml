@@ -26,7 +26,7 @@ runs:
         ( command -v apt-get && ${SUDO} apt-get update && ${SUDO} apt-get install -y git gpg gpg-agent ) || true
       shell: sh
     - name: Call upstream import gpg action
-      uses: crazy-max/ghaction-import-gpg@v6
+      uses: crazy-max/ghaction-import-gpg@v7
       with:
         gpg_private_key: ${{ inputs.gpg_private_key }}
         passphrase: ${{ inputs.passphrase }}
