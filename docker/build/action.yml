@@ -122,7 +122,7 @@ runs:
           type=sha,format=long
 
     - name: Build Docker Container
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         context: ${{ inputs.docker-context }}
         file: ${{ inputs.dockerfile }}
