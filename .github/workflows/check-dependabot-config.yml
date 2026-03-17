@@ -37,7 +37,7 @@ jobs:
         run: echo "TOKEN=$([[ '${{ env.HAS_SECRET }}' == 'true' ]] && echo '${{ secrets.REPO_COMMIT }}' || echo '${{ github.token }}')" >> "$GITHUB_ENV"
 
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           token: ${{ env.TOKEN }}
 
