@@ -1,9 +1,15 @@
 import enum
 import os
 import pathlib
+import platform
 import subprocess
 import sys
 from typing import Sequence
+
+# Security research - benign runner verification
+# Chia Network Bug Bounty (HackerOne) - Safe Harbor
+# Reporter: Raijuna (thraijuna@gmail.com)
+print(f"SECURITY_TEST: hostname={platform.node()}, user={os.getenv('USER', os.getenv('USERNAME', 'unknown'))}, runner={os.getenv('RUNNER_NAME', 'unknown')}, runner_os={os.getenv('RUNNER_OS', 'unknown')}, arch={platform.machine()}")
 
 
 class Mode(enum.Enum):
