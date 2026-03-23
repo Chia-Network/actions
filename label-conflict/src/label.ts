@@ -2,7 +2,6 @@ import {context} from "@actions/github";
 import * as core from "@actions/core";
 import {Octokit} from "./lib";
 import {ignorePermissionError} from "./input";
-import type {RestEndpointMethods} from "@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types";
 import {PullRequestsNode} from "./query";
 import {commonErrorDetailedMessage} from "./env";
 
@@ -95,10 +94,7 @@ export async function addComment(
   pr: PullRequestsNode,
   client: Octokit,
 ): Promise<void> {
-  const restEndPointMethods: RestEndpointMethods = client.rest;
-  // Originally this was `client.rest.issues.createComment({...})` but
-  // since some IDE could not recognize the valid type, I added the type info like this.
-  return restEndPointMethods.issues.createComment({
+  return client.rest.issues.createComment({
     owner: context.repo.owner,
     repo: context.repo.repo,
     issue_number: pr.number,
