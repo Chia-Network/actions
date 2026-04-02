@@ -1,0 +1,27 @@
+name: "Check architecture"
+description: "Check that the runner architecture is as expected"
+
+inputs:
+  mode:
+    description: "the expected architecture"
+    required: true
+    type: choice
+    options:
+      - "intel"
+      - "arm"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check architecture (Linux/macOS)
+      if: runner.os == 'Linux' || runner.os == 'macOS'
+      run: |
+        CHECK_NAME=$(uname -p)
+        echo "CHECK_NAME=${CHECK_NAME}"
+        [ "${CHECK_NAME}" = "${{ matrix.os.check-name[matrix.os.matrix] }}" ]
+
+    - name: Check architecture (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        # TODO: actually check
+        (Get-CimInstance Win32_operatingsystem).OSArchitecture
