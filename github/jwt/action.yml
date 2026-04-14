@@ -1,5 +1,10 @@
 name: "Gets JWT Token from GitHub"
 description: "Gets JWT token from github"
+inputs:
+  audience:
+    description: "The audience for the OIDC token request. If not specified, the token will be requested without an audience."
+    required: false
+    default: ""
 runs:
   using: "composite"
   steps:
@@ -17,10 +22,17 @@ runs:
 
     - name: Get JWT from GitHub
       shell: sh
+      env:
+        AUDIENCE: ${{ inputs.audience }}
       run: |
+        REQUEST_URL="$ACTIONS_ID_TOKEN_REQUEST_URL"
+        if [ -n "$AUDIENCE" ]; then
+          REQUEST_URL="${REQUEST_URL}&audience=${AUDIENCE}"
+        fi
+
         i=1
         while [ "${i}" -le 5 ]; do
-          JWT_TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL" | jq -r '.value')
+          JWT_TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$REQUEST_URL" | jq -r '.value')
           if [ -n "$JWT_TOKEN" ]; then
             echo "::add-mask::$JWT_TOKEN"
             echo "JWT_TOKEN=$JWT_TOKEN" >> "$GITHUB_ENV"
