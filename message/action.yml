@@ -1,0 +1,46 @@
+name: "Send message via alert-receiver"
+description: "Gets a GitHub JWT and sends a message to the alert-receiver worker"
+inputs:
+  receiver_url:
+    description: "Base URL of the alert-receiver worker"
+    required: false
+    default: "https://alert-receiver.chiaops.com/"
+  receiver_route:
+    description: "The route to call on the receiver (appended to receiver_url)"
+    required: true
+  message:
+    description: "The message to send in the POST body"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Get GitHub JWT
+      uses: Chia-Network/actions/github/jwt@main
+      with:
+        audience: ${{ inputs.receiver_url }}
+
+    - name: Send message
+      shell: sh
+      env:
+        RECEIVER_URL: ${{ inputs.receiver_url }}
+        RECEIVER_ROUTE: ${{ inputs.receiver_route }}
+        MESSAGE: ${{ inputs.message }}
+      run: |
+        BASE_URL="${RECEIVER_URL%/}"
+        ROUTE="${RECEIVER_ROUTE#/}"
+        FULL_URL="${BASE_URL}/${ROUTE}"
+
+        RESPONSE=$(curl -sS -w '\n%{http_code}' \
+          -X POST \
+          -H "Authorization: Bearer ${JWT_TOKEN}" \
+          -d "${MESSAGE}" \
+          "${FULL_URL}")
+        RESPONSE_CODE=$(echo "$RESPONSE" | tail -1)
+        RESPONSE_BODY=$(echo "$RESPONSE" | sed '$d')
+
+        echo "HTTP ${RESPONSE_CODE}: ${RESPONSE_BODY}"
+
+        if [ "$RESPONSE_CODE" != "200" ]; then
+          echo "Request failed"
+          exit 1
+        fi
