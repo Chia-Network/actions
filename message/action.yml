@@ -15,7 +15,7 @@ runs:
   using: "composite"
   steps:
     - name: Get GitHub JWT
-      uses: Chia-Network/actions/github/jwt@add-github-message-action
+      uses: Chia-Network/actions/github/jwt@main
       with:
         audience: ${{ inputs.receiver_url }}
 
