@@ -1,0 +1,74 @@
+name: "Setup Python"
+
+description: 'Set up a specific version of Python and add the command-line tools to the PATH.'
+
+inputs:
+  artifacts:
+    description: "The artifacts to upload.  Will be processed by bash so wildcards are allowed as in the default value `dist/*`."
+    required: false
+    default: "dist/*"
+  pypi_password:
+    description: "Password for uploading to PyPI.  This should generally be from GitHub secrets and be an API token."
+    required: true
+  test_pypi_password:
+    description: "Password for uploading to PyPI.  This should generally be from GitHub secrets and be an API token."
+    required: true
+  install_requirements:
+    description: "Generally requirements should be installed by the containing package so they can be pinned.  If that is not being done then this action can create a virtual environment for itself."
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Create virtual environment
+      if: ${{ fromJSON(inputs.install_requirements) }}
+      id: create_virtual_environment
+      shell: bash
+      run: |
+        TEMPORARY_DIRECTORY=$(mktemp --directory)
+        cd "${TEMPORARY_DIRECTORY}"
+        python -m venv venv
+        cd venv
+        echo ::set-output name=root::$(pwd)
+
+    # TODO: can, or should, this be referencing by path?
+    - uses: chia-network/actions/activate-venv@main
+      if: ${{ fromJSON(inputs.install_requirements) }}
+      with:
+        directories: ${{ toJSON([steps.create_virtual_environment.root]) }}
+
+    - name: Install requirements
+      if: ${{ fromJSON(inputs.install_requirements) }}
+      shell: bash
+      run: |
+        pip install twine
+
+    - name: Test for secrets access
+      id: check_secrets
+      shell: bash
+      run: |
+        unset HAS_SECRET
+        if [ -n "$SECRET" ]; then HAS_SECRET='true' ; fi
+        echo ::set-output name=HAS_SECRET::${HAS_SECRET}
+      env:
+        SECRET: "${{ inputs.test_pypi_password }}"
+
+    - name: Publish distribution to PyPI
+      if: startsWith(github.event.ref, 'refs/tags') && steps.check_secrets.outputs.HAS_SECRET
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_NON_INTERACTIVE: 1
+        TWINE_PASSWORD: "${{ inputs.pypi_password }}"
+      run: twine upload --non-interactive --skip-existing --verbose '${{ inputs.artifacts }}'
+
+    - name: Publish distribution to Test PyPI
+      if: steps.check_secrets.outputs.HAS_SECRET
+      env:
+        TWINE_REPOSITORY_URL: https://test.pypi.org/legacy/
+        TWINE_USERNAME: __token__
+        TWINE_NON_INTERACTIVE: 1
+        TWINE_PASSWORD: "${{ inputs.test_pypi_password }}"
+      run: twine upload --non-interactive --skip-existing --verbose '${{ inputs.artifacts }}'
+
+    # TODO: deactivate the environment
