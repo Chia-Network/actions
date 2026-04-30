@@ -2,13 +2,16 @@ name: "Connect Tailscale"
 description: "Wrapper around the official tailscale action to add support for containers and ssh connections"
 inputs:
   oauth-client-id:
-    description: "Your Tailscale OAuth Client ID."
+    description: "This is your Tailscale OAuth/OIDC Client ID."
     required: true
   oauth-secret:
-    description: "Your Tailscale OAuth Client Secret."
-    required: true
+    description: "If using an OAuth trust credential from Tailscale this is your Tailscale OAuth Client Secret."
+    required: false
+  oidc-audience:
+    description: "If using an OIDC trust credential from Tailscale this is your aud claim."
+    required: false
   tags:
-    description: "Comma separated list of Tags to be applied to nodes. The OAuth client must have permission to apply these tags."
+    description: "Comma separated list of Tags to be applied to nodes. The Tailscale trust credential must have permission to apply these tags."
     required: true
   args:
     description: "Optional additional arguments to `tailscale up`"
@@ -27,11 +30,38 @@ runs:
         ( command -v apk && apk add bash coreutils curl netcat-openbsd openssh-client sudo ) || true
         ( command -v apt-get && apt-get update && apt-get install -y curl netcat-openbsd openssh-client sudo ) || true
 
-    - name: Tailscale
+    - name: Validate Tailscale trust credential inputs
+      shell: sh
+      env:
+        OAUTH_SECRET: ${{ inputs.oauth-secret }}
+        OIDC_AUDIENCE: ${{ inputs.oidc-audience }}
+      run: |
+        if [ -n "$OAUTH_SECRET" ] && [ -n "$OIDC_AUDIENCE" ]; then
+          echo "::error::Provide either 'oauth-secret' or 'oidc-audience', not both."
+          exit 1
+        fi
+        if [ -z "$OAUTH_SECRET" ] && [ -z "$OIDC_AUDIENCE" ]; then
+          echo "::error::One of 'oauth-secret' or 'oidc-audience' must be provided."
+          exit 1
+        fi
+
+    - name: Tailscale (OAuth)
+      if: inputs.oauth-secret != ''
       uses: tailscale/github-action@v4
       with:
         oauth-client-id: ${{ inputs.oauth-client-id }}
         oauth-secret: ${{ inputs.oauth-secret }}
+        tags: ${{ inputs.tags }}
+        args: ${{ inputs.args }}
+        tailscaled-args: "--tun=userspace-networking --socks5-server=localhost:1055"
+        hostname: ${{ inputs.hostname }}
+
+    - name: Tailscale (OIDC)
+      if: inputs.oidc-audience != ''
+      uses: tailscale/github-action@v4
+      with:
+        oauth-client-id: ${{ inputs.oauth-client-id }}
+        audience: ${{ inputs.oidc-audience }}
         tags: ${{ inputs.tags }}
         args: ${{ inputs.args }}
         tailscaled-args: "--tun=userspace-networking --socks5-server=localhost:1055"
