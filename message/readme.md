@@ -4,11 +4,11 @@ Sends a message to the alert-receiver worker using GitHub OIDC for authenticatio
 
 ## Inputs
 
-| Name | Required | Default | Description |
-|------|----------|---------|-------------|
-| `receiver_url` | No | `https://alert-receiver.chiaops.com/` | Base URL of the alert-receiver worker |
-| `receiver_route` | Yes | | The route to call on the receiver (appended to `receiver_url`) |
-| `message` | Yes | | The message to send in the POST body |
+| Name             | Required | Default                               | Description                                                    |
+| ---------------- | -------- | ------------------------------------- | -------------------------------------------------------------- |
+| `receiver_url`   | No       | `https://alert-receiver.chiaops.com/` | Base URL of the alert-receiver worker                          |
+| `receiver_route` | Yes      |                                       | The route to call on the receiver (appended to `receiver_url`) |
+| `message`        | Yes      |                                       | The message to send in the POST body                           |
 
 ## Permissions
 
