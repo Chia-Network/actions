@@ -27,8 +27,14 @@ runs:
     - name: Install deps
       shell: sh
       run: |
-        ( command -v apk && apk add bash coreutils curl netcat-openbsd openssh-client sudo ) || true
-        ( command -v apt-get && apt-get update && apt-get install -y curl netcat-openbsd openssh-client sudo ) || true
+        # If running as root, then don't use sudo
+        if [ "$(id -u)" -eq 0 ]; then
+            SUDO=""
+        else
+            SUDO=$(command -v sudo || echo "")
+        fi
+        ( command -v apk && ${SUDO} apk add bash coreutils curl netcat-openbsd openssh-client sudo ) || true
+        ( command -v apt-get && ${SUDO} apt-get update && ${SUDO} apt-get install -y curl netcat-openbsd openssh-client sudo ) || true
 
     - name: Validate Tailscale trust credential inputs
       shell: sh
@@ -82,4 +88,14 @@ runs:
     - name: Fix /etc/passwd file for alternate $HOME path
       shell: sh
       run: |
-        sed -i "s~root:/root~root:$HOME~g" /etc/passwd
+        # If running as root, then don't use sudo
+        if [ "$(id -u)" -eq 0 ]; then
+            SUDO=""
+        else
+            SUDO=$(command -v sudo || echo "")
+        fi
+        CURRENT_USER=$(id -un)
+        CURRENT_HOME_IN_PASSWD=$(getent passwd "$CURRENT_USER" | cut -d: -f6)
+        if [ "$CURRENT_HOME_IN_PASSWD" != "$HOME" ]; then
+            ${SUDO} sed -i "s~${CURRENT_USER}:${CURRENT_HOME_IN_PASSWD}~${CURRENT_USER}:${HOME}~g" /etc/passwd
+        fi
