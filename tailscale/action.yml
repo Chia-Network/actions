@@ -21,6 +21,10 @@ inputs:
     description: "Fixed hostname to use."
     required: false
     default: ""
+  userspace-networking:
+    description: "Use userspace networking mode (--tun=userspace-networking). Required on runners that don't support TUN devices. When false, kernel TUN is used and traffic routes normally."
+    required: false
+    default: "true"
 runs:
   using: "composite"
   steps:
@@ -59,7 +63,7 @@ runs:
         oauth-secret: ${{ inputs.oauth-secret }}
         tags: ${{ inputs.tags }}
         args: ${{ inputs.args }}
-        tailscaled-args: "--tun=userspace-networking --socks5-server=localhost:1055"
+        tailscaled-args: ${{ inputs.userspace-networking == 'true' && '--tun=userspace-networking --socks5-server=localhost:1055' || '' }}
         hostname: ${{ inputs.hostname }}
 
     - name: Tailscale (OIDC)
@@ -70,10 +74,11 @@ runs:
         audience: ${{ inputs.oidc-audience }}
         tags: ${{ inputs.tags }}
         args: ${{ inputs.args }}
-        tailscaled-args: "--tun=userspace-networking --socks5-server=localhost:1055"
+        tailscaled-args: ${{ inputs.userspace-networking == 'true' && '--tun=userspace-networking --socks5-server=localhost:1055' || '' }}
         hostname: ${{ inputs.hostname }}
 
     - name: Add SSH Proxy Config
+      if: inputs.userspace-networking == 'true'
       shell: sh
       run: |
         mkdir -p ~/.ssh
