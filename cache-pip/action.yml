@@ -14,6 +14,17 @@ inputs:
       - "setuptools"
       - "poetry"
 
+outputs:
+  cache-hit:
+    description: Whether the primary cache key was restored
+    value: ${{ steps.cache-restore-result.outputs.cache-hit }}
+  cache-primary-key:
+    description: Cache key used for restore and save
+    value: ${{ steps.cache-restore-result.outputs.cache-primary-key }}
+  dir:
+    description: Local cache directory path
+    value: ${{ steps.create-directory.outputs.dir }}
+
 runs:
   using: "composite"
   steps:
@@ -25,8 +36,10 @@ runs:
       run: |
         python "${GITHUB_ACTION_PATH}/cache_pip.py" "${{ inputs.mode }}"
 
-    - name: Cache pip
-      uses: actions/cache@v5
+    - name: Restore pip cache
+      id: restore-pip-cache
+      uses: actions/cache/restore@v5
+      continue-on-error: true
       env:
         SEGMENT_DOWNLOAD_TIMEOUT_MIN: 1
       with:
@@ -35,7 +48,46 @@ runs:
         restore-keys: |
           ${{ runner.os }}-${{ inputs.mode }}-
 
+    - name: Retry pip cache restore
+      id: retry-pip-cache
+      if: steps.restore-pip-cache.outcome == 'failure'
+      uses: actions/cache/restore@v5
+      continue-on-error: true
+      env:
+        SEGMENT_DOWNLOAD_TIMEOUT_MIN: 1
+      with:
+        path: ${{ steps.create-directory.outputs.dir }}
+        key: ${{ runner.os }}-${{ inputs.mode }}-${{ (inputs.mode == 'pip' && hashFiles('**/setup.py')) || (inputs.mode == 'poetry' && hashFiles('**/poetry.lock')) || 'unhandled_case' }}
+        restore-keys: |
+          ${{ runner.os }}-${{ inputs.mode }}-
+
+    - name: Set cache restore outputs
+      id: cache-restore-result
+      shell: bash
+      run: |
+        if [ "${{ steps.retry-pip-cache.outcome }}" = "success" ]; then
+          echo "cache-hit=${{ steps.retry-pip-cache.outputs.cache-hit }}" >> "$GITHUB_OUTPUT"
+          echo "cache-primary-key=${{ steps.retry-pip-cache.outputs.cache-primary-key }}" >> "$GITHUB_OUTPUT"
+        else
+          echo "cache-hit=${{ steps.restore-pip-cache.outputs.cache-hit }}" >> "$GITHUB_OUTPUT"
+          echo "cache-primary-key=${{ steps.restore-pip-cache.outputs.cache-primary-key }}" >> "$GITHUB_OUTPUT"
+        fi
+
+    # Register the job-end cache save from actions/cache without re-downloading.
+    - name: Register pip cache save
+      uses: actions/cache@v5
+      continue-on-error: true
+      env:
+        SEGMENT_DOWNLOAD_TIMEOUT_MIN: 1
+      with:
+        lookup-only: true
+        path: ${{ steps.create-directory.outputs.dir }}
+        key: ${{ runner.os }}-${{ inputs.mode }}-${{ (inputs.mode == 'pip' && hashFiles('**/setup.py')) || (inputs.mode == 'poetry' && hashFiles('**/poetry.lock')) || 'unhandled_case' }}
+        restore-keys: |
+          ${{ runner.os }}-${{ inputs.mode }}-
+
     - name: Report cache directory contents
       shell: bash
       run: |
-        ls -la "${{ steps.create-directory.outputs.dir }}"
+        mkdir -p "${{ steps.create-directory.outputs.dir }}"
+        ls -la "${{ steps.create-directory.outputs.dir }}" || true
