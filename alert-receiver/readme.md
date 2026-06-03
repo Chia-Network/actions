@@ -1,5 +1,7 @@
 # Alert-Manager Receiver Action
 
+NOTE: In most cases you probably want to use the `message` Action in this repository, not this one. This is an older method to send messages from GitHub Actions using a static token. The new method uses short lived GitHub Action job JWTs.
+
 Sends JSON to the alertmanager receiver, which generates alerts in Keybase.
 
 ```yaml
