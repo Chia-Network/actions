@@ -4,7 +4,7 @@ inputs:
   receiver_url:
     description: "Base URL of the alert-receiver worker"
     required: false
-    default: "https://alert-receiver.chiaops.com/"
+    default: "https://alert-receiver.chiaops.com"
   receiver_route:
     description: "The route to call on the receiver (appended to receiver_url)"
     required: true
