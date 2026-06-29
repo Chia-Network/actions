@@ -42,7 +42,7 @@ runs:
         else
           poetry_version_string="==${{ inputs.poetry-version }}"
         fi
-        ${{ inputs.python-executable }} -m pip install -I poetry${poetry_version_string}
+        ${{ inputs.python-executable }} -m pip install --upgrade poetry${poetry_version_string}
 
     - name: Run Poetry command (Linux)
       shell: bash
