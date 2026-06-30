@@ -38,7 +38,7 @@ runs:
 
     - name: Restore pip cache
       id: restore-pip-cache
-      uses: actions/cache/restore@v5
+      uses: actions/cache/restore@v6
       continue-on-error: true
       env:
         SEGMENT_DOWNLOAD_TIMEOUT_MIN: 1
@@ -51,7 +51,7 @@ runs:
     - name: Retry pip cache restore
       id: retry-pip-cache
       if: steps.restore-pip-cache.outcome == 'failure'
-      uses: actions/cache/restore@v5
+      uses: actions/cache/restore@v6
       continue-on-error: true
       env:
         SEGMENT_DOWNLOAD_TIMEOUT_MIN: 1
@@ -75,7 +75,7 @@ runs:
 
     # Register the job-end cache save from actions/cache without re-downloading.
     - name: Register pip cache save
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       continue-on-error: true
       env:
         SEGMENT_DOWNLOAD_TIMEOUT_MIN: 1
