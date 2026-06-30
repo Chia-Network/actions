@@ -1,0 +1,58 @@
+name: test-library
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+
+concurrency:
+  # SHA is added to the end if on `main` to let all main workflows run
+  group: ${{ github.ref }}-${{ github.workflow }}-${{ github.event_name }}-${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/') || startsWith(github.ref, 'refs/heads/long_lived/')) && github.sha || '' }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  library:
+    uses: ./.github/workflows/reflow-library.yml
+    with:
+      url: https://raw.githubusercontent.com/Chia-Network/actions/${{ github.sha }}/library/library.yaml
+
+  test:
+    name: Test library contents available
+    runs-on: ubuntu-latest
+    needs: library
+    timeout-minutes: 5
+
+    steps:
+      - name: Check a number
+        env:
+          EXIT_CODE: ${{ (fromJSON(needs.library.outputs.root)._test.a-number == 1) && '0' || '1' }}
+        run: |
+          exit ${EXIT_CODE}
+
+      - name: Check an alias
+        env:
+          EXIT_CODE: ${{ (fromJSON(needs.library.outputs.root)._test.an-alias == 'red') && '0' || '1' }}
+        run: |
+          exit ${EXIT_CODE}
+
+  test_matrix:
+    name: ${{ matrix.os.emoji }}${{ matrix.arch.emoji }} Test a library matrix
+    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
+    needs: library
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.library.outputs.root).matrix.complete.standard_installer_python }}
+    steps:
+      - name: Dump the matrix
+        run: |
+          echo "${{ toJSON(matrix) }}" | yq --prettyPrint
