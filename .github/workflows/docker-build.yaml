@@ -123,7 +123,23 @@ jobs:
           # Force lowercase
           imagename="$(echo "$imagename" | tr '[:upper:]' '[:lower:]')"
 
+          # Registry cache tag is per-image (incl. subpath) and per-platform set so
+          # parallel single-arch matrix builds do not clobber each other.
+          # "linux/amd64" → cache-linux-amd64
+          # "linux/amd64,linux/arm64" → cache-linux-amd64-linux-arm64
+          platform_suffix="$(
+            echo "${{ inputs.docker-platforms }}" \
+              | tr ',' '\n' \
+              | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
+              | tr '[:upper:]' '[:lower:]' \
+              | tr '/' '-' \
+              | sort -u \
+              | paste -sd '-' -
+          )"
+          cache_ref="${imagename}:cache-${platform_suffix}"
+
           echo "imagename=$imagename" >> "$GITHUB_OUTPUT"
+          echo "cache_ref=$cache_ref" >> "$GITHUB_OUTPUT"
 
       - name: Docker meta
         id: meta
@@ -161,8 +177,8 @@ jobs:
           push: ${{ inputs.push }}
           tags: ${{ steps.meta.outputs.tags }}
           build-args: ${{ inputs.build-args }}
-          cache-from: ${{ inputs.enable-cache == 'true' && format('type=registry,ref={0}:cache', steps.image.outputs.imagename) || '' }}
-          cache-to: ${{ inputs.enable-cache == 'true' && format('type=registry,ref={0}:cache,mode=max,compression=zstd', steps.image.outputs.imagename) || '' }}
+          cache-from: ${{ inputs.enable-cache == 'true' && format('type=registry,ref={0}', steps.image.outputs.cache_ref) || '' }}
+          cache-to: ${{ inputs.enable-cache == 'true' && format('type=registry,ref={0},mode=max,compression=zstd', steps.image.outputs.cache_ref) || '' }}
 
       - name: Report image sizes
         if: ${{ inputs.report-image-size == 'true' }}
