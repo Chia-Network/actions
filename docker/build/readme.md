@@ -20,11 +20,9 @@ When `enable-cache` is `true`, BuildKit registry cache is stored at:
 
 Examples:
 
-| `image_subpath` | `docker-platforms`        | Cache tag                                |
-| --------------- | ------------------------- | ---------------------------------------- |
-| _(empty)_       | `linux/amd64`             | `cache-linux-amd64`                      |
-| _(empty)_       | `linux/arm64`             | `cache-linux-arm64`                      |
-| `mcp`           | `linux/amd64`             | `ghcr.io/org/repo/mcp:cache-linux-amd64` |
-| _(empty)_       | `linux/amd64,linux/arm64` | `cache-linux-amd64-linux-arm64`          |
-
-Single-arch matrix legs therefore get isolated caches automatically. The previous unscoped `:cache` tag is no longer used (one cold rebuild after upgrading).
+| `image_subpath` | `docker-platforms`        | Cache ref                                        |
+| --------------- | ------------------------- | ------------------------------------------------ |
+| _(empty)_       | `linux/amd64`             | `ghcr.io/org/repo:cache-linux-amd64`             |
+| _(empty)_       | `linux/arm64`             | `ghcr.io/org/repo:cache-linux-arm64`             |
+| `mcp`           | `linux/amd64`             | `ghcr.io/org/repo/mcp:cache-linux-amd64`         |
+| _(empty)_       | `linux/amd64,linux/arm64` | `ghcr.io/org/repo:cache-linux-amd64-linux-arm64` |
