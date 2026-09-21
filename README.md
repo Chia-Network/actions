@@ -57,6 +57,10 @@ Wrapper around actions/setup-python that also supports ARM64 Mac and ARM64 Linux
 
 Windows Codesigning. Signs a file with a cert for windows.
 
+### sign/azure-windows
+
+Windows code signing with Azure Artifact Signing (GitHub OIDC + `signtool` / dlib). Replacement for `digicert/windows-sign`.
+
 ### terraform/plan
 
 Runs terraform plan and shows the output.

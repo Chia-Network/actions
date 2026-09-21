@@ -1,0 +1,145 @@
+name: "Azure Windows Code Sign"
+description: "Signs the specified file with signtool and Azure Artifact Signing (OIDC + dlib)"
+inputs:
+  azure_tenant_id:
+    description: "Azure AD tenant ID used for GitHub OIDC federation"
+    required: false
+  azure_client_id:
+    description: "Azure AD application (client) ID used for GitHub OIDC federation"
+    required: false
+  endpoint:
+    description: "Azure Trusted Signing / Artifact Signing endpoint"
+    required: false
+    default: "https://wus2.codesigning.azure.net/"
+  code_signing_account_name:
+    description: "Azure code signing account name"
+    required: false
+    default: "ChiaNetworkInc"
+  certificate_profile_name:
+    description: "Azure certificate profile name"
+    required: false
+    default: "ChiaNetworkInc"
+  timestamp_server:
+    description: "RFC 3161 timestamp server URL"
+    required: false
+    default: "http://timestamp.acs.microsoft.com"
+  sign:
+    description: "Whether to actually sign the file or just install the tools. Defaults to installing + signing"
+    required: false
+    default: "true"
+  file:
+    description: "Path to the file to sign. Multiple paths, one per line, are supported."
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: Add signtool to PATH
+      shell: bash
+      run: |
+        echo "C:\Program Files (x86)\Windows Kits\10\App Certification Kit" >> "$GITHUB_PATH"
+
+    - name: Install Azure Artifact Signing client
+      shell: pwsh
+      env:
+        SIGNING_ENDPOINT: ${{ inputs.endpoint }}
+        SIGNING_ACCOUNT_NAME: ${{ inputs.code_signing_account_name }}
+        SIGNING_CERTIFICATE_PROFILE: ${{ inputs.certificate_profile_name }}
+      run: |
+        if ($env:AZURE_CODE_SIGNING_DLIB -and (Test-Path $env:AZURE_CODE_SIGNING_DLIB) -and $env:AZURE_CODE_SIGNING_METADATA -and (Test-Path $env:AZURE_CODE_SIGNING_METADATA)) {
+          Write-Output "Azure Artifact Signing client already installed"
+          Write-Output "dlib=$env:AZURE_CODE_SIGNING_DLIB"
+          Write-Output "metadata=$env:AZURE_CODE_SIGNING_METADATA"
+          exit 0
+        }
+
+        $toolsDir = Join-Path $env:RUNNER_TEMP "artifact-signing-client"
+        New-Item -ItemType Directory -Path $toolsDir -Force | Out-Null
+        Push-Location $toolsDir
+
+        Invoke-WebRequest -Uri "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" -OutFile nuget.exe
+        .\nuget.exe install Microsoft.ArtifactSigning.Client -x -OutputDirectory .
+
+        $dlib = Get-ChildItem -Recurse -Filter "Azure.CodeSigning.Dlib.dll" |
+          Where-Object { $_.FullName -match '[\\/]x64[\\/]' } |
+          Select-Object -First 1
+        if (-not $dlib) {
+          throw "Azure.CodeSigning.Dlib.dll (x64) not found after installing Microsoft.ArtifactSigning.Client"
+        }
+
+        $metadataPath = Join-Path $toolsDir "metadata.json"
+        @{
+          Endpoint = $env:SIGNING_ENDPOINT
+          CodeSigningAccountName = $env:SIGNING_ACCOUNT_NAME
+          CertificateProfileName = $env:SIGNING_CERTIFICATE_PROFILE
+          CorrelationId = "github-actions-$env:GITHUB_RUN_ID"
+        } | ConvertTo-Json | Set-Content -Path $metadataPath
+
+        Add-Content -Path $env:GITHUB_ENV -Value "AZURE_CODE_SIGNING_DLIB=$($dlib.FullName)"
+        Add-Content -Path $env:GITHUB_ENV -Value "AZURE_CODE_SIGNING_METADATA=$metadataPath"
+
+        Write-Output "dlib=$($dlib.FullName)"
+        Write-Output "metadata=$metadataPath"
+        Get-Content $metadataPath
+        Pop-Location
+
+    - name: Sign file
+      if: ${{ inputs.sign == 'true' }}
+      shell: pwsh
+      env:
+        # prod chain: EnvironmentCredential / WorkloadIdentity (not Azure CLI).
+        AZURE_TOKEN_CREDENTIALS: prod
+        AZURE_TENANT_ID: ${{ inputs.azure_tenant_id }}
+        AZURE_CLIENT_ID: ${{ inputs.azure_client_id }}
+        SIGN_FILE: ${{ inputs.file }}
+        TIMESTAMP_SERVER: ${{ inputs.timestamp_server }}
+      run: |
+        if (-not $env:SIGN_FILE -or -not $env:SIGN_FILE.Trim()) {
+          throw "file input is required when sign is true"
+        }
+        if (-not $env:ACTIONS_ID_TOKEN_REQUEST_URL -or -not $env:ACTIONS_ID_TOKEN_REQUEST_TOKEN) {
+          throw "ACTIONS_ID_TOKEN_REQUEST_URL/TOKEN not available; ensure permissions.id-token: write is set"
+        }
+        if (-not $env:AZURE_TENANT_ID -or -not $env:AZURE_CLIENT_ID) {
+          throw "AZURE_TENANT_ID and AZURE_CLIENT_ID must be set for AZURE_TOKEN_CREDENTIALS=prod"
+        }
+        if (-not $env:AZURE_CODE_SIGNING_DLIB -or -not (Test-Path $env:AZURE_CODE_SIGNING_DLIB)) {
+          throw "AZURE_CODE_SIGNING_DLIB is not set or does not exist: $env:AZURE_CODE_SIGNING_DLIB"
+        }
+        if (-not $env:AZURE_CODE_SIGNING_METADATA -or -not (Test-Path $env:AZURE_CODE_SIGNING_METADATA)) {
+          throw "AZURE_CODE_SIGNING_METADATA is not set or does not exist: $env:AZURE_CODE_SIGNING_METADATA"
+        }
+
+        # Request a fresh GitHub OIDC token immediately before signing.
+        $tokenUrl = "$($env:ACTIONS_ID_TOKEN_REQUEST_URL)&audience=api://AzureADTokenExchange"
+        $headers = @{ Authorization = "Bearer $($env:ACTIONS_ID_TOKEN_REQUEST_TOKEN)" }
+        $response = Invoke-RestMethod -Uri $tokenUrl -Headers $headers -Method GET
+        if (-not $response.value) {
+          throw "Failed to obtain GitHub OIDC token for Azure federated credential"
+        }
+
+        $tokenFile = Join-Path $env:RUNNER_TEMP "azure-federated-token"
+        Set-Content -Path $tokenFile -Value $response.value -NoNewline
+        $env:AZURE_FEDERATED_TOKEN_FILE = $tokenFile
+        Write-Output "Wrote Azure federated token to $tokenFile"
+
+        $files = $env:SIGN_FILE -split "[\r\n]+" | ForEach-Object { $_.Trim() } | Where-Object { $_ }
+        foreach ($filePath in $files) {
+          if (-not (Test-Path $filePath)) {
+            throw "File to sign does not exist: $filePath"
+          }
+
+          Write-Output "Signing $filePath"
+          signtool.exe sign /v /fd SHA256 /tr $env:TIMESTAMP_SERVER /td SHA256 `
+            /dlib $env:AZURE_CODE_SIGNING_DLIB `
+            /dmdf $env:AZURE_CODE_SIGNING_METADATA `
+            $filePath
+          if ($LASTEXITCODE -ne 0) {
+            throw "Azure Artifact Signing failed for $filePath with exit code $LASTEXITCODE"
+          }
+
+          Write-Output "Verify signature"
+          signtool.exe verify /v /pa $filePath
+          if ($LASTEXITCODE -ne 0) {
+            throw "Signature verification failed for $filePath"
+          }
+        }
