@@ -8,7 +8,7 @@ The calling job needs:
 
 - `permissions: id-token: write`
 - A GitHub Actions environment whose name matches the federated credential subject, typically `windows-code-signing` (`repo:<org>/<repo>:environment:windows-code-signing`)
-- Org/repo secrets `AZURE_SIGNING_TENANT_ID` and `AZURE_SIGNING_CLIENT_ID`
+- Organization or repository secrets `AZURE_SIGNING_TENANT_ID` and `AZURE_SIGNING_CLIENT_ID`
 
 ```yaml
 permissions:
