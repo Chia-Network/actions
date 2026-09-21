@@ -57,6 +57,10 @@ Wrapper around actions/setup-python that also supports ARM64 Mac and ARM64 Linux
 
 Windows Codesigning. Signs a file with a cert for windows.
 
+### digicert/windows-sign
+
+Retired. Fails immediately and points callers at `sign/azure-windows`. DigiCert Signing Manager rejects the organization `SM_*` credentials.
+
 ### terraform/plan
 
 Runs terraform plan and shows the output.
