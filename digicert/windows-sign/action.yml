@@ -1,77 +1,48 @@
 name: "Windows Code Sign"
-description: "Signs the specified file with signtool and digicert HSM"
+description: "Retired. Use Chia-Network/actions/sign/azure-windows instead."
 inputs:
   sm_tools_download_url:
-    description: "URL to download smtools-windows-x64.msi from. If set in env SM_TOOLS_DOWNLOAD_URL, env wins"
+    description: "Unused. This action is retired."
     default: "https://one.digicert.com/signingmanager/api-ui/v1/releases/smtools-windows-x64.msi/download"
     required: false
   sm_host:
-    description: "Digicert signing host"
+    description: "Unused. This action is retired."
     default: "https://clientauth.one.digicert.com"
     required: false
   sm_api_key:
-    description: "API Key for digicert"
-    required: true
+    description: "Unused. This action is retired."
+    required: false
   sm_client_cert_file_b64:
-    description: "Base64 of client cert file"
-    required: true
+    description: "Unused. This action is retired."
+    required: false
   sm_client_cert_password:
-    description: "Password for client cert"
-    required: true
+    description: "Unused. This action is retired."
+    required: false
   sm_code_signing_cert_sha1_hash:
-    description: "fingerprint of the cert in the HSM to use for signing"
-    required: true
+    description: "Unused. This action is retired."
+    required: false
   sm_certkey_alias:
-    description: "alias of the keypair to sync from keylocker"
-    required: true
+    description: "Unused. This action is retired."
+    required: false
   sign:
-    description: "Whether to actually sign the file or just install the tools. Defaults so installing + signing"
+    description: "Unused. This action is retired."
     required: false
     default: "true"
   file:
-    description: "Path to the file to sign"
+    description: "Unused. This action is retired."
     required: false
 runs:
   using: "composite"
   steps:
-    - name: Setup Certificate
+    - name: DigiCert Windows signing is retired
       shell: bash
       run: |
-        echo "${{ inputs.sm_client_cert_file_b64 }}" | base64 --decode > /d/Certificate_pkcs12.p12
-
-    - name: Set signing variables
-      shell: bash
-      run: |
-        if [[ -z $SM_TOOLS_DOWNLOAD_URL ]]; then
-          echo "SM_TOOLS_DOWNLOAD_URL=${{ inputs.sm_tools_download_url }}" >> "$GITHUB_ENV"
-        fi
-        echo "SM_HOST=${{ inputs.sm_host }}" >> "$GITHUB_ENV"
-        echo "SM_API_KEY=${{ inputs.sm_api_key }}" >> "$GITHUB_ENV"
-        echo "SM_CLIENT_CERT_FILE=D:\\Certificate_pkcs12.p12" >> "$GITHUB_ENV"
-        echo "SM_CLIENT_CERT_PASSWORD=${{ inputs.sm_client_cert_password }}" >> "$GITHUB_ENV"
-        echo "SM_CODE_SIGNING_CERT_SHA1_HASH=${{ inputs.sm_code_signing_cert_sha1_hash }}" >> "$GITHUB_ENV"
-        echo "C:\Program Files (x86)\Windows Kits\10\App Certification Kit" >> $GITHUB_PATH
-        echo "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools" >> $GITHUB_PATH
-        echo "C:\Program Files\DigiCert\DigiCert One Signing Manager Tools" >> $GITHUB_PATH
-
-    - name: Setup SSM KSP
-      shell: cmd
-      run: |
-        curl -X GET "%SM_TOOLS_DOWNLOAD_URL%" -H "x-api-key:%SM_API_KEY%" -o smtools-windows-x64.msi
-        msiexec /i smtools-windows-x64.msi /quiet /qn
-        smksp_registrar.exe list
-        smctl.exe keypair ls
-        C:\Windows\System32\certutil.exe -csp "DigiCert Signing Manager KSP" -key -user
-        smctl.exe windows certsync --keypair-alias=${{ inputs.sm_certkey_alias }}
-
-    - name: Sign file
-      if: ${{ inputs.sign == 'true' }}
-      shell: pwsh
-      run: |
-        signtool.exe sign /sha1 $env:SM_CODE_SIGNING_CERT_SHA1_HASH /tr http://timestamp.digicert.com /td SHA256 /fd SHA256 "${{ inputs.file }}"
-
-    - name: Validate signature
-      if: ${{ inputs.sign == 'true' }}
-      shell: pwsh
-      run: |
-        signtool.exe verify /v /pa "${{ inputs.file }}"
+        {
+          echo "::error title=DigiCert Windows signing is retired::Chia-Network/actions/digicert/windows-sign no longer works. DigiCert Signing Manager rejects the SM_* credentials (HTTP 403 Invalid credentials). Switch this job to Chia-Network/actions/sign/azure-windows. The calling job must run on Windows, use environment windows-code-signing, set permissions.id-token: write, and pass AZURE_SIGNING_TENANT_ID / AZURE_SIGNING_CLIENT_ID from secrets."
+          echo "Chia-Network/actions/digicert/windows-sign is retired."
+          echo "DigiCert Signing Manager rejects the SM_* credentials (HTTP 403 Invalid credentials)."
+          echo "Use Chia-Network/actions/sign/azure-windows instead."
+          echo "Calling job requirements: Windows runner, environment: windows-code-signing,"
+          echo "permissions.id-token: write, secrets AZURE_SIGNING_TENANT_ID and AZURE_SIGNING_CLIENT_ID."
+        } >&2
+        exit 1
