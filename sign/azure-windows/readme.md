@@ -28,6 +28,8 @@ jobs:
           file: ${{ github.workspace }}/dist/my-file.exe
 ```
 
+Pass `azure_tenant_id` and `azure_client_id` from `secrets.*` (never literals) so GitHub masks them in logs. The action does not print those IDs, the OIDC JWT, or `ACTIONS_ID_TOKEN_REQUEST_TOKEN`.
+
 `file` accepts multiple paths, one per line.
 
 Set `sign: "false"` to only install the Artifact Signing client and write `AZURE_CODE_SIGNING_DLIB` / `AZURE_CODE_SIGNING_METADATA` into the job env (the same split `chia-blockchain` uses when a local script signs many binaries). Re-running the action in the same job skips the nuget install if those env vars already point at existing files.
