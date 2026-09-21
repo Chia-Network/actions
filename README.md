@@ -61,10 +61,6 @@ Windows Codesigning. Signs a file with a cert for windows.
 
 Windows code signing with Azure Artifact Signing (GitHub OIDC + `signtool` / dlib). Replacement for `digicert/windows-sign`.
 
-### digicert/windows-sign
-
-Retired. Fails immediately and points callers at `sign/azure-windows`. DigiCert Signing Manager rejects the organization `SM_*` credentials.
-
 ### terraform/plan
 
 Runs terraform plan and shows the output.
