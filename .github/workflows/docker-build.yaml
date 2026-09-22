@@ -60,6 +60,11 @@ on:
         type: string
         default: "false"
         description: Should the builds use docker cache
+      enable-blacksmith-cache:
+        required: false
+        type: boolean
+        default: false
+        description: "Use Blacksmith's persistent Docker layer cache instead of the registry cache"
       enable-qemu-cache:
         required: false
         type: string
@@ -89,7 +94,12 @@ jobs:
           cache-image: ${{ inputs.enable-qemu-cache }}
 
       - name: Set up Docker Buildx
+        if: ${{ !inputs.enable-blacksmith-cache }}
         uses: docker/setup-buildx-action@v4.3.0
+
+      - name: Set up Blacksmith Docker Builder
+        if: ${{ inputs.enable-blacksmith-cache }}
+        uses: useblacksmith/setup-docker-builder@v1
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v4
@@ -169,6 +179,7 @@ jobs:
           path: ${{ inputs.artifacts-path }}
 
       - name: Build Docker Container
+        if: ${{ !inputs.enable-blacksmith-cache }}
         uses: docker/build-push-action@v7
         with:
           context: ${{ inputs.docker-context }}
@@ -179,6 +190,17 @@ jobs:
           build-args: ${{ inputs.build-args }}
           cache-from: ${{ inputs.enable-cache == 'true' && format('type=registry,ref={0}', steps.image.outputs.cache_ref) || '' }}
           cache-to: ${{ inputs.enable-cache == 'true' && format('type=registry,ref={0},mode=max,compression=zstd', steps.image.outputs.cache_ref) || '' }}
+
+      - name: Build Docker Container with Blacksmith Cache
+        if: ${{ inputs.enable-blacksmith-cache }}
+        uses: useblacksmith/build-push-action@v2
+        with:
+          context: ${{ inputs.docker-context }}
+          file: ${{ inputs.dockerfile }}
+          platforms: ${{ inputs.docker-platforms }}
+          push: ${{ inputs.push }}
+          tags: ${{ steps.meta.outputs.tags }}
+          build-args: ${{ inputs.build-args }}
 
       - name: Report image sizes
         if: ${{ inputs.report-image-size == 'true' }}
