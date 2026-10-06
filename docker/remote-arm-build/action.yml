@@ -73,7 +73,7 @@ runs:
       id: runner_ip
       shell: bash
       run: |
-        RUNNER_IP=$(curl -s -4 https://ip.cmm.io)
+        RUNNER_IP=$(curl -fsS -4 https://checkip.amazonaws.com | tr -d '[:space:]')
         echo "Public IP Address is ${RUNNER_IP}"
         echo "RUNNER_IP=$RUNNER_IP" >> $GITHUB_OUTPUT
 
