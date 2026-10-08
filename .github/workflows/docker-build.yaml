@@ -95,7 +95,7 @@ jobs:
 
       - name: Set up Docker Buildx
         if: ${{ !inputs.enable-blacksmith-cache }}
-        uses: docker/setup-buildx-action@v4.3.0
+        uses: docker/setup-buildx-action@v4.4.1
 
       - name: Set up Blacksmith Docker Builder
         if: ${{ inputs.enable-blacksmith-cache }}
