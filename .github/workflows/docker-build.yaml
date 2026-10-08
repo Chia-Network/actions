@@ -99,7 +99,9 @@ jobs:
 
       - name: Set up Blacksmith Docker Builder
         if: ${{ inputs.enable-blacksmith-cache }}
-        uses: useblacksmith/setup-docker-builder@v1
+        uses: useblacksmith/setup-docker-builder@v2
+        with:
+          cache-key: ${{ github.repository }}/${{ inputs.image_subpath || inputs.dockerfile }}
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v4
